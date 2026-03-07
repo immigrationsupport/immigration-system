@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../better-auth/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -14,64 +7,194 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String    @db.Text
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?   @db.Text
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  id               String   @id @default(uuid())
+  name             String
+  email            String   @unique
+  emailVerified    Boolean  @default(false)
+  image            String?
+  password         String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  role             Role     @default(CLIENT)
+  profileCompleted Boolean  @default(false)
+  isSuspended      Boolean  @default(false)
 
-  @@unique([email])
+  // Personal Information
+  dateOfBirth      DateTime?
+  nationality      String?
+  maritalStatus    MaritalStatus?
+  numberOfChildren Int            @default(0)
+  phoneNumber      String?
+  address          String?
+
+  agentId         String?
+  applications    Application[] @relation("ClientApplications")
+  documents       Document[]
+  messages        Message[]
+  accounts        Account[]
+  sessions        Session[]
+  auditLogs       AuditLog[]
+  agent           User?         @relation("AgentClients", fields: [agentId], references: [id])
+  assignedClients User[]        @relation("AgentClients")
+  assignedApps    Application[] @relation("AgentApplications")
+
   @@map("user")
 }
 
 model Session {
-  id        String   @id
+  id        String   @id @default(uuid())
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  ipAddress String?  @db.Text
-  userAgent String?  @db.Text
+  ipAddress String?
+  userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
-  @@index([userId()])
+  @@index([userId])
   @@map("session")
 }
 
 model Account {
-  id                    String    @id
-  accountId             String    @db.Text
-  providerId            String    @db.Text
+  id                    String    @id @default(uuid())
+  accountId             String
+  providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?   @db.Text
-  refreshToken          String?   @db.Text
-  idToken               String?   @db.Text
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
   accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
-  scope                 String?   @db.Text
-  password              String?   @db.Text
+  scope                 String?
+  password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId()])
+  @@index([userId])
   @@map("account")
 }
 
 model Verification {
-  id         String   @id
-  identifier String   @db.Text
-  value      String   @db.Text
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  @@index([identifier()])
+  @@index([identifier])
   @@map("verification")
+}
+
+model Application {
+  id         String            @id @default(uuid())
+  country    String
+  status     ApplicationStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  clientId   String
+  agentId    String?
+  client     User              @relation("ClientApplications", fields: [clientId], references: [id])
+  agent      User?             @relation("AgentApplications", fields: [agentId], references: [id])
+  procedures Procedure[]
+}
+
+model Procedure {
+  id            String          @id @default(uuid())
+  type          ProcedureType
+  description   String?
+  status        ProcedureStatus @default(PENDING)
+  isLocked      Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  applicationId String
+  documents     Document[]
+  messages      Message[]
+  application   Application     @relation(fields: [applicationId], references: [id])
+}
+
+model Message {
+  id          String    @id @default(uuid())
+  content     String
+  createdAt   DateTime  @default(now())
+  procedureId String
+  senderId    String
+  procedure   Procedure @relation(fields: [procedureId], references: [id])
+  sender      User      @relation(fields: [senderId], references: [id])
+}
+
+model Document {
+  id          String         @id @default(uuid())
+  name        String
+  fileUrl     String
+  type        DocumentType   @default(OTHER)
+  status      DocumentStatus @default(UPLOADED)
+  uploadedAt  DateTime       @default(now())
+  procedureId String
+  uploaderId  String
+  procedure   Procedure      @relation(fields: [procedureId], references: [id])
+  uploader    User           @relation(fields: [uploaderId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  CLIENT
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+enum ProcedureType {
+  PR
+  WORK
+  STUDY
+  SCHOLARSHIP
+}
+
+enum DocumentType {
+  PASSPORT
+  BIRTH_CERTIFICATE
+  ID_CARD
+  TRANSCRIPT
+  OTHER
+}
+
+enum DocumentStatus {
+  UPLOADED
+  VERIFIED
+  REJECTED
+}
+
+enum ApplicationStatus {
+  PENDING
+  IN_REVIEW
+  MODIFICATION_REQUESTED
+  APPROVED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum ProcedureStatus {
+  PENDING
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+  ACTION_REQUIRED
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  details   String?
+  userId    String?
+  author    User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }

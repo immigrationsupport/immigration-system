@@ -1,0 +1,214 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+    FileText,
+    Lock,
+    Unlock,
+    Upload,
+    Trash,
+    MessageSquare,
+    CheckCircle2,
+    Clock,
+    AlertCircle,
+    Loader2,
+    ChevronDown,
+    ChevronUp,
+    Paperclip,
+    Plus
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { submitProcedureAction, addDocumentAction, deleteDocumentAction } from "./actions";
+
+interface ProcedureDetailsProps {
+    procedure: any;
+}
+
+export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
+    const [isExpanded, setIsExpanded] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+
+    const handleSubmit = async () => {
+        if (!confirm("Are you sure? Once submitted, you cannot edit this procedure until an agent unlocks it.")) return;
+        setLoading(true);
+        const res = await submitProcedureAction(procedure.id);
+        setLoading(false);
+        if (res.error) alert(res.error);
+    };
+
+    const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setUploading(true);
+        const formData = new FormData(e.currentTarget);
+        const res = await addDocumentAction(formData);
+        setUploading(false);
+        if (res.error) alert(res.error);
+        else (e.target as HTMLFormElement).reset();
+    };
+
+    const handleDeleteDoc = async (docId: string) => {
+        if (!confirm("Delete this document?")) return;
+        setLoading(true);
+        const res = await deleteDocumentAction(docId);
+        setLoading(false);
+        if (res.error) alert(res.error);
+    };
+
+    return (
+        <Card className={`overflow-hidden transition-all duration-500 rounded-3xl border-none shadow-xl ${procedure.isLocked ? "bg-gray-50/50" : "bg-white"}`}>
+            <CardHeader
+                className={`flex flex-row items-center justify-between p-8 border-b border-gray-100 cursor-pointer ${procedure.isLocked ? "bg-gray-100/50" : "bg-blue-50/20"}`}
+                onClick={() => setIsExpanded(!isExpanded)}
+            >
+                <div className="flex gap-6 items-center">
+                    <div className={`p-3 rounded-2xl shadow-sm ${procedure.isLocked ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}>
+                        {procedure.isLocked ? <Lock className="h-6 w-6" /> : <Unlock className="h-6 w-6" />}
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Pathway Type</span>
+                            <span className="h-1 w-1 bg-gray-300 rounded-full" />
+                            <span className="text-xs font-black text-blue-700 uppercase tracking-widest">{procedure.type}</span>
+                        </div>
+                        <CardTitle className="text-2xl font-black text-gray-900 tracking-tight">{procedure.description || "Project Details"}</CardTitle>
+                    </div>
+                </div>
+                <div className="flex items-center gap-6">
+                    <div className="hidden md:flex flex-col items-end">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Current Status</span>
+                        <div className="flex items-center gap-2">
+                            {procedure.status === "PENDING" ? <Clock className="h-4 w-4 text-yellow-500" /> : <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                            <span className="font-bold text-gray-700 uppercase text-xs">{procedure.status.replace("_", " ")}</span>
+                        </div>
+                    </div>
+                    {isExpanded ? <ChevronUp className="h-6 w-6 text-gray-400" /> : <ChevronDown className="h-6 w-6 text-gray-400" />}
+                </div>
+            </CardHeader>
+
+            {isExpanded && (
+                <CardContent className="p-8 space-y-10 animate-in slide-in-from-top-4 duration-500">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* Documents Section */}
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center px-2">
+                                <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <Paperclip className="h-4 w-4 text-blue-500" /> Required Documents
+                                </h3>
+                                <div className="bg-blue-50 text-[#1E3A8A] px-3 py-1 rounded-full text-[10px] font-bold ring-1 ring-blue-100">
+                                    {procedure.documents.length} Files Attached
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                {procedure.documents.map((doc: any) => (
+                                    <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl group hover:shadow-lg hover:border-blue-100 transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className="bg-gray-50 p-2.5 rounded-xl group-hover:bg-blue-50 transition-colors">
+                                                <FileText className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-gray-800 tracking-tight group-hover:text-blue-900 transition-colors">{doc.name}</p>
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{doc.type}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <a href={doc.fileUrl} target="_blank" className="text-[10px] font-bold text-blue-600 uppercase tracking-widest hover:text-blue-800">Download</a>
+                                            {!procedure.isLocked && (
+                                                <button onClick={() => handleDeleteDoc(doc.id)} className="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-all">
+                                                    <Trash className="h-4 w-4" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {procedure.documents.length === 0 && (
+                                    <div className="text-center py-12 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-100">
+                                        <Upload className="h-8 w-8 text-gray-200 mx-auto mb-2" />
+                                        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No Documents Uploaded</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {!procedure.isLocked && (
+                                <form onSubmit={handleUpload} className="bg-blue-50/30 p-6 rounded-2xl border border-blue-50 space-y-4 shadow-inner">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <Input name="name" placeholder="Document Name (e.g. Passport Proof)" required className="bg-white border-blue-100 h-10 rounded-xl" />
+                                        <select name="type" className="bg-white border border-blue-100 rounded-xl px-3 text-xs font-bold uppercase outline-none focus:ring-1 focus:ring-blue-400" required>
+                                            <option value="PASSPORT">Passport</option>
+                                            <option value="BIRTH_CERTIFICATE">Birth Certificate</option>
+                                            <option value="ID_CARD">ID Card</option>
+                                            <option value="TRANSCRIPT">Transcript</option>
+                                            <option value="OTHER">Other</option>
+                                        </select>
+                                    </div>
+                                    <Input name="fileUrl" type="url" placeholder="Paste File URL (Mock Storage)" required className="bg-white border-blue-100 h-10 rounded-xl" />
+                                    <input type="hidden" name="procedureId" value={procedure.id} />
+                                    <Button disabled={uploading} className="w-full bg-[#1E3A8A] hover:bg-blue-900 rounded-xl h-10 font-bold shadow-md transition-all hover:translate-y-[-2px]">
+                                        {uploading ? <Loader2 className="animate-spin h-4 w-4" /> : <><Plus className="h-4 w-4 mr-2" /> Upload Document</>}
+                                    </Button>
+                                </form>
+                            )}
+                        </div>
+
+                        {/* Messages Section */}
+                        <div className="space-y-6">
+                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em] px-2 flex items-center gap-2">
+                                <MessageSquare className="h-4 w-4 text-blue-500" /> Communication Channel
+                            </h3>
+                            <div className="bg-white border border-gray-100 rounded-3xl p-6 min-h-[300px] flex flex-col shadow-sm max-h-[400px] overflow-y-auto">
+                                <div className="space-y-6 flex-1">
+                                    {procedure.messages.map((msg: any) => (
+                                        <div key={msg.id} className={`flex flex-col ${msg.senderId === procedure.application.clientId ? "items-end" : "items-start"}`}>
+                                            <div className={`max-w-[85%] p-4 rounded-2xl shadow-sm tracking-tight text-sm ${msg.senderId === procedure.application.clientId ? "bg-blue-600 text-white rounded-tr-none" : "bg-gray-100 text-gray-800 rounded-tl-none font-medium"}`}>
+                                                {msg.content}
+                                            </div>
+                                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1.5 px-1">{new Date(msg.createdAt).toLocaleString()}</span>
+                                        </div>
+                                    ))}
+                                    {procedure.messages.length === 0 && (
+                                        <div className="flex items-center justify-center flex-col py-12 opacity-30 grayscale">
+                                            <MessageSquare className="h-12 w-12 mb-2" />
+                                            <p className="text-sm font-black uppercase tracking-widest">No Communication Found</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Procedure Submission Button */}
+                            {!procedure.isLocked ? (
+                                <div className="p-8 bg-gradient-to-br from-blue-900 to-[#1e3a8a] rounded-3xl shadow-2xl relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                                        <AlertCircle className="h-12 w-12 transition-transform duration-700 group-hover:scale-125" />
+                                    </div>
+                                    <div className="relative z-10 text-center">
+                                        <h4 className="text-white font-black text-lg mb-2">Ready to Submit?</h4>
+                                        <p className="text-blue-200 text-xs mb-6 px-4">Submitting will lock the procedure for review. Ensure all required documents are attached.</p>
+                                        <Button
+                                            onClick={handleSubmit}
+                                            disabled={loading || procedure.documents.length === 0}
+                                            className="w-full bg-white text-[#1E3A8A] hover:bg-blue-50 font-black h-14 rounded-2xl shadow-xl transition-all hover:scale-[1.03] active:scale-95 disabled:opacity-50"
+                                        >
+                                            {loading ? <Loader2 className="animate-spin h-5 w-5" /> : "YES, SUBMIT PROCEDURE"}
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="p-8 bg-red-50 border border-red-100 rounded-3xl flex flex-col items-center text-center">
+                                    <div className="bg-red-100 p-3 rounded-2xl text-red-600 mb-4 shadow-sm">
+                                        <Lock className="h-7 w-7" />
+                                    </div>
+                                    <h4 className="text-red-900 font-black text-lg mb-1 uppercase tracking-tight">Procedure Locked</h4>
+                                    <p className="text-red-700/70 text-xs font-semibold max-w-xs">Currently being handled by our legal team. Modification is disabled to preserve record integrity.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </CardContent>
+            )}
+        </Card>
+    );
+}

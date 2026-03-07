@@ -9,7 +9,53 @@
 * 🟢 You can import this file directly.
 */
 
+export const Role = {
+  ADMIN: 'ADMIN',
+  AGENT: 'AGENT',
+  CLIENT: 'CLIENT'
+} as const
+
+export type Role = (typeof Role)[keyof typeof Role]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const DocumentStatus = {
+  UPLOADED: 'UPLOADED',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type DocumentStatus = (typeof DocumentStatus)[keyof typeof DocumentStatus]
+
+
+export const ApplicationType = {
+  STUDY: 'STUDY',
+  WORK: 'WORK',
+  PR: 'PR',
+  FAMILY: 'FAMILY'
+} as const
+
+export type ApplicationType = (typeof ApplicationType)[keyof typeof ApplicationType]
+
+
+export const ApplicationStatus = {
+  PENDING: 'PENDING',
+  IN_REVIEW: 'IN_REVIEW',
+  MODIFICATION_REQUESTED: 'MODIFICATION_REQUESTED',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type ApplicationStatus = (typeof ApplicationStatus)[keyof typeof ApplicationStatus]
+
+
+export const ProcedureStatus = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  ACTION_REQUIRED: 'ACTION_REQUIRED'
+} as const
+
+export type ProcedureStatus = (typeof ProcedureStatus)[keyof typeof ProcedureStatus]

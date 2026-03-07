@@ -30,8 +30,12 @@ export type UserMinAggregateOutputType = {
   email: string | null
   emailVerified: boolean | null
   image: string | null
+  password: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  role: string | null
+  isSuspended: boolean | null
+  agentId: string | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -40,8 +44,12 @@ export type UserMaxAggregateOutputType = {
   email: string | null
   emailVerified: boolean | null
   image: string | null
+  password: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  role: string | null
+  isSuspended: boolean | null
+  agentId: string | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -50,8 +58,12 @@ export type UserCountAggregateOutputType = {
   email: number
   emailVerified: number
   image: number
+  password: number
   createdAt: number
   updatedAt: number
+  role: number
+  isSuspended: number
+  agentId: number
   _all: number
 }
 
@@ -62,8 +74,12 @@ export type UserMinAggregateInputType = {
   email?: true
   emailVerified?: true
   image?: true
+  password?: true
   createdAt?: true
   updatedAt?: true
+  role?: true
+  isSuspended?: true
+  agentId?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -72,8 +88,12 @@ export type UserMaxAggregateInputType = {
   email?: true
   emailVerified?: true
   image?: true
+  password?: true
   createdAt?: true
   updatedAt?: true
+  role?: true
+  isSuspended?: true
+  agentId?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -82,8 +102,12 @@ export type UserCountAggregateInputType = {
   email?: true
   emailVerified?: true
   image?: true
+  password?: true
   createdAt?: true
   updatedAt?: true
+  role?: true
+  isSuspended?: true
+  agentId?: true
   _all?: true
 }
 
@@ -165,8 +189,12 @@ export type UserGroupByOutputType = {
   email: string
   emailVerified: boolean
   image: string | null
+  password: string | null
   createdAt: Date
   updatedAt: Date
+  role: string | null
+  isSuspended: boolean
+  agentId: string | null
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -196,10 +224,20 @@ export type UserWhereInput = {
   email?: Prisma.StringFilter<"User"> | string
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   image?: Prisma.StringNullableFilter<"User"> | string | null
+  password?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  sessions?: Prisma.SessionListRelationFilter
+  role?: Prisma.StringNullableFilter<"User"> | string | null
+  isSuspended?: Prisma.BoolFilter<"User"> | boolean
+  agentId?: Prisma.StringNullableFilter<"User"> | string | null
+  applications?: Prisma.ApplicationListRelationFilter
+  documents?: Prisma.DocumentListRelationFilter
+  messages?: Prisma.MessageListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
+  sessions?: Prisma.SessionListRelationFilter
+  agent?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  assignedClients?: Prisma.UserListRelationFilter
+  assignedApps?: Prisma.ApplicationListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -208,10 +246,20 @@ export type UserOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
+  password?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  sessions?: Prisma.SessionOrderByRelationAggregateInput
+  role?: Prisma.SortOrderInput | Prisma.SortOrder
+  isSuspended?: Prisma.SortOrder
+  agentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  applications?: Prisma.ApplicationOrderByRelationAggregateInput
+  documents?: Prisma.DocumentOrderByRelationAggregateInput
+  messages?: Prisma.MessageOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
+  sessions?: Prisma.SessionOrderByRelationAggregateInput
+  agent?: Prisma.UserOrderByWithRelationInput
+  assignedClients?: Prisma.UserOrderByRelationAggregateInput
+  assignedApps?: Prisma.ApplicationOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -223,10 +271,20 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"User"> | string
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   image?: Prisma.StringNullableFilter<"User"> | string | null
+  password?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  sessions?: Prisma.SessionListRelationFilter
+  role?: Prisma.StringNullableFilter<"User"> | string | null
+  isSuspended?: Prisma.BoolFilter<"User"> | boolean
+  agentId?: Prisma.StringNullableFilter<"User"> | string | null
+  applications?: Prisma.ApplicationListRelationFilter
+  documents?: Prisma.DocumentListRelationFilter
+  messages?: Prisma.MessageListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
+  sessions?: Prisma.SessionListRelationFilter
+  agent?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  assignedClients?: Prisma.UserListRelationFilter
+  assignedApps?: Prisma.ApplicationListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -235,8 +293,12 @@ export type UserOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
+  password?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  role?: Prisma.SortOrderInput | Prisma.SortOrder
+  isSuspended?: Prisma.SortOrder
+  agentId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -251,32 +313,54 @@ export type UserScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   emailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   image?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  password?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  role?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  isSuspended?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  agentId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
 }
 
 export type UserCreateInput = {
-  id: string
+  id?: string
   name: string
   email: string
   emailVerified?: boolean
   image?: string | null
+  password?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  role?: string | null
+  isSuspended?: boolean
+  applications?: Prisma.ApplicationCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  agent?: Prisma.UserCreateNestedOneWithoutAssignedClientsInput
+  assignedClients?: Prisma.UserCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateInput = {
-  id: string
+  id?: string
   name: string
   email: string
   emailVerified?: boolean
   image?: string | null
+  password?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  role?: string | null
+  isSuspended?: boolean
+  agentId?: string | null
+  applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  assignedClients?: Prisma.UserUncheckedCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserUpdateInput = {
@@ -285,10 +369,19 @@ export type UserUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applications?: Prisma.ApplicationUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  agent?: Prisma.UserUpdateOneWithoutAssignedClientsNestedInput
+  assignedClients?: Prisma.UserUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -297,20 +390,33 @@ export type UserUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  agentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applications?: Prisma.ApplicationUncheckedUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  assignedClients?: Prisma.UserUncheckedUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type UserCreateManyInput = {
-  id: string
+  id?: string
   name: string
   email: string
   emailVerified?: boolean
   image?: string | null
+  password?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  agentId?: string | null
 }
 
 export type UserUpdateManyMutationInput = {
@@ -319,8 +425,11 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -329,8 +438,27 @@ export type UserUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  agentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
+}
+
+export type UserListRelationFilter = {
+  every?: Prisma.UserWhereInput
+  some?: Prisma.UserWhereInput
+  none?: Prisma.UserWhereInput
+}
+
+export type UserOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -339,8 +467,12 @@ export type UserCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  isSuspended?: Prisma.SortOrder
+  agentId?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -349,8 +481,12 @@ export type UserMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  isSuspended?: Prisma.SortOrder
+  agentId?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -359,13 +495,37 @@ export type UserMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  isSuspended?: Prisma.SortOrder
+  agentId?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
   is?: Prisma.UserWhereInput
   isNot?: Prisma.UserWhereInput
+}
+
+export type UserCreateNestedOneWithoutAssignedClientsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignedClientsInput, Prisma.UserUncheckedCreateWithoutAssignedClientsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignedClientsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedManyWithoutAgentInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAgentInput, Prisma.UserUncheckedCreateWithoutAgentInput> | Prisma.UserCreateWithoutAgentInput[] | Prisma.UserUncheckedCreateWithoutAgentInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAgentInput | Prisma.UserCreateOrConnectWithoutAgentInput[]
+  createMany?: Prisma.UserCreateManyAgentInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUncheckedCreateNestedManyWithoutAgentInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAgentInput, Prisma.UserUncheckedCreateWithoutAgentInput> | Prisma.UserCreateWithoutAgentInput[] | Prisma.UserUncheckedCreateWithoutAgentInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAgentInput | Prisma.UserCreateOrConnectWithoutAgentInput[]
+  createMany?: Prisma.UserCreateManyAgentInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -382,6 +542,44 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type UserUpdateOneWithoutAssignedClientsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignedClientsInput, Prisma.UserUncheckedCreateWithoutAssignedClientsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignedClientsInput
+  upsert?: Prisma.UserUpsertWithoutAssignedClientsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssignedClientsInput, Prisma.UserUpdateWithoutAssignedClientsInput>, Prisma.UserUncheckedUpdateWithoutAssignedClientsInput>
+}
+
+export type UserUpdateManyWithoutAgentNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAgentInput, Prisma.UserUncheckedCreateWithoutAgentInput> | Prisma.UserCreateWithoutAgentInput[] | Prisma.UserUncheckedCreateWithoutAgentInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAgentInput | Prisma.UserCreateOrConnectWithoutAgentInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutAgentInput | Prisma.UserUpsertWithWhereUniqueWithoutAgentInput[]
+  createMany?: Prisma.UserCreateManyAgentInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutAgentInput | Prisma.UserUpdateWithWhereUniqueWithoutAgentInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutAgentInput | Prisma.UserUpdateManyWithWhereWithoutAgentInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserUncheckedUpdateManyWithoutAgentNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAgentInput, Prisma.UserUncheckedCreateWithoutAgentInput> | Prisma.UserCreateWithoutAgentInput[] | Prisma.UserUncheckedCreateWithoutAgentInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAgentInput | Prisma.UserCreateOrConnectWithoutAgentInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutAgentInput | Prisma.UserUpsertWithWhereUniqueWithoutAgentInput[]
+  createMany?: Prisma.UserCreateManyAgentInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutAgentInput | Prisma.UserUpdateWithWhereUniqueWithoutAgentInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutAgentInput | Prisma.UserUpdateManyWithWhereWithoutAgentInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
 }
 
 export type UserCreateNestedOneWithoutSessionsInput = {
@@ -412,26 +610,281 @@ export type UserUpdateOneRequiredWithoutAccountsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAccountsInput, Prisma.UserUpdateWithoutAccountsInput>, Prisma.UserUncheckedUpdateWithoutAccountsInput>
 }
 
-export type UserCreateWithoutSessionsInput = {
-  id: string
+export type UserCreateNestedOneWithoutApplicationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutApplicationsInput, Prisma.UserUncheckedCreateWithoutApplicationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutApplicationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutAssignedAppsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignedAppsInput, Prisma.UserUncheckedCreateWithoutAssignedAppsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignedAppsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutApplicationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutApplicationsInput, Prisma.UserUncheckedCreateWithoutApplicationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutApplicationsInput
+  upsert?: Prisma.UserUpsertWithoutApplicationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutApplicationsInput, Prisma.UserUpdateWithoutApplicationsInput>, Prisma.UserUncheckedUpdateWithoutApplicationsInput>
+}
+
+export type UserUpdateOneWithoutAssignedAppsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignedAppsInput, Prisma.UserUncheckedCreateWithoutAssignedAppsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignedAppsInput
+  upsert?: Prisma.UserUpsertWithoutAssignedAppsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssignedAppsInput, Prisma.UserUpdateWithoutAssignedAppsInput>, Prisma.UserUncheckedUpdateWithoutAssignedAppsInput>
+}
+
+export type UserCreateNestedOneWithoutMessagesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMessagesInput, Prisma.UserUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMessagesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutMessagesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMessagesInput, Prisma.UserUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMessagesInput
+  upsert?: Prisma.UserUpsertWithoutMessagesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMessagesInput, Prisma.UserUpdateWithoutMessagesInput>, Prisma.UserUncheckedUpdateWithoutMessagesInput>
+}
+
+export type UserCreateNestedOneWithoutDocumentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentsInput, Prisma.UserUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentsInput, Prisma.UserUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentsInput
+  upsert?: Prisma.UserUpsertWithoutDocumentsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentsInput, Prisma.UserUpdateWithoutDocumentsInput>, Prisma.UserUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type UserCreateWithoutAssignedClientsInput = {
+  id?: string
   name: string
   email: string
   emailVerified?: boolean
   image?: string | null
+  password?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  applications?: Prisma.ApplicationCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  agent?: Prisma.UserCreateNestedOneWithoutAssignedClientsInput
+  assignedApps?: Prisma.ApplicationCreateNestedManyWithoutAgentInput
+}
+
+export type UserUncheckedCreateWithoutAssignedClientsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  agentId?: string | null
+  applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  assignedApps?: Prisma.ApplicationUncheckedCreateNestedManyWithoutAgentInput
+}
+
+export type UserCreateOrConnectWithoutAssignedClientsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignedClientsInput, Prisma.UserUncheckedCreateWithoutAssignedClientsInput>
+}
+
+export type UserCreateWithoutAgentInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  applications?: Prisma.ApplicationCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  assignedClients?: Prisma.UserCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationCreateNestedManyWithoutAgentInput
+}
+
+export type UserUncheckedCreateWithoutAgentInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  assignedClients?: Prisma.UserUncheckedCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationUncheckedCreateNestedManyWithoutAgentInput
+}
+
+export type UserCreateOrConnectWithoutAgentInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAgentInput, Prisma.UserUncheckedCreateWithoutAgentInput>
+}
+
+export type UserCreateManyAgentInputEnvelope = {
+  data: Prisma.UserCreateManyAgentInput | Prisma.UserCreateManyAgentInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserUpsertWithoutAssignedClientsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAssignedClientsInput, Prisma.UserUncheckedUpdateWithoutAssignedClientsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignedClientsInput, Prisma.UserUncheckedCreateWithoutAssignedClientsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAssignedClientsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAssignedClientsInput, Prisma.UserUncheckedUpdateWithoutAssignedClientsInput>
+}
+
+export type UserUpdateWithoutAssignedClientsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applications?: Prisma.ApplicationUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  agent?: Prisma.UserUpdateOneWithoutAssignedClientsNestedInput
+  assignedApps?: Prisma.ApplicationUpdateManyWithoutAgentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAssignedClientsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  agentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applications?: Prisma.ApplicationUncheckedUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  assignedApps?: Prisma.ApplicationUncheckedUpdateManyWithoutAgentNestedInput
+}
+
+export type UserUpsertWithWhereUniqueWithoutAgentInput = {
+  where: Prisma.UserWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAgentInput, Prisma.UserUncheckedUpdateWithoutAgentInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAgentInput, Prisma.UserUncheckedCreateWithoutAgentInput>
+}
+
+export type UserUpdateWithWhereUniqueWithoutAgentInput = {
+  where: Prisma.UserWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAgentInput, Prisma.UserUncheckedUpdateWithoutAgentInput>
+}
+
+export type UserUpdateManyWithWhereWithoutAgentInput = {
+  where: Prisma.UserScalarWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutAgentInput>
+}
+
+export type UserScalarWhereInput = {
+  AND?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+  OR?: Prisma.UserScalarWhereInput[]
+  NOT?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+  id?: Prisma.StringFilter<"User"> | string
+  name?: Prisma.StringFilter<"User"> | string
+  email?: Prisma.StringFilter<"User"> | string
+  emailVerified?: Prisma.BoolFilter<"User"> | boolean
+  image?: Prisma.StringNullableFilter<"User"> | string | null
+  password?: Prisma.StringNullableFilter<"User"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  role?: Prisma.StringNullableFilter<"User"> | string | null
+  isSuspended?: Prisma.BoolFilter<"User"> | boolean
+  agentId?: Prisma.StringNullableFilter<"User"> | string | null
+}
+
+export type UserCreateWithoutSessionsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  applications?: Prisma.ApplicationCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  agent?: Prisma.UserCreateNestedOneWithoutAssignedClientsInput
+  assignedClients?: Prisma.UserCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
-  id: string
+  id?: string
   name: string
   email: string
   emailVerified?: boolean
   image?: string | null
+  password?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  agentId?: string | null
+  applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  assignedClients?: Prisma.UserUncheckedCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -456,9 +909,18 @@ export type UserUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applications?: Prisma.ApplicationUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  agent?: Prisma.UserUpdateOneWithoutAssignedClientsNestedInput
+  assignedClients?: Prisma.UserUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -467,31 +929,58 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  agentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applications?: Prisma.ApplicationUncheckedUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  assignedClients?: Prisma.UserUncheckedUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
-  id: string
+  id?: string
   name: string
   email: string
   emailVerified?: boolean
   image?: string | null
+  password?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  applications?: Prisma.ApplicationCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  agent?: Prisma.UserCreateNestedOneWithoutAssignedClientsInput
+  assignedClients?: Prisma.UserCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
-  id: string
+  id?: string
   name: string
   email: string
   emailVerified?: boolean
   image?: string | null
+  password?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  agentId?: string | null
+  applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  assignedClients?: Prisma.UserUncheckedCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -516,9 +1005,18 @@ export type UserUpdateWithoutAccountsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applications?: Prisma.ApplicationUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  agent?: Prisma.UserUpdateOneWithoutAssignedClientsNestedInput
+  assignedClients?: Prisma.UserUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -527,9 +1025,468 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  agentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applications?: Prisma.ApplicationUncheckedUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  assignedClients?: Prisma.UserUncheckedUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUncheckedUpdateManyWithoutAgentNestedInput
+}
+
+export type UserCreateWithoutApplicationsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  documents?: Prisma.DocumentCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  agent?: Prisma.UserCreateNestedOneWithoutAssignedClientsInput
+  assignedClients?: Prisma.UserCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationCreateNestedManyWithoutAgentInput
+}
+
+export type UserUncheckedCreateWithoutApplicationsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  agentId?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  assignedClients?: Prisma.UserUncheckedCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationUncheckedCreateNestedManyWithoutAgentInput
+}
+
+export type UserCreateOrConnectWithoutApplicationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutApplicationsInput, Prisma.UserUncheckedCreateWithoutApplicationsInput>
+}
+
+export type UserCreateWithoutAssignedAppsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  applications?: Prisma.ApplicationCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  agent?: Prisma.UserCreateNestedOneWithoutAssignedClientsInput
+  assignedClients?: Prisma.UserCreateNestedManyWithoutAgentInput
+}
+
+export type UserUncheckedCreateWithoutAssignedAppsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  agentId?: string | null
+  applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUploaderInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  assignedClients?: Prisma.UserUncheckedCreateNestedManyWithoutAgentInput
+}
+
+export type UserCreateOrConnectWithoutAssignedAppsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignedAppsInput, Prisma.UserUncheckedCreateWithoutAssignedAppsInput>
+}
+
+export type UserUpsertWithoutApplicationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutApplicationsInput, Prisma.UserUncheckedUpdateWithoutApplicationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutApplicationsInput, Prisma.UserUncheckedCreateWithoutApplicationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutApplicationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutApplicationsInput, Prisma.UserUncheckedUpdateWithoutApplicationsInput>
+}
+
+export type UserUpdateWithoutApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  documents?: Prisma.DocumentUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  agent?: Prisma.UserUpdateOneWithoutAssignedClientsNestedInput
+  assignedClients?: Prisma.UserUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUpdateManyWithoutAgentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  agentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  assignedClients?: Prisma.UserUncheckedUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUncheckedUpdateManyWithoutAgentNestedInput
+}
+
+export type UserUpsertWithoutAssignedAppsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAssignedAppsInput, Prisma.UserUncheckedUpdateWithoutAssignedAppsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignedAppsInput, Prisma.UserUncheckedCreateWithoutAssignedAppsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAssignedAppsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAssignedAppsInput, Prisma.UserUncheckedUpdateWithoutAssignedAppsInput>
+}
+
+export type UserUpdateWithoutAssignedAppsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applications?: Prisma.ApplicationUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  agent?: Prisma.UserUpdateOneWithoutAssignedClientsNestedInput
+  assignedClients?: Prisma.UserUpdateManyWithoutAgentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAssignedAppsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  agentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applications?: Prisma.ApplicationUncheckedUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  assignedClients?: Prisma.UserUncheckedUpdateManyWithoutAgentNestedInput
+}
+
+export type UserCreateWithoutMessagesInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  applications?: Prisma.ApplicationCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUploaderInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  agent?: Prisma.UserCreateNestedOneWithoutAssignedClientsInput
+  assignedClients?: Prisma.UserCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationCreateNestedManyWithoutAgentInput
+}
+
+export type UserUncheckedCreateWithoutMessagesInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  agentId?: string | null
+  applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutClientInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUploaderInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  assignedClients?: Prisma.UserUncheckedCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationUncheckedCreateNestedManyWithoutAgentInput
+}
+
+export type UserCreateOrConnectWithoutMessagesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMessagesInput, Prisma.UserUncheckedCreateWithoutMessagesInput>
+}
+
+export type UserUpsertWithoutMessagesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMessagesInput, Prisma.UserUncheckedUpdateWithoutMessagesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMessagesInput, Prisma.UserUncheckedCreateWithoutMessagesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMessagesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMessagesInput, Prisma.UserUncheckedUpdateWithoutMessagesInput>
+}
+
+export type UserUpdateWithoutMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applications?: Prisma.ApplicationUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUploaderNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  agent?: Prisma.UserUpdateOneWithoutAssignedClientsNestedInput
+  assignedClients?: Prisma.UserUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUpdateManyWithoutAgentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  agentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applications?: Prisma.ApplicationUncheckedUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  assignedClients?: Prisma.UserUncheckedUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUncheckedUpdateManyWithoutAgentNestedInput
+}
+
+export type UserCreateWithoutDocumentsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  applications?: Prisma.ApplicationCreateNestedManyWithoutClientInput
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  agent?: Prisma.UserCreateNestedOneWithoutAssignedClientsInput
+  assignedClients?: Prisma.UserCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationCreateNestedManyWithoutAgentInput
+}
+
+export type UserUncheckedCreateWithoutDocumentsInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+  agentId?: string | null
+  applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutClientInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  assignedClients?: Prisma.UserUncheckedCreateNestedManyWithoutAgentInput
+  assignedApps?: Prisma.ApplicationUncheckedCreateNestedManyWithoutAgentInput
+}
+
+export type UserCreateOrConnectWithoutDocumentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentsInput, Prisma.UserUncheckedCreateWithoutDocumentsInput>
+}
+
+export type UserUpsertWithoutDocumentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentsInput, Prisma.UserUncheckedUpdateWithoutDocumentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentsInput, Prisma.UserUncheckedCreateWithoutDocumentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentsInput, Prisma.UserUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type UserUpdateWithoutDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applications?: Prisma.ApplicationUpdateManyWithoutClientNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  agent?: Prisma.UserUpdateOneWithoutAssignedClientsNestedInput
+  assignedClients?: Prisma.UserUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUpdateManyWithoutAgentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  agentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applications?: Prisma.ApplicationUncheckedUpdateManyWithoutClientNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  assignedClients?: Prisma.UserUncheckedUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUncheckedUpdateManyWithoutAgentNestedInput
+}
+
+export type UserCreateManyAgentInput = {
+  id?: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  password?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: string | null
+  isSuspended?: boolean
+}
+
+export type UserUpdateWithoutAgentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applications?: Prisma.ApplicationUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  assignedClients?: Prisma.UserUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUpdateManyWithoutAgentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAgentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applications?: Prisma.ApplicationUncheckedUpdateManyWithoutClientNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  assignedClients?: Prisma.UserUncheckedUpdateManyWithoutAgentNestedInput
+  assignedApps?: Prisma.ApplicationUncheckedUpdateManyWithoutAgentNestedInput
+}
+
+export type UserUncheckedUpdateManyWithoutAgentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -538,13 +1495,23 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
  */
 
 export type UserCountOutputType = {
-  sessions: number
+  applications: number
+  documents: number
+  messages: number
   accounts: number
+  sessions: number
+  assignedClients: number
+  assignedApps: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  applications?: boolean | UserCountOutputTypeCountApplicationsArgs
+  documents?: boolean | UserCountOutputTypeCountDocumentsArgs
+  messages?: boolean | UserCountOutputTypeCountMessagesArgs
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
+  sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  assignedClients?: boolean | UserCountOutputTypeCountAssignedClientsArgs
+  assignedApps?: boolean | UserCountOutputTypeCountAssignedAppsArgs
 }
 
 /**
@@ -560,8 +1527,22 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.SessionWhereInput
+export type UserCountOutputTypeCountApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApplicationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MessageWhereInput
 }
 
 /**
@@ -571,6 +1552,27 @@ export type UserCountOutputTypeCountAccountsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.AccountWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SessionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAssignedClientsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAssignedAppsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApplicationWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -578,10 +1580,20 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  password?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  role?: boolean
+  isSuspended?: boolean
+  agentId?: boolean
+  applications?: boolean | Prisma.User$applicationsArgs<ExtArgs>
+  documents?: boolean | Prisma.User$documentsArgs<ExtArgs>
+  messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  agent?: boolean | Prisma.User$agentArgs<ExtArgs>
+  assignedClients?: boolean | Prisma.User$assignedClientsArgs<ExtArgs>
+  assignedApps?: boolean | Prisma.User$assignedAppsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -591,8 +1603,13 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  password?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  role?: boolean
+  isSuspended?: boolean
+  agentId?: boolean
+  agent?: boolean | Prisma.User$agentArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -601,8 +1618,13 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  password?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  role?: boolean
+  isSuspended?: boolean
+  agentId?: boolean
+  agent?: boolean | Prisma.User$agentArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -611,24 +1633,44 @@ export type UserSelectScalar = {
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  password?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  role?: boolean
+  isSuspended?: boolean
+  agentId?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "password" | "createdAt" | "updatedAt" | "role" | "isSuspended" | "agentId", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  applications?: boolean | Prisma.User$applicationsArgs<ExtArgs>
+  documents?: boolean | Prisma.User$documentsArgs<ExtArgs>
+  messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  agent?: boolean | Prisma.User$agentArgs<ExtArgs>
+  assignedClients?: boolean | Prisma.User$assignedClientsArgs<ExtArgs>
+  assignedApps?: boolean | Prisma.User$assignedAppsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  agent?: boolean | Prisma.User$agentArgs<ExtArgs>
+}
+export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  agent?: boolean | Prisma.User$agentArgs<ExtArgs>
+}
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    sessions: Prisma.$SessionPayload<ExtArgs>[]
+    applications: Prisma.$ApplicationPayload<ExtArgs>[]
+    documents: Prisma.$DocumentPayload<ExtArgs>[]
+    messages: Prisma.$MessagePayload<ExtArgs>[]
     accounts: Prisma.$AccountPayload<ExtArgs>[]
+    sessions: Prisma.$SessionPayload<ExtArgs>[]
+    agent: Prisma.$UserPayload<ExtArgs> | null
+    assignedClients: Prisma.$UserPayload<ExtArgs>[]
+    assignedApps: Prisma.$ApplicationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -636,8 +1678,12 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     email: string
     emailVerified: boolean
     image: string | null
+    password: string | null
     createdAt: Date
     updatedAt: Date
+    role: string | null
+    isSuspended: boolean
+    agentId: string | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1032,8 +2078,14 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  applications<T extends Prisma.User$applicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documents<T extends Prisma.User$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  messages<T extends Prisma.User$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  agent<T extends Prisma.User$agentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$agentArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  assignedClients<T extends Prisma.User$assignedClientsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedClientsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignedApps<T extends Prisma.User$assignedAppsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedAppsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1068,8 +2120,12 @@ export interface UserFieldRefs {
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly emailVerified: Prisma.FieldRef<"User", 'Boolean'>
   readonly image: Prisma.FieldRef<"User", 'String'>
+  readonly password: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly role: Prisma.FieldRef<"User", 'String'>
+  readonly isSuspended: Prisma.FieldRef<"User", 'Boolean'>
+  readonly agentId: Prisma.FieldRef<"User", 'String'>
 }
     
 
@@ -1319,6 +2375,10 @@ export type UserCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    */
   data: Prisma.UserCreateManyInput | Prisma.UserCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1389,6 +2449,10 @@ export type UserUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many Users to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1458,27 +2522,75 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.sessions
+ * User.applications
  */
-export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$applicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Session
+   * Select specific fields to fetch from the Application
    */
-  select?: Prisma.SessionSelect<ExtArgs> | null
+  select?: Prisma.ApplicationSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Session
+   * Omit specific fields from the Application
    */
-  omit?: Prisma.SessionOmit<ExtArgs> | null
+  omit?: Prisma.ApplicationOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.SessionInclude<ExtArgs> | null
-  where?: Prisma.SessionWhereInput
-  orderBy?: Prisma.SessionOrderByWithRelationInput | Prisma.SessionOrderByWithRelationInput[]
-  cursor?: Prisma.SessionWhereUniqueInput
+  include?: Prisma.ApplicationInclude<ExtArgs> | null
+  where?: Prisma.ApplicationWhereInput
+  orderBy?: Prisma.ApplicationOrderByWithRelationInput | Prisma.ApplicationOrderByWithRelationInput[]
+  cursor?: Prisma.ApplicationWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+  distinct?: Prisma.ApplicationScalarFieldEnum | Prisma.ApplicationScalarFieldEnum[]
+}
+
+/**
+ * User.documents
+ */
+export type User$documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * User.messages
+ */
+export type User$messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Message
+   */
+  select?: Prisma.MessageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Message
+   */
+  omit?: Prisma.MessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MessageInclude<ExtArgs> | null
+  where?: Prisma.MessageWhereInput
+  orderBy?: Prisma.MessageOrderByWithRelationInput | Prisma.MessageOrderByWithRelationInput[]
+  cursor?: Prisma.MessageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MessageScalarFieldEnum | Prisma.MessageScalarFieldEnum[]
 }
 
 /**
@@ -1503,6 +2615,97 @@ export type User$accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.AccountScalarFieldEnum | Prisma.AccountScalarFieldEnum[]
+}
+
+/**
+ * User.sessions
+ */
+export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Session
+   */
+  select?: Prisma.SessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Session
+   */
+  omit?: Prisma.SessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SessionInclude<ExtArgs> | null
+  where?: Prisma.SessionWhereInput
+  orderBy?: Prisma.SessionOrderByWithRelationInput | Prisma.SessionOrderByWithRelationInput[]
+  cursor?: Prisma.SessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.agent
+ */
+export type User$agentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * User.assignedClients
+ */
+export type User$assignedClientsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+  orderBy?: Prisma.UserOrderByWithRelationInput | Prisma.UserOrderByWithRelationInput[]
+  cursor?: Prisma.UserWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserScalarFieldEnum | Prisma.UserScalarFieldEnum[]
+}
+
+/**
+ * User.assignedApps
+ */
+export type User$assignedAppsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Application
+   */
+  select?: Prisma.ApplicationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Application
+   */
+  omit?: Prisma.ApplicationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ApplicationInclude<ExtArgs> | null
+  where?: Prisma.ApplicationWhereInput
+  orderBy?: Prisma.ApplicationOrderByWithRelationInput | Prisma.ApplicationOrderByWithRelationInput[]
+  cursor?: Prisma.ApplicationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ApplicationScalarFieldEnum | Prisma.ApplicationScalarFieldEnum[]
 }
 
 /**

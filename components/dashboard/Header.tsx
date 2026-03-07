@@ -1,0 +1,50 @@
+"use client";
+
+import { Bell, Menu, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { signOut } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+
+interface HeaderProps {
+    title: string;
+    onMenuClick?: () => void;
+    showLogout?: boolean;
+}
+
+export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) {
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        await signOut();
+        router.push("/sign-in");
+    };
+
+    return (
+        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 sticky top-0 z-20">
+            <div className="flex items-center gap-4">
+                <Button variant="outline" className="md:hidden" onClick={onMenuClick}>
+                    <Menu className="h-6 w-6" />
+                </Button>
+                <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
+            </div>
+
+            <div className="flex items-center gap-4">
+                <Button variant="outline" className="text-gray-500 relative">
+                    <Bell className="h-5 w-5" />
+                    <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full"></span>
+                </Button>
+
+                {showLogout && (
+                    <Button
+                        variant="ghost"
+                        onClick={handleLogout}
+                        className="text-gray-600 hover:text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        <span className="hidden sm:inline">Logout</span>
+                    </Button>
+                )}
+            </div>
+        </header>
+    );
+}
