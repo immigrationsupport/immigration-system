@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Role } from "@prisma/client";
+import { User } from "@prisma/client";
 import { Search, Edit2, Ban, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import prisma from "@/lib/prisma";
@@ -9,7 +9,7 @@ export default async function ManageAgentsPage() {
     // Fetch real agent data securely from DB
     const agents: (User & { assignedClients: { id: string }[] })[] =
         await prisma.user.findMany({
-            where: { role: Role.AGENT },
+            where: { role: "AGENT" as any },
             include: {
                 assignedClients: { select: { id: true } }
             },
@@ -43,12 +43,12 @@ export default async function ManageAgentsPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {agents.length > 0 ? (
-                                agents.map((agent: any) => (
+                                agents.map((agent: User & { assignedClients: { id: string }[] }) => (
                                     <tr key={agent.id} className="hover:bg-gray-50 transition-colors bg-white">
                                         <td className="px-4 py-4 font-medium text-gray-900 border-l-2 border-transparent hover:border-blue-800">
                                             {agent.name}
                                         </td>
-                                     <td className="px-4 py-4 text-gray-500">{agent.email}</td>
+                                        <td className="px-4 py-4 text-gray-500">{agent.email}</td>
                                         <td className="px-4 py-4 text-gray-900 font-semibold">{agent.assignedClients.length}</td>
                                         <td className="px-4 py-4">
                                             <span className="bg-green-100 text-green-800 px-2.5 py-1 text-xs font-semibold" style={{ borderRadius: "4px" }}>
