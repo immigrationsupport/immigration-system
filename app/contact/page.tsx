@@ -115,7 +115,7 @@ export default function ContactPage() {
                                         <div>
                                             <h4 className="text-sm font-bold text-gray-900 mb-1">Mailing Address</h4>
                                             <p className="text-gray-600 leading-relaxed text-sm">
-                                                Apex Immigration, LLC<br />
+                                                ATLE Immigration<br />
                                                 400 Corporate Link, Suite 300<br />
                                                 Washington, DC 20001
                                             </p>
@@ -137,7 +137,7 @@ export default function ContactPage() {
                                         <div>
                                             <h4 className="text-sm font-bold text-gray-900 mb-1">Official Communications</h4>
                                             <p className="text-gray-600 text-sm">
-                                                contact@apeximmigration.com
+                                                contact@atlimmigration.com
                                             </p>
                                         </div>
                                     </div>

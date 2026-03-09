@@ -43,7 +43,7 @@ export function Sidebar({ items, userRole, userName }: SidebarProps) {
     return (
         <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 z-30">
             <div className="flex items-center justify-center h-16 border-b border-gray-200 px-6">
-                <span className="text-xl font-bold text-[var(--color-primary)] tracking-wide">IMMI SYSTEM</span>
+                <span className="text-xl font-bold text-[var(--color-primary)] tracking-wide">ATLE Immigration</span>
             </div>
 
             <div className="p-4 border-b border-gray-200">

@@ -21,7 +21,7 @@ export default function AboutPage() {
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Mission & Experience</h2>
                             <div className="prose prose-lg text-gray-600 max-w-none">
                                 <p className="leading-relaxed mb-4">
-                                    Founded with the goal of providing transparent, ethical, and efficient immigration guidance, Apex Immigration has developed an elite practice focusing on the precise processing of legal visas, residency statuses, and corporate immigration structures.
+                                    Founded with the goal of providing transparent, ethical, and efficient immigration guidance, ATLE Immigration has developed an elite practice focusing on the precise processing of legal visas, residency statuses, and corporate immigration structures.
                                 </p>
                                 <p className="leading-relaxed">
                                     Our firm operates at the intersection of international law and local regulations, guaranteeing that our clients' filings meet strict governmental criteria. We pride ourselves on confidentiality, reducing risk, and eliminating the administrative burdens common to complex immigration pipelines.

@@ -49,7 +49,7 @@ export default async function ApplicationHubPage({ params }: { params: { id: str
                         <div>
                             <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">{application.country}</h1>
                             <p className="text-blue-100 font-bold uppercase tracking-widest mt-2 flex items-center gap-2">
-                                <span className="h-2 w-2 bg-blue-400 rounded-full" /> Immigration Hub Dashboard
+                                <span className="h-2 w-2 bg-blue-400 rounded-full" /> ATLE Immigration
                             </p>
                         </div>
                     </div>
