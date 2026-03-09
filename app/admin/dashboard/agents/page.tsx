@@ -1,5 +1,5 @@
 import React from "react";
-import { User } from "@prisma/client";
+import { User, Role } from "@prisma/client";
 import { Search, Edit2, Ban, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import prisma from "@/lib/prisma";
@@ -9,7 +9,7 @@ export default async function ManageAgentsPage() {
     // Fetch real agent data securely from DB
     const agents: (User & { assignedClients: { id: string }[] })[] =
         await prisma.user.findMany({
-            where: { role: "AGENT" as any },
+            where: { role: Role.AGENT },
             include: {
                 assignedClients: { select: { id: true } }
             },
