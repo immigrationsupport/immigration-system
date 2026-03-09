@@ -1,4 +1,5 @@
 import React from "react";
+import { User, Role } from "@prisma/client";
 import { Search, Edit2, Ban, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import prisma from "@/lib/prisma";
@@ -6,13 +7,14 @@ import CreateAgentModal from "./create-agent-modal";
 
 export default async function ManageAgentsPage() {
     // Fetch real agent data securely from DB
-    const agents = await prisma.user.findMany({
-        where: { role: "AGENT" as any },
-        include: {
-            assignedClients: { select: { id: true } }
-        },
-        orderBy: { createdAt: "desc" }
-    });
+    const agents: (User & { assignedClients: { id: string }[] })[] =
+        await prisma.user.findMany({
+            where: { role: Role.AGENT },
+            include: {
+                assignedClients: { select: { id: true } }
+            },
+            orderBy: { createdAt: "desc" }
+        });
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto">
@@ -41,12 +43,12 @@ export default async function ManageAgentsPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {agents.length > 0 ? (
-                                agents.map(agent => (
+                                agents.map((agent: any) => (
                                     <tr key={agent.id} className="hover:bg-gray-50 transition-colors bg-white">
                                         <td className="px-4 py-4 font-medium text-gray-900 border-l-2 border-transparent hover:border-blue-800">
                                             {agent.name}
                                         </td>
-                                        <td className="px-4 py-4 text-gray-500">{agent.email}</td>
+                                     <td className="px-4 py-4 text-gray-500">{agent.email}</td>
                                         <td className="px-4 py-4 text-gray-900 font-semibold">{agent.assignedClients.length}</td>
                                         <td className="px-4 py-4">
                                             <span className="bg-green-100 text-green-800 px-2.5 py-1 text-xs font-semibold" style={{ borderRadius: "4px" }}>
