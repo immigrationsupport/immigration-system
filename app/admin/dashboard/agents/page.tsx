@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import { Search, Edit2, Ban, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import prisma from "@/lib/prisma";
@@ -7,7 +7,7 @@ import CreateAgentModal from "./create-agent-modal";
 
 export default async function ManageAgentsPage() {
     // Fetch real agent data securely from DB
-    const agents: (User & { assignedClients: { id: string }[] })[] =
+    const agents =
         await prisma.user.findMany({
             where: { role: Role.AGENT },
             include: {
@@ -43,7 +43,7 @@ export default async function ManageAgentsPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {agents.length > 0 ? (
-                                agents.map((agent: User & { assignedClients: { id: string }[] }) => (
+                                agents.map((agent) => (
                                     <tr key={agent.id} className="hover:bg-gray-50 transition-colors bg-white">
                                         <td className="px-4 py-4 font-medium text-gray-900 border-l-2 border-transparent hover:border-blue-800">
                                             {agent.name}
