@@ -72,43 +72,8 @@ export default async function AdminDashboardOverview() {
     };
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto p-6">
-            <h1 className="text-2xl font-semibold mb-6" style={{ color: "#1E3A8A" }}>System Overview</h1>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Total Clients Card */}
-                <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md" style={{ borderRadius: "12px" }}>
-                    <div className="p-3.5 rounded-xl bg-blue-50 text-[#1E3A8A]">
-                        <Users size={24} />
-                    </div>
-                    <div>
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Total Clients</p>
-                        <h3 className="text-3xl font-black text-gray-900">{totalClients}</h3>
-                    </div>
-                </div>
-
-                {/* Total Agents Card */}
-                <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md" style={{ borderRadius: "12px" }}>
-                    <div className="p-3.5 rounded-xl bg-indigo-50 text-indigo-700 text-opacity-80">
-                        <Briefcase size={24} />
-                    </div>
-                    <div>
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Total Agents</p>
-                        <h3 className="text-3xl font-black text-gray-900">{totalAgents}</h3>
-                    </div>
-                </div>
-
-                {/* Total Applications Card */}
-                <div className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md" style={{ borderRadius: "12px" }}>
-                    <div className="p-3.5 rounded-xl bg-emerald-50 text-emerald-700 text-opacity-80">
-                        <FileText size={24} />
-                    </div>
-                    <div>
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Total Applications</p>
-                        <h3 className="text-3xl font-black text-gray-900">{totalApplications}</h3>
-                    </div>
-                </div>
-            </div>
+        <div className="space-y-6 max-w-7xl mx-auto p-6 pt-0">
+            {/* Statistics are now in the layout */}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
                 {/* Applications by Status */}

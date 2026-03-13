@@ -70,7 +70,6 @@ export default async function AgentDashboard() {
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{assignedApps}</div>
-                        <p className="text-xs font-bold text-blue-600 mt-1 uppercase tracking-tighter">Active across all clients</p>
                     </CardContent>
                 </Card>
                 <Card className="border-none shadow-lg shadow-yellow-50/50 rounded-2xl overflow-hidden">
@@ -80,7 +79,6 @@ export default async function AgentDashboard() {
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{inReviewApps}</div>
-                        <p className="text-xs font-bold text-yellow-600 mt-1 uppercase tracking-tighter">Requires your attention</p>
                     </CardContent>
                 </Card>
                 <Card className="border-none shadow-lg shadow-green-50/50 rounded-2xl overflow-hidden">
@@ -90,7 +88,6 @@ export default async function AgentDashboard() {
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{completedApps}</div>
-                        <p className="text-xs font-bold text-green-600 mt-1 uppercase tracking-tighter">Successfully processed</p>
                     </CardContent>
                 </Card>
             </div>
@@ -145,8 +142,13 @@ export default async function AgentDashboard() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-5 text-right">
-                                            <Link href="/dashboard/agent/applications">
-                                                <Button  variant="ghost" className="h-8 w-8 p-0 rounded-full hover:bg-blue-100 hover:text-blue-700">
+                                            <Link href={`/dashboard/agent/clients/${app.clientId}`}>
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    className="h-9 w-9 p-0 rounded-xl border-gray-100 text-[#1E3A8A] hover:bg-blue-50 hover:border-blue-200 shadow-sm transition-all"
+                                                    title="View Client Details"
+                                                >
                                                     <ExternalLink className="h-4 w-4" />
                                                 </Button>
                                             </Link>

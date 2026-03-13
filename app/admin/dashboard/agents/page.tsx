@@ -4,6 +4,7 @@ import { Search, Edit2, Ban, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import prisma from "@/lib/prisma";
 import CreateAgentModal from "./create-agent-modal";
+import AgentActionButtons from "./agent-actions";
 
 export default async function ManageAgentsPage() {
     // Fetch real agent data securely from DB
@@ -51,22 +52,21 @@ export default async function ManageAgentsPage() {
                                         <td className="px-4 py-4 text-gray-500">{agent.email}</td>
                                         <td className="px-4 py-4 text-gray-900 font-semibold">{agent.assignedClients.length}</td>
                                         <td className="px-4 py-4">
-                                            <span className="bg-green-100 text-green-800 px-2.5 py-1 text-xs font-semibold" style={{ borderRadius: "4px" }}>
-                                                Active
+                                            <span className={`px-2.5 py-1 text-[10px] uppercase font-black tracking-widest rounded ${
+                                                agent.isSuspended 
+                                                ? "bg-red-50 text-red-700 border border-red-100" 
+                                                : "bg-green-50 text-green-700 border border-green-100"
+                                            }`}>
+                                                {agent.isSuspended ? "Suspended" : "Active"}
                                             </span>
                                         </td>
                                         <td className="px-4 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button className="p-1.5 text-gray-500 hover:text-blue-800 transition-colors" title="Edit Agent">
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                <button className="p-1.5 text-gray-500 hover:text-orange-500 transition-colors" title="Suspend Agent">
-                                                    <Ban size={16} />
-                                                </button>
-                                                <button className="p-1.5 text-gray-500 hover:text-red-500 transition-colors" title="Delete Agent">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
+                                            <AgentActionButtons 
+                                                agentId={agent.id} 
+                                                agentName={agent.name} 
+                                                agentEmail={agent.email} 
+                                                isSuspended={agent.isSuspended} 
+                                            />
                                         </td>
                                     </tr>
                                 ))

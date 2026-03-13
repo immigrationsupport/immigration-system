@@ -11,9 +11,9 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const agentItems = [
+        { icon: "LayoutDashboard", label: "Overview", href: "/dashboard/agent" },
         { icon: "Users", label: "Assigned Clients", href: "/dashboard/agent/clients" },
         { icon: "FileText", label: "Assigned Applications", href: "/dashboard/agent/applications" },
-        { icon: "MessageSquare", label: "Messages", href: "/dashboard/agent/messages" },
         { icon: "UserCog", label: "Profile", href: "/dashboard/agent/profile" },
     ];
 

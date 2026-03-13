@@ -1,16 +1,25 @@
-import { auth } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export default async function middleware(request: NextRequest) {
-    const session = await auth.api.getSession({
-        headers: request.headers
-    });
+    let session = null;
+    try {
+        const response = await fetch(`${request.nextUrl.origin}/api/auth/get-session`, {
+            headers: {
+                cookie: request.headers.get("cookie") || "",
+            },
+        });
+        if (response.ok) {
+            session = await response.json();
+        }
+    } catch (e) {
+        console.error("[Middleware] Fetch session error:", e);
+    }
 
     const url = request.nextUrl.clone();
     const pathname = url.pathname;
 
     console.log(`[Middleware] Path: ${pathname}, Session: ${!!session}`);
-    if (session) {
+    if (session && session.user) {
         console.log(`[Middleware] User: ${JSON.stringify(session.user)}`);
     }
 

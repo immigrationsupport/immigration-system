@@ -24,6 +24,7 @@ export default async function SystemLogsPage() {
     // 3. Map to UI format
     const formattedLogs = logs.map(log => ({
         id: log.id,
+        logNumber: log.logNumber,
         action: log.action,
         details: log.details || "No details provided.",
         createdAt: log.createdAt,

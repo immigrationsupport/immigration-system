@@ -121,18 +121,7 @@ export default function CompleteProfilePage() {
                             </div>
                         </div>
 
-                        {/* Phone Number */}
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                <Phone className="h-4 w-4 text-blue-500" /> Phone Number
-                            </label>
-                            <Input
-                                name="phoneNumber"
-                                placeholder="+237 ..."
-                                className="h-11 border-gray-200 focus:ring-[#1E3A8A]"
-                                required
-                            />
-                        </div>
+                       
 
                         {/* Address */}
                         <div className="space-y-1.5">

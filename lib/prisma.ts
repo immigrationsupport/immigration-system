@@ -1,28 +1,25 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaNeonHttp } from "@prisma/adapter-neon";
 
 const globalForPrisma = global as unknown as {
-  prisma: PrismaClient | undefined;
+  prisma_v2: PrismaClient | undefined;
 };
 
 const createPrisma = () => {
-  if (process.env.NEXT_RUNTIME === "edge") {
-    const { PrismaNeon } = require("@prisma/adapter-neon");
-    const { Pool } = require("@neondatabase/serverless");
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    const adapter = new PrismaNeon(pool);
-    return new PrismaClient({ adapter });
-  } else {
-    // Node.js Runtime (API Routes, Server Actions)
-    const { PrismaPg } = require("@prisma/adapter-pg");
-    const { Pool } = require("pg");
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    const adapter = new PrismaPg(pool);
-    return new PrismaClient({ adapter });
-  }
+    let connectionString = process.env.DATABASE_URL || "";
+    // Clean URL for HTTP fetch to avoid any pooling arguments that break it
+    connectionString = connectionString.replace(/['"]+/g, '');
+    let cleanUrl = connectionString.split('?')[0];
+
+    const adapter = new PrismaNeonHttp(cleanUrl, { fetchOptions: {} });
+    return new PrismaClient({ 
+        adapter,
+        log: ["error", "warn"] 
+    });
 };
 
-const prisma = globalForPrisma.prisma || createPrisma();
+export const prisma = globalForPrisma.prisma_v2 || createPrisma();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma_v2 = prisma;
 
 export default prisma;

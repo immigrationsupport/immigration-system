@@ -47,6 +47,10 @@ export async function assignAgentToClientAction(clientId: string, agentId: strin
 
         // Transaction to update client and all their applications
         await prisma.$transaction(async (tx) => {
+            // Re-fetch agent with name
+            const agent = await tx.user.findUnique({ where: { id: agentId } });
+            const agentName = agent?.name || agentId;
+
             // Update client
             await tx.user.update({
                 where: { id: clientId },
@@ -63,19 +67,11 @@ export async function assignAgentToClientAction(clientId: string, agentId: strin
             await tx.auditLog.create({
                 data: {
                     action: "ASSIGN_AGENT",
-                    details: `Agent ${agentId} assigned to Client ${client.name} (${client.email}).`,
+                    details: `Agent ${agentName} assigned to Client ${client.name} (${client.email}).`,
                     userId: session.user.id,
+                    targetId: clientId
                 }
             });
-
-            // Create system message for the agent (Notification)
-            // Note: Since messages require a procedure, and a client might have multiple, 
-            // we'll log it in AuditLog as the primary "notification" for now, 
-            // or create a procedure if one exists.
-
-            // Re-fetch client with agent name
-            const agent = await tx.user.findUnique({ where: { id: agentId } });
-            console.log(`[Notification] ${agent?.name || agentId} assigned to ${client.name}`);
         });
 
         revalidatePath("/admin/dashboard/clients");
@@ -96,6 +92,9 @@ export async function toggleSuspendClientAction(clientId: string, currentlySuspe
     }
 
     try {
+        const client = await prisma.user.findUnique({ where: { id: clientId } });
+        if (!client) return { error: "Client not found." };
+
         await prisma.user.update({
             where: { id: clientId },
             data: { isSuspended: !currentlySuspended }
@@ -104,8 +103,9 @@ export async function toggleSuspendClientAction(clientId: string, currentlySuspe
         await prisma.auditLog.create({
             data: {
                 action: currentlySuspended ? "UNSUSPEND_CLIENT" : "SUSPEND_CLIENT",
-                details: `Client ${clientId} ${currentlySuspended ? "unsuspended" : "suspended"} by Admin.`,
+                details: `Client ${client.name} (${client.email}) ${currentlySuspended ? "unsuspended" : "suspended"} by Admin.`,
                 userId: session.user.id,
+                targetId: clientId
             }
         });
 

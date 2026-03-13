@@ -12,6 +12,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const navItems = [
         { label: "Dashboard", href: "/dashboard/client" },
         { label: "Applications", href: "/dashboard/client/applications" },
+        { label: "Official Messages", href: "/dashboard/client/messages" },
         { label: "Profile", href: "/dashboard/client/profile" },
     ];
 

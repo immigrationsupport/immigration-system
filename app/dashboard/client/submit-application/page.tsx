@@ -122,17 +122,23 @@ export default function SubmitApplicationPage() {
 
                         <div className="space-y-4">
                             <Label>Documents Upload</Label>
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
+                            <div className="relative group p-10 border-2 border-dashed border-blue-100 rounded-3xl bg-blue-50/10 hover:bg-blue-50/50 hover:border-blue-400 transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center text-center">
                                 <Input
                                     type="file"
                                     multiple
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                     onChange={handleFileChange}
                                     accept=".pdf,.jpg,.jpeg,.png"
                                 />
-                                <Upload className="h-10 w-10 text-gray-400 mb-2" />
-                                <p className="text-sm font-medium text-gray-900">Drag and drop or click to upload</p>
-                                <p className="text-xs text-gray-500 mt-1">PDF, JPG, PNG up to 10MB</p>
+                                <div className="bg-white p-4 rounded-2xl shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                                    <Upload className="h-8 w-8 text-blue-600" />
+                                </div>
+                                <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Browse your files</h3>
+                                <p className="text-sm text-gray-500 font-medium mt-1">Drag & Drop or Click to choose from device</p>
+                                <div className="mt-6 px-6 py-2 bg-[#1E3A8A] text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-200 group-hover:bg-blue-900 transition-colors">
+                                    Select Documents
+                                </div>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-4">PDF, JPG, PNG (Max 10MB per file)</p>
                             </div>
 
                             {files.length > 0 && (

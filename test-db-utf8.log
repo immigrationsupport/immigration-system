@@ -1,0 +1,74 @@
+﻿[dotenv@17.3.1] injecting env (11) from .env -- tip: ÔÜÖ´©Å  enable debug logging with { debug: true }
+node.exe : C:\Users\DELL\OneD
+rive\Bureau\IMMI-app\immigrat
+ion-system\node_modules\@pris
+ma\client\src\runtime\utils\v
+alidatePrismaClientOptions.ts
+:239
+Au caractère C:\Program 
+Files\nodejs\npx.ps1:29 : 3
++   & $NODE_EXE $NPX_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (C:\User  
+  s\DELL\O...tOptions.ts:2   
+ 39:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+      throw new PrismaClientC
+onstructorValidationError(
+            ^
+
+
+PrismaClientConstructorValida
+tionError: Unknown property 
+datasources provided to 
+PrismaClient constructor.
+Read more at https://pris.ly/
+d/client-constructor
+    at 
+validatePrismaClientOptions (
+C:\Users\DELL\OneDrive\Bureau
+\IMMI-app\immigration-system\
+node_modules\@prisma\client\s
+rc\runtime\utils\validatePris
+maClientOptions.ts:239:13)
+    at new t (C:\Users\DELL\O
+neDrive\Bureau\IMMI-app\immig
+ration-system\node_modules\@p
+risma\client\src\runtime\getP
+rismaClient.ts:281:7)
+    at <anonymous> (C:\Users\
+DELL\OneDrive\Bureau\IMMI-app
+\immigration-system\test-db.t
+s:8:16)
+    at Object.<anonymous> (C:
+\Users\DELL\OneDrive\Bureau\I
+MMI-app\immigration-system\te
+st-db.ts:29:6)
+    at Module._compile (node:
+internal/modules/cjs/loader:1
+734:14)
+    at Object.transformer (C:
+\Users\DELL\OneDrive\Bureau\I
+MMI-app\immigration-system\no
+de_modules\tsx\dist\register-
+D46fvsV_.cjs:3:1104)
+    at Module.load (node:inte
+rnal/modules/cjs/loader:1469:
+32)
+    at Module._load (node:int
+ernal/modules/cjs/loader:1286
+:12)
+    at 
+TracingChannel.traceSync (nod
+e:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:i
+nternal/modules/cjs/loader:23
+5:24)
+
+Node.js v24.1.0

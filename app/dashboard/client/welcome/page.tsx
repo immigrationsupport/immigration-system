@@ -33,7 +33,7 @@ export default async function WelcomePage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6 pb-8">
-                    <Link href="/dashboard/client/submit-application">
+                    <Link href="/applications/new">
                         <Button className="bg-[#1E3A8A] hover:bg-blue-800 text-white px-8 py-6 text-lg rounded-sm transition-colors shadow-md hover:shadow-lg">
                             Start New Application
                         </Button>

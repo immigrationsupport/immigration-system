@@ -19,7 +19,7 @@ export async function completeProfileAction(formData: FormData) {
     const phoneNumber = formData.get("phoneNumber") as string;
     const address = formData.get("address") as string;
 
-    if (!dateOfBirth || !nationality || !maritalStatus || !phoneNumber || !address) {
+    if (!dateOfBirth || !nationality || !maritalStatus || !address) {
         return { error: "All fields are required." };
     }
 

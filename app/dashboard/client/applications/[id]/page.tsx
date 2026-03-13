@@ -8,7 +8,8 @@ import { Globe } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default async function ApplicationHubPage({ params }: { params: { id: string } }) {
+export default async function ApplicationHubPage(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -21,6 +22,7 @@ export default async function ApplicationHubPage({ params }: { params: { id: str
             procedures: {
                 include: {
                     documents: true,
+                    application: true,
                     messages: {
                         orderBy: { createdAt: "asc" }
                     }

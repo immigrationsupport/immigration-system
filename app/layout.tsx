@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Professional immigration consultancy delivering secure, transparent, and accurate visa and residency processing globally.",
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,6 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

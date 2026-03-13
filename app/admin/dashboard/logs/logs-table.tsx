@@ -25,6 +25,7 @@ interface Author {
 
 interface LogItem {
     id: string;
+    logNumber: number;
     action: string;
     details: string;
     createdAt: Date;
@@ -47,6 +48,7 @@ export default function LogsTable({
             str.includes("error") ||
             str.includes("suspicious") ||
             str.includes("remove") ||
+            str.includes("suspend") ||
             str.includes("reject");
     };
 
@@ -68,8 +70,11 @@ export default function LogsTable({
 
     const getActionStyles = (action: string) => {
         const a = action.toUpperCase();
-        if (a.includes("DELETE") || a.includes("REMOVE") || a.includes("FAIL") || a.includes("REJECT")) {
+        if (a.includes("DELETE") || a.includes("REMOVE") || a.includes("FAIL") || a.includes("REJECT") || a.includes("SUSPEND")) {
             return { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", icon: <ShieldAlert size={14} /> };
+        }
+        if (a.includes("SEND_MESSAGE") || a.includes("NOTIFICATION")) {
+            return { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200", icon: <Activity size={14} /> };
         }
         if (a.includes("UPDATE") || a.includes("MODIFY") || a.includes("ASSIGN")) {
             return { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", icon: <RefreshCw size={14} /> };
@@ -124,6 +129,7 @@ export default function LogsTable({
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-gray-50/50 text-gray-500 text-[10px] uppercase tracking-wider font-extrabold border-b border-gray-100">
                         <tr>
+                            <th className="px-6 py-4">Ref #</th>
                             <th className="px-6 py-4">Action Event</th>
                             <th className="px-6 py-4 w-1/3">Context / Target Details</th>
                             <th className="px-6 py-4">Author Profile</th>
@@ -137,6 +143,11 @@ export default function LogsTable({
 
                             return (
                                 <tr key={log.id} className={`hover:bg-slate-50/50 transition-colors ${anomalyDetected && typeFilter === 'ANOMALY' ? 'bg-red-50/20' : ''}`}>
+                                    <td className="px-6 py-4">
+                                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                                            LOG-{log.logNumber.toString().padStart(4, '0')}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4">
                                         <div className={`flex items-center gap-2 w-fit px-3 py-1.5 rounded-lg border ${styles.bg} ${styles.border} ${styles.text}`}>
                                             {styles.icon}
@@ -161,8 +172,8 @@ export default function LogsTable({
                                                     <p className="text-sm font-bold text-gray-900 leading-tight">{log.author.name}</p>
                                                     <div className="flex items-center gap-2 mt-0.5">
                                                         <span className={`flex items-center text-[8px] uppercase font-black px-1.5 py-0.5 rounded leading-none ${log.author.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' :
-                                                                log.author.role === 'AGENT' ? 'bg-blue-100 text-blue-700' :
-                                                                    'bg-gray-100 text-gray-700'
+                                                            log.author.role === 'AGENT' ? 'bg-blue-100 text-blue-700' :
+                                                                'bg-gray-100 text-gray-700'
                                                             }`}>
                                                             {log.author.role}
                                                         </span>

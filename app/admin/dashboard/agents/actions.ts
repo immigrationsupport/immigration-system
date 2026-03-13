@@ -61,6 +61,7 @@ export async function createAgentAction(formData: FormData) {
                 action: "CREATE_AGENT",
                 details: `Agent ${name} (${email}) created by Admin.`,
                 userId: session.user.id,
+                targetId: newUser.id,
             }
         });
 
@@ -71,3 +72,109 @@ export async function createAgentAction(formData: FormData) {
         return { error: "An error occurred while creating the agent." };
     }
 }
+
+export async function toggleSuspendAgentAction(agentId: string, currentlySuspended: boolean) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || (session.user as any).role !== "ADMIN") {
+        return { error: "Unauthorized access." };
+    }
+
+    try {
+        const agent = await prisma.user.findUnique({ where: { id: agentId } });
+        if (!agent) return { error: "Agent not found." };
+
+        await prisma.user.update({
+            where: { id: agentId },
+            data: { isSuspended: !currentlySuspended }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: currentlySuspended ? "UNSUSPEND_AGENT" : "SUSPEND_AGENT",
+                details: `Agent ${agent.name} (${agent.email}) ${currentlySuspended ? "unsuspended" : "suspended"} by Admin.`,
+                userId: session.user.id,
+                targetId: agentId
+            }
+        });
+
+        revalidatePath("/admin/dashboard/agents");
+        return { success: true };
+    } catch (e: any) {
+        return { error: "Failed to update agent status." };
+    }
+}
+
+export async function deleteAgentAction(agentId: string) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || (session.user as any).role !== "ADMIN") {
+        return { error: "Unauthorized access." };
+    }
+
+    try {
+        const agent = await prisma.user.findUnique({ where: { id: agentId } });
+        
+        await prisma.user.delete({
+            where: { id: agentId }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "DELETE_AGENT",
+                details: `Agent ${agent?.name} (${agent?.email}) deleted by Admin.`,
+                userId: session.user.id,
+                targetId: agentId
+            }
+        });
+
+        revalidatePath("/admin/dashboard/agents");
+        return { success: true };
+    } catch (e: any) {
+        console.error("Delete Error:", e);
+        return { error: "Failed to delete agent. They might have assigned clients." };
+    }
+}
+
+export async function updateAgentAction(agentId: string, name: string, email: string) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || (session.user as any).role !== "ADMIN") {
+        return { error: "Unauthorized access." };
+    }
+
+    if (!name || !email) {
+        return { error: "Name and email are required." };
+    }
+
+    try {
+        await prisma.user.update({
+            where: { id: agentId },
+            data: { 
+                name, 
+                email: email.toLowerCase() 
+            }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "UPDATE_AGENT",
+                details: `Agent ${name} (${email}) details updated by Admin.`,
+                userId: session.user.id,
+                targetId: agentId
+            }
+        });
+
+        revalidatePath("/admin/dashboard/agents");
+        return { success: true };
+    } catch (e: any) {
+        return { error: "Failed to update agent details." };
+    }
+}
+

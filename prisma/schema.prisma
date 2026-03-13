@@ -27,16 +27,18 @@ model User {
   phoneNumber      String?
   address          String?
 
-  agentId         String?
-  applications    Application[] @relation("ClientApplications")
-  documents       Document[]
-  messages        Message[]
-  accounts        Account[]
-  sessions        Session[]
-  auditLogs       AuditLog[]
-  agent           User?         @relation("AgentClients", fields: [agentId], references: [id])
-  assignedClients User[]        @relation("AgentClients")
-  assignedApps    Application[] @relation("AgentApplications")
+  agentId          String?
+  applications     Application[]     @relation("ClientApplications")
+  documents        Document[]
+  messages         Message[]
+  accounts         Account[]
+  sessions         Session[]
+  sentMessages     OfficialMessage[] @relation("SentMessages")
+  receivedMessages OfficialMessage[] @relation("ReceivedMessages")
+  authoredLogs     AuditLog[]        @relation("AuthorLogs")
+  agent            User?             @relation("AgentClients", fields: [agentId], references: [id])
+  assignedClients  User[]            @relation("AgentClients")
+  assignedApps     Application[]     @relation("AgentApplications")
 
   @@map("user")
 }
@@ -125,6 +127,18 @@ model Message {
   sender      User      @relation(fields: [senderId], references: [id])
 }
 
+model OfficialMessage {
+  id         String   @id @default(uuid())
+  subject    String
+  content    String
+  senderId   String
+  receiverId String
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
+
 model Document {
   id          String         @id @default(uuid())
   name        String
@@ -160,9 +174,16 @@ enum ProcedureType {
 
 enum DocumentType {
   PASSPORT
+  PASSPORT_PHOTO
   BIRTH_CERTIFICATE
   ID_CARD
-  TRANSCRIPT
+  DIPLOMA
+  CV
+  WORK_CERTIFICATE
+  LANGUAGE_REGISTRATION
+  LANGUAGE_RESULT
+  MEDICAL
+  VISA_APPROVAL
   OTHER
 }
 
@@ -192,9 +213,11 @@ enum ProcedureStatus {
 
 model AuditLog {
   id        String   @id @default(uuid())
+  logNumber Int      @unique @default(autoincrement())
   action    String
   details   String?
   userId    String?
-  author    User?    @relation(fields: [userId], references: [id])
+  targetId  String?
+  author    User?    @relation("AuthorLogs", fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }

@@ -51,38 +51,49 @@ export async function submitProcedureAction(procedureId: string) {
 }
 
 export async function addDocumentAction(formData: FormData) {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    });
-
-    if (!session) return { error: "Unauthorized" };
-
-    const procedureId = formData.get("procedureId") as string;
-    const name = formData.get("name") as string;
-    const fileUrl = formData.get("fileUrl") as string; // Typically should be from storage
-    const type = formData.get("type") as string;
-
-    const procedure = await prisma.procedure.findUnique({
-        where: { id: procedureId },
-        include: { application: true }
-    });
-
-    if (!procedure || procedure.application.clientId !== session.user.id) {
-        return { error: "Procedure not found." };
-    }
-
-    if (procedure.isLocked) {
-        return { error: "Cannot add documents to a locked procedure." };
-    }
-
     try {
+        const session = await auth.api.getSession({
+            headers: await headers()
+        });
+
+        if (!session) return { error: "Session expired. Please login again." };
+
+        const procedureId = formData.get("procedureId")?.toString();
+        const name = formData.get("name")?.toString();
+        const type = formData.get("type")?.toString();
+        const file = formData.get("file") as File;
+
+        if (!procedureId || !name || !type || !file || file.size === 0) {
+            return { error: "Missing required information. Please ensure a file and category are selected." };
+        }
+
+        // MOCK STORAGE: In a real app we'd upload to S3/UploadThing here.
+        const fileUrl = `/mock-storage/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+
+        const procedure = await prisma.procedure.findUnique({
+            where: { id: procedureId },
+            include: { application: true }
+        });
+
+        if (!procedure) return { error: "Application section not found." };
+        
+        if (procedure.application.clientId !== session.user.id) {
+            return { error: "You do not have permission to modify this application." };
+        }
+
+        if (procedure.isLocked) {
+            return { error: "This section is currently locked for review." };
+        }
+
+        // Create the document
         await prisma.document.create({
             data: {
-                name,
+                name: name.trim(),
                 fileUrl,
                 type: type as any,
                 procedureId,
-                uploaderId: session.user.id
+                uploaderId: session.user.id,
+                status: "UPLOADED"
             }
         });
 
@@ -90,15 +101,17 @@ export async function addDocumentAction(formData: FormData) {
         await prisma.auditLog.create({
             data: {
                 action: "DOCUMENT_UPLOAD",
-                details: `Client uploaded document "${name}" for procedure ${procedureId}.`,
-                userId: session.user.id
+                details: `Client uploaded ${name} for ${procedure.application.country} application.`,
+                userId: session.user.id,
+                targetId: procedure.applicationId
             }
         });
 
         revalidatePath(`/dashboard/client/applications/${procedure.applicationId}`);
         return { success: true };
     } catch (e: any) {
-        return { error: e.message || "Failed to add document." };
+        console.error("Document Upload Error:", e);
+        return { error: e.message || "A server error occurred during upload. Please try again." };
     }
 }
 

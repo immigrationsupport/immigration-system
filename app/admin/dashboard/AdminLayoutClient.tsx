@@ -1,23 +1,46 @@
-import React, { Suspense } from "react";
+"use client";
+
+import React, { useEffect } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
-import AdminStats from "@/components/dashboard/AdminStats";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import {
+    LayoutDashboard,
+    Users,
+    Briefcase,
+    FileText,
+    FolderSearch,
+    List
+} from "lucide-react";
+import { useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
-export default async function AdminDashboardLayout({
+export default function AdminDashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    });
+    const { data: session, isPending } = useSession();
+    const router = useRouter();
 
-    if (!session || (session.user as any).role !== "ADMIN") {
-        redirect("/admin/login");
+    useEffect(() => {
+        // Simple role-based protection
+        if (!isPending) {
+            // Check if user is logged in
+            if (!session) {
+                router.push("/admin/login");
+            }
+            // Optional: you can check a specific role field e.g., session.user.role === 'admin'
+            // else if (session.user?.role !== "admin") {
+            //      router.push("/admin/login");
+            // }
+        }
+    }, [session, isPending, router]);
+
+    if (isPending) {
+        return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     }
+
+    if (!session) return null; // Prevent flicker while redirecting
 
     const adminSidebarItems = [
         { icon: "LayoutDashboard", label: "Overview", href: "/admin/dashboard" },
@@ -42,13 +65,9 @@ export default async function AdminDashboardLayout({
                 <Header title="" showLogout={true} />
 
                 <main className="flex-1 p-6 md:p-8 overflow-y-auto w-full mx-auto" style={{ backgroundColor: "#F9FAFB" }}>
-                    <Suspense fallback={<div className="h-32 w-full bg-gray-50 animate-pulse rounded-xl mb-8"></div>}>
-                        <AdminStats />
-                    </Suspense>
                     {children}
                 </main>
             </div>
         </div>
     );
 }
-

@@ -21,7 +21,7 @@ export default function Footer() {
                         <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">Our Offices</h3>
                         <div className="flex items-center text-gray-600 text-sm">
                             <Mail className="w-4 h-4 mr-3 text-[#1E3A8A]" />
-                            <a href="mailto:contact@apeximmigration.com" className="hover:text-gray-900 transition-colors">[EMAIL_ADDRESS]</a>
+                            <a href="mailto:emlieag573@gmail.com" className="hover:text-gray-900 transition-colors">emlieag573@gmail.com</a>
                         </div>
                         <div className="flex items-center text-gray-600 text-sm">
                             <Phone className="w-4 h-4 mr-3 text-[#1E3A8A]" />
