@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
     try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
         const { fullName, email, phone, message } = await req.json();
 
         if (!fullName || !email || !message) {
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
         if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "your_resend_api_key_here") {
             console.error("[Contact API] RESEND_API_KEY not configured in .env");
             return NextResponse.json(
-                { error: "Email service not configured." },
+                { error: "Email service not configured. Please use a valid RESEND_API_KEY." },
                 { status: 503 }
             );
         }
@@ -82,3 +83,4 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
