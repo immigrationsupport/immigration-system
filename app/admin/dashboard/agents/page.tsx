@@ -32,35 +32,44 @@ export default async function ManageAgentsPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 text-gray-600 border-b border-gray-200 uppercase text-xs">
-                            <tr>
-                                <th className="px-4 py-3 font-medium">Agent Name</th>
-                                <th className="px-4 py-3 font-medium">Email</th>
-                                <th className="px-4 py-3 font-medium">Assigned Clients</th>
-                                <th className="px-4 py-3 font-medium">Status</th>
-                                <th className="px-4 py-3 font-medium text-right">Actions</th>
+                    <table className="w-full text-sm text-left border-separate border-spacing-0">
+                        <thead>
+                            <tr className="bg-gray-50/80">
+                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 first:rounded-tl-xl">Agent Name</th>
+                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100">Email</th>
+                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 text-center">Assigned Clients</th>
+                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100">Status</th>
+                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 text-right last:rounded-tr-xl">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-50">
                             {agents.length > 0 ? (
-                                agents.map((agent) => (
-                                    <tr key={agent.id} className="hover:bg-gray-50 transition-colors bg-white">
-                                        <td className="px-4 py-4 font-medium text-gray-900 border-l-2 border-transparent hover:border-blue-800">
-                                            {agent.name}
+                                agents.map((agent: any) => (
+                                    <tr key={agent.id} className="hover:bg-blue-50/40 transition-all duration-200 group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-black text-[#1E3A8A]">
+                                                    {agent.name.substring(0, 2).toUpperCase()}
+                                                </div>
+                                                <span className="font-bold text-gray-900">{agent.name}</span>
+                                            </div>
                                         </td>
-                                        <td className="px-4 py-4 text-gray-500">{agent.email}</td>
-                                        <td className="px-4 py-4 text-gray-900 font-semibold">{agent.assignedClients.length}</td>
-                                        <td className="px-4 py-4">
-                                            <span className={`px-2.5 py-1 text-[10px] uppercase font-black tracking-widest rounded ${
+                                        <td className="px-6 py-4 text-gray-500 font-medium">{agent.email}</td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="inline-flex items-center justify-center h-7 px-3 rounded-full bg-gray-100 text-gray-700 text-xs font-black">
+                                                {agent.assignedClients.length}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter ${
                                                 agent.isSuspended 
-                                                ? "bg-red-50 text-red-700 border border-red-100" 
-                                                : "bg-green-50 text-green-700 border border-green-100"
+                                                ? "bg-red-50 text-red-600 border border-red-100" 
+                                                : "bg-emerald-50 text-emerald-600 border border-emerald-100"
                                             }`}>
                                                 {agent.isSuspended ? "Suspended" : "Active"}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-4 text-right">
+                                        <td className="px-6 py-4 text-right">
                                             <AgentActionButtons 
                                                 agentId={agent.id} 
                                                 agentName={agent.name} 
@@ -72,8 +81,8 @@ export default async function ManageAgentsPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="px-4 py-8 text-center text-gray-500 italic">
-                                        No agents found. Click "Create Agent" to add the first agent.
+                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-400 font-bold uppercase tracking-widest text-xs">
+                                        No agents found. Click "Create Agent" to start.
                                     </td>
                                 </tr>
                             )}

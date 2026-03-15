@@ -139,47 +139,46 @@ export default function ApplicationTable({
                 </div>
             </div>
 
-            {/* Table */}
             <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-gray-50/50 text-gray-500 text-[11px] uppercase tracking-wider font-semibold border-b border-gray-100">
-                        <tr>
-                            <th className="px-6 py-4">Client & App Info</th>
-                            <th className="px-6 py-4">Destination</th>
-                            <th className="px-6 py-4">Assigned Agent</th>
-                            <th className="px-6 py-4">Status</th>
-                            <th className="px-6 py-4">Created At</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
+                <table className="w-full text-left border-separate border-spacing-0">
+                    <thead>
+                        <tr className="bg-gray-50/80">
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 first:rounded-tl-xl whitespace-nowrap">Client & App Info</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Destination</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Assigned Agent</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Status</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Created At</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 text-right last:rounded-tr-xl">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                         {filteredApplications.map((app) => (
-                            <tr key={app.id} className="hover:bg-blue-50/30 transition-colors group">
+                            <tr key={app.id} className="hover:bg-blue-50/40 transition-all duration-200 group">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border border-blue-200">
-                                            {app.client.name[0]}
+                                        <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-[10px] font-black border border-blue-200">
+                                            {app.client.name.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold text-gray-900 leading-none mb-1">{app.client.name}</p>
-                                            <p className="text-xs text-gray-500 font-mono">ID: {app.id.substring(0, 8).toUpperCase()}</p>
+                                            <p className="text-sm font-bold text-gray-900 leading-none mb-1">{app.client.name}</p>
+                                            <p className="text-[10px] text-gray-400 font-mono">ID: {app.id.substring(0, 8).toUpperCase()}</p>
                                         </div>
                                     </div>
                                 </td>
 
                                 <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <Globe size={14} className="text-gray-400" />
+                                    <div className="flex items-center gap-2 text-sm text-gray-700 font-medium">
+                                        <Globe size={14} className="text-blue-400" />
                                         {app.destination}
                                     </div>
-                                    <p className="text-[10px] text-gray-400 mt-0.5">{(app.type || "GENERAL").replace('_', ' ')}</p>
+                                    <p className="text-[9px] font-black uppercase tracking-tighter text-gray-400 mt-1">{(app.type || "GENERAL").replace('_', ' ')}</p>
                                 </td>
 
-                                <td className="px-6 py-4 text-sm">
+                                <td className="px-6 py-4">
                                     <select
                                         value={app.agent?.id || "null"}
                                         onChange={(e) => handleAgentChange(app.id, e.target.value)}
-                                        className="bg-transparent border-none text-gray-600 hover:text-blue-700 cursor-pointer outline-none focus:ring-0 p-0 text-sm"
+                                        className="bg-gray-100/50 border-none text-gray-600 hover:text-[#1E3A8A] hover:bg-white rounded px-2 py-1 cursor-pointer outline-none focus:ring-1 focus:ring-blue-200 transition-all text-xs font-semibold"
                                         disabled={loadingId === app.id}
                                     >
                                         <option value="null">Select Agent...</option>
@@ -198,7 +197,7 @@ export default function ApplicationTable({
                                                 ${getStatusStyles(app.status).bg} 
                                                 ${getStatusStyles(app.status).text} 
                                                 ${getStatusStyles(app.status).border} 
-                                                text-[11px] font-bold px-2 py-1 rounded border outline-none cursor-pointer
+                                                text-[10px] font-black uppercase tracking-tighter px-2 py-1 rounded-full border outline-none cursor-pointer transition-all hover:brightness-95
                                             `}
                                             disabled={loadingId === app.id}
                                         >
@@ -207,37 +206,37 @@ export default function ApplicationTable({
                                             <option value="APPROVED">APPROVED</option>
                                             <option value="REJECTED">REJECTED</option>
                                         </select>
-                                        {loadingId === app.id && <Loader2 size={14} className="animate-spin text-blue-400" />}
+                                        {loadingId === app.id && <Loader2 size={12} className="animate-spin text-blue-400" />}
                                     </div>
                                 </td>
 
                                 <td className="px-6 py-4 text-gray-500 text-xs font-medium">
-                                    <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center gap-1.5 whitespace-nowrap">
                                         <Calendar size={13} className="text-gray-300" />
-                                        {new Date(app.createdAt).toLocaleDateString()}
+                                        {new Date(app.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
                                 </td>
 
                                 <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-2">
+                                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                         <Button
                                             variant="ghost"
-                                            size="icon"
-                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-transparent hover:border-blue-100"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-white shadow-sm"
                                             onClick={() => setSelectedAppId(app.id)}
                                             title="View Details"
                                         >
-                                            <Eye size={18} />
+                                            <Eye size={16} />
                                         </Button>
                                         <Button
                                             variant="ghost"
-                                            size="icon"
-                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-100"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-white shadow-sm"
                                             onClick={() => handleDelete(app.id)}
                                             disabled={loadingId === app.id}
                                             title="Delete Application"
                                         >
-                                            <Trash2 size={18} />
+                                            <Trash2 size={16} />
                                         </Button>
                                     </div>
                                 </td>

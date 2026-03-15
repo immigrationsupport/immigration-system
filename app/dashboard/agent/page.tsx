@@ -118,7 +118,7 @@ export default async function AgentDashboard() {
                                     <tr key={app.id} className="hover:bg-blue-50/30 transition-colors group">
                                         <td className="px-6 py-5">
                                             <div className="font-bold text-gray-900">{app.client.name}</div>
-                                            <div className="text-[10px] text-gray-400 font-mono tracking-tighter uppercase">{app.country} Hub</div>
+                                            <div className="text-[10px] text-gray-400 font-mono tracking-tighter uppercase">{app.country}</div>
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex gap-1 flex-wrap">

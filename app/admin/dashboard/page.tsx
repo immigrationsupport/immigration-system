@@ -1,6 +1,7 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Users, Briefcase, FileText, Activity, Clock } from "lucide-react";
 import prisma from "@/lib/prisma";
+import AdminStats from "@/components/dashboard/AdminStats";
 
 function getTimeAgo(date: Date) {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
@@ -73,7 +74,9 @@ export default async function AdminDashboardOverview() {
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto p-6 pt-0">
-            {/* Statistics are now in the layout */}
+            <Suspense fallback={<div className="h-32 w-full bg-gray-50 animate-pulse rounded-xl mb-8"></div>}>
+                <AdminStats />
+            </Suspense>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
                 {/* Applications by Status */}

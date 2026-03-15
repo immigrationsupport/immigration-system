@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Eye, EyeOff } from "lucide-react";
 import { createAgentAction } from "./actions";
 
 export default function CreateAgentModal() {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -23,7 +24,6 @@ export default function CreateAgentModal() {
         if (res.error) {
             setError(res.error);
         } else {
-            alert("Agent created successfully!");
             setIsOpen(false);
         }
     }
@@ -32,71 +32,81 @@ export default function CreateAgentModal() {
         <>
             <Button
                 onClick={() => setIsOpen(true)}
-                className="flex items-center gap-2 text-white"
-                style={{ backgroundColor: "#1E3A8A", borderRadius: "8px" }}
+                className="flex items-center gap-2 text-white font-black px-6"
+                style={{ backgroundColor: "#1E3A8A", borderRadius: "12px" }}
             >
                 <Plus size={16} />
                 Create Agent
             </Button>
 
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative border-none">
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 font-bold"
+                            className="absolute top-6 right-6 text-gray-400 hover:text-gray-700 font-bold"
                         >
                             ✕
                         </button>
 
-                        <h2 className="text-xl font-bold mb-4 text-[#1E3A8A]">Create New Agent</h2>
-                        <p className="text-sm text-gray-500 mb-6">Enter details to create an agent account.</p>
+                        <h2 className="text-2xl font-black mb-1 text-[#1E3A8A]">Create New Agent</h2>
+                        <p className="text-sm text-gray-500 mb-8 font-medium">Provision a new agent account.</p>
 
                         {error && (
-                            <div className="mb-4 bg-red-50 text-red-600 p-3 rounded-md text-sm border border-red-200">
+                            <div className="mb-6 bg-red-50 text-red-600 p-4 rounded-xl text-xs font-bold border border-red-100 uppercase tracking-tight">
                                 {error}
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div className="space-y-1.5">
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
                                 <input
                                     name="name"
                                     type="text"
                                     required
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-[#1E3A8A] focus:border-[#1E3A8A]"
+                                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-200 outline-none font-bold"
                                     placeholder="e.g. John Agent"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <div className="space-y-1.5">
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email</label>
                                 <input
                                     name="email"
                                     type="email"
                                     required
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-[#1E3A8A] focus:border-[#1E3A8A]"
+                                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-200 outline-none font-bold"
                                     placeholder="agent@example.com"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                <input
-                                    name="password"
-                                    type="password"
-                                    required
-                                    minLength={6}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-[#1E3A8A] focus:border-[#1E3A8A]"
-                                    placeholder="Enter secure password"
-                                />
+                            <div className="space-y-1.5">
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Password</label>
+                                <div className="relative">
+                                    <input
+                                        name="password"
+                                        type={showPassword ? "text" : "password"}
+                                        required
+                                        minLength={6}
+                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-200 outline-none font-bold pr-12"
+                                        placeholder="Min 6 characters"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="pt-4 flex justify-end gap-3">
+                            <div className="pt-6 flex justify-end gap-3">
                                 <Button
                                     type="button"
-                                    variant="outline"
+                                    variant="ghost"
                                     onClick={() => setIsOpen(false)}
                                     disabled={loading}
+                                    className="font-bold text-gray-500 rounded-xl"
                                 >
                                     Cancel
                                 </Button>
@@ -104,7 +114,7 @@ export default function CreateAgentModal() {
                                     type="submit"
                                     disabled={loading}
                                     style={{ backgroundColor: "#1E3A8A" }}
-                                    className="text-white"
+                                    className="text-white font-black rounded-xl px-8 shadow-lg shadow-blue-100"
                                 >
                                     {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                                     {loading ? "Creating..." : "Save Agent"}

@@ -74,7 +74,7 @@ export default async function MyApplicationsPage() {
                                     </span>
                                     <Link href={`/dashboard/client/applications/${app.id}`}>
                                         <Button variant="ghost" className="text-white hover:bg-white/10 rounded-xl px-4 h-10 font-bold border border-white/20">
-                                            View Hub <ChevronRight className="ml-1 h-4 w-4" />
+                                            View Details <ChevronRight className="ml-1 h-4 w-4" />
                                         </Button>
                                     </Link>
                                 </div>

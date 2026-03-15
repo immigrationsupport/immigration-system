@@ -124,16 +124,15 @@ export default function LogsTable({
                 </div>
             </div>
 
-            {/* Table */}
             <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-gray-50/50 text-gray-500 text-[10px] uppercase tracking-wider font-extrabold border-b border-gray-100">
-                        <tr>
-                            <th className="px-6 py-4">Ref #</th>
-                            <th className="px-6 py-4">Action Event</th>
-                            <th className="px-6 py-4 w-1/3">Context / Target Details</th>
-                            <th className="px-6 py-4">Author Profile</th>
-                            <th className="px-6 py-4 w-48">Timestamp</th>
+                <table className="w-full text-left border-separate border-spacing-0">
+                    <thead>
+                        <tr className="bg-gray-50/80">
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 first:rounded-tl-xl whitespace-nowrap">Ref #</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Action Event</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 w-1/3">Context / Target Details</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Author Profile</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 last:rounded-tr-xl">Timestamp</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
@@ -142,30 +141,30 @@ export default function LogsTable({
                             const anomalyDetected = isAnomaly(log.action, log.details);
 
                             return (
-                                <tr key={log.id} className={`hover:bg-slate-50/50 transition-colors ${anomalyDetected && typeFilter === 'ANOMALY' ? 'bg-red-50/20' : ''}`}>
-                                    <td className="px-6 py-4">
-                                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                                <tr key={log.id} className={`hover:bg-blue-50/40 transition-all duration-200 group ${anomalyDetected && typeFilter === 'ANOMALY' ? 'bg-red-50/20' : ''}`}>
+                                    <td className="px-6 py-4 align-top">
+                                        <span className="inline-flex text-[10px] font-black text-slate-500 bg-gray-100/50 px-2 py-1 rounded border border-gray-100">
                                             LOG-{log.logNumber.toString().padStart(4, '0')}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <div className={`flex items-center gap-2 w-fit px-3 py-1.5 rounded-lg border ${styles.bg} ${styles.border} ${styles.text}`}>
+                                    <td className="px-6 py-4 align-top">
+                                        <div className={`flex items-center gap-2 w-fit px-2.5 py-1 rounded-full border ${styles.bg} ${styles.border} ${styles.text}`}>
                                             {styles.icon}
-                                            <span className="text-[10px] font-black uppercase tracking-widest">{log.action.replace(/_/g, " ")}</span>
+                                            <span className="text-[10px] font-black uppercase tracking-widest leading-none">{log.action.replace(/_/g, " ")}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 align-top">
                                         <p className="text-sm font-medium text-gray-700 leading-snug">{log.details}</p>
                                         {anomalyDetected && (
                                             <div className="flex items-center gap-1 mt-1.5 text-[10px] text-red-500 font-bold uppercase tracking-wider">
-                                                <AlertTriangle size={12} /> Detected System Anomaly
+                                                <AlertTriangle size={12} /> Detected Anomaly
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 align-top">
                                         {log.author ? (
                                             <div className="flex items-center gap-3">
-                                                <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold">
+                                                <div className="h-8 w-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 text-[10px] font-black">
                                                     {log.author.name[0]?.toUpperCase()}
                                                 </div>
                                                 <div>
@@ -177,26 +176,26 @@ export default function LogsTable({
                                                             }`}>
                                                             {log.author.role}
                                                         </span>
-                                                        <span className="text-[10px] text-gray-400 truncate max-w-[120px]" title={log.author.email}>{log.author.email || "unknown"}</span>
+                                                        <span className="text-[10px] text-gray-400 truncate max-w-[120px]">{log.author.email || "unknown"}</span>
                                                     </div>
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="flex items-center gap-2 text-gray-400 bg-gray-50 w-fit px-3 py-2 rounded-lg border border-gray-100">
-                                                <Shield size={14} className="text-slate-400" />
-                                                <span className="text-xs font-bold uppercase tracking-widest text-slate-500">System Bot</span>
+                                            <div className="flex items-center gap-2 text-gray-400 bg-gray-50/50 w-fit px-2.5 py-1.5 rounded-lg border border-gray-100">
+                                                <Shield size={12} className="text-slate-400" />
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">System Core</span>
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-gray-500 text-xs font-semibold">
-                                        <div className="flex flex-col gap-1 w-fit bg-slate-50 border border-slate-100 px-3 py-2 rounded-lg">
-                                            <div className="flex items-center gap-2">
-                                                <Calendar size={13} className="text-blue-400" />
-                                                {new Date(log.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                    <td className="px-6 py-4 align-top">
+                                        <div className="flex flex-col gap-1 text-[11px] font-medium text-gray-500">
+                                            <div className="flex items-center gap-1.5">
+                                                <Calendar size={12} className="text-gray-400" />
+                                                {new Date(log.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                             </div>
-                                            <div className="flex items-center gap-2 text-slate-400">
-                                                <Clock size={13} />
-                                                {new Date(log.createdAt).toLocaleTimeString()}
+                                            <div className="flex items-center gap-1.5 text-gray-400">
+                                                <Clock size={12} />
+                                                {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </div>
                                     </td>

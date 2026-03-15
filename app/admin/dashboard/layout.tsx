@@ -42,9 +42,6 @@ export default async function AdminDashboardLayout({
                 <Header title="" showLogout={true} />
 
                 <main className="flex-1 p-6 md:p-8 overflow-y-auto w-full mx-auto" style={{ backgroundColor: "#F9FAFB" }}>
-                    <Suspense fallback={<div className="h-32 w-full bg-gray-50 animate-pulse rounded-xl mb-8"></div>}>
-                        <AdminStats />
-                    </Suspense>
                     {children}
                 </main>
             </div>

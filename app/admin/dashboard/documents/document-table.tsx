@@ -115,22 +115,21 @@ export default function DocumentTable({
                 </div>
             </div>
 
-            {/* Table */}
             <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-gray-50/50 text-gray-500 text-[11px] uppercase tracking-wider font-semibold border-b border-gray-100">
-                        <tr>
-                            <th className="px-6 py-4">Document Details</th>
-                            <th className="px-6 py-4">Client & Uploader</th>
-                            <th className="px-6 py-4">Context Reference</th>
-                            <th className="px-6 py-4">Review Status</th>
-                            <th className="px-6 py-4">Uploaded At</th>
-                            <th className="px-6 py-4 text-right">Preview</th>
+                <table className="w-full text-left border-separate border-spacing-0">
+                    <thead>
+                        <tr className="bg-gray-50/80">
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 first:rounded-tl-xl whitespace-nowrap">Document Details</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Client & Uploader</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Context Reference</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Review Status</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Uploaded At</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 text-right last:rounded-tr-xl">Preview</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                         {filteredDocuments.map((doc) => (
-                            <tr key={doc.id} className="hover:bg-blue-50/30 transition-colors group">
+                            <tr key={doc.id} className="hover:bg-blue-50/40 transition-all duration-200 group">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
                                         <div className="h-9 w-9 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600 font-bold border border-orange-100">
@@ -138,22 +137,22 @@ export default function DocumentTable({
                                         </div>
                                         <div className="max-w-[150px] md:max-w-xs">
                                             <p className="text-sm font-bold text-gray-900 truncate leading-none mb-1" title={doc.name}>{doc.name}</p>
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{doc.type.replace('_', ' ')}</p>
+                                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-tighter">{doc.type.replace('_', ' ')}</p>
                                         </div>
                                     </div>
                                 </td>
 
                                 <td className="px-6 py-4">
                                     <p className="text-sm font-bold text-gray-900">{doc.client.name}</p>
-                                    <p className="text-[10px] text-gray-500 mt-0.5 max-w-[120px] md:max-w-[200px] truncate" title={doc.client.email}>{doc.client.email}</p>
+                                    <p className="text-[10px] text-gray-400 mt-0.5 truncate max-w-[150px]">{doc.client.email}</p>
                                 </td>
 
                                 <td className="px-6 py-4">
                                     <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-1.5 text-xs font-mono text-gray-600 bg-gray-50 w-fit px-2 py-0.5 rounded border border-gray-100" title="Application Reference">
+                                        <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-500 bg-gray-100/50 w-fit px-2 py-0.5 rounded border border-gray-100 uppercase tracking-tighter">
                                             App: {doc.application.id.substring(0, 8).toUpperCase()}
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-blue-700 bg-blue-50 w-fit px-2 py-0.5 rounded border border-blue-100">
+                                        <div className="flex items-center gap-1.5 text-[10px] font-black text-blue-700 bg-blue-50/50 w-fit px-2 py-0.5 rounded border border-blue-100 uppercase tracking-tighter">
                                             Proc: {(doc.procedure.type || "GENERAL").replace('_', ' ')}
                                         </div>
                                     </div>
@@ -168,23 +167,22 @@ export default function DocumentTable({
                                                 ${getStatusStyles(doc.status).bg} 
                                                 ${getStatusStyles(doc.status).text} 
                                                 ${getStatusStyles(doc.status).border} 
-                                                text-[11px] font-bold px-2 py-1.5 rounded border outline-none cursor-pointer transition-colors
+                                                text-[10px] font-black uppercase tracking-tighter px-2.5 py-1 rounded-full border outline-none cursor-pointer transition-all hover:brightness-95
                                             `}
-                                            title="Update Verification Status"
                                             disabled={loadingId === doc.id}
                                         >
-                                            <option value="UPLOADED">Under Review / Uploaded</option>
+                                            <option value="UPLOADED">Under Review</option>
                                             <option value="VERIFIED">Approved (Verified)</option>
                                             <option value="REJECTED">Rejected</option>
                                         </select>
-                                        {loadingId === doc.id && <Loader2 size={14} className="animate-spin text-blue-400" />}
+                                        {loadingId === doc.id && <Loader2 size={12} className="animate-spin text-blue-400" />}
                                     </div>
                                 </td>
 
                                 <td className="px-6 py-4 text-gray-500 text-xs font-medium">
-                                    <div className="flex items-center gap-1.5">
-                                        <Calendar size={13} className="text-gray-400" />
-                                        {new Date(doc.uploadedAt).toLocaleDateString()}
+                                    <div className="flex items-center gap-1.5 whitespace-nowrap">
+                                        <Calendar size={13} className="text-gray-300" />
+                                        {new Date(doc.uploadedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
                                 </td>
 
@@ -193,10 +191,10 @@ export default function DocumentTable({
                                         href={doc.fileUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center justify-center gap-2 h-9 px-3 rounded-lg text-xs font-bold bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:text-blue-700 hover:border-blue-200 transition-all shadow-sm"
+                                        className="inline-flex items-center justify-center gap-2 h-8 px-3 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:text-[#1E3A8A] hover:border-blue-200 transition-all shadow-sm"
                                         title="View Document"
                                     >
-                                        Open <ExternalLink size={14} />
+                                        View <ExternalLink size={12} />
                                     </a>
                                 </td>
                             </tr>

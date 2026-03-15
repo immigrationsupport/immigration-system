@@ -140,7 +140,7 @@ export async function deleteAgentAction(agentId: string) {
     }
 }
 
-export async function updateAgentAction(agentId: string, name: string, email: string) {
+export async function updateAgentAction(agentId: string, name: string, email: string, password?: string) {
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -154,18 +154,36 @@ export async function updateAgentAction(agentId: string, name: string, email: st
     }
 
     try {
+        const updateData: any = { 
+            name, 
+            email: email.toLowerCase() 
+        };
+
+        if (password && password.trim() !== "") {
+            const hashedPassword = await hashPassword(password);
+            updateData.password = hashedPassword;
+            
+            // Also update the credential account password if it exists
+            await prisma.account.updateMany({
+                where: {
+                    userId: agentId,
+                    providerId: "credential"
+                },
+                data: {
+                    password: hashedPassword
+                }
+            });
+        }
+
         await prisma.user.update({
             where: { id: agentId },
-            data: { 
-                name, 
-                email: email.toLowerCase() 
-            }
+            data: updateData
         });
 
         await prisma.auditLog.create({
             data: {
                 action: "UPDATE_AGENT",
-                details: `Agent ${name} (${email}) details updated by Admin.`,
+                details: `Agent ${name} (${email}) details updated by Admin.${password ? " Password was also reset." : ""}`,
                 userId: session.user.id,
                 targetId: agentId
             }
@@ -174,6 +192,7 @@ export async function updateAgentAction(agentId: string, name: string, email: st
         revalidatePath("/admin/dashboard/agents");
         return { success: true };
     } catch (e: any) {
+        console.error("Update Error:", e);
         return { error: "Failed to update agent details." };
     }
 }

@@ -6,13 +6,14 @@ import { signIn } from "@/lib/auth-client";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Loader2 } from "lucide-react";
+import { Loader2,Eye,EyeOff } from "lucide-react";
 
 function SignInForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         if (searchParams.get("suspended")) {
@@ -41,6 +42,7 @@ function SignInForm() {
         });
 
         if (res.error) {
+            console.error("AUTH ERROR RESPONSE:", res.error);
             setError(res.error.message || "Invalid email or password.");
             setLoading(false);
         } else {
@@ -90,15 +92,24 @@ function SignInForm() {
 
                 <div>
                     <label htmlFor="password" className="block text-sm font-semibold text-gray-800 mb-1">Password</label>
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        placeholder="••••••••"
-                        required
-                        disabled={loading}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-sm text-gray-900 focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] sm:text-sm transition-colors disabled:bg-gray-50 disabled:text-gray-500"
-                    />
+                    <div className="relative">
+                        <input
+                            id="password"
+                            name="password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            required
+                            disabled={loading}
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-sm text-gray-900 focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] sm:text-sm transition-colors disabled:bg-gray-50 disabled:text-gray-500 pr-10"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                    </div>
                 </div>
 
                 <button

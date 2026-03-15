@@ -1,25 +1,38 @@
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeonHttp } from "@prisma/adapter-neon";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
+// Explicit initialization for Prisma 7 with pg adapter
 const globalForPrisma = global as unknown as {
-  prisma_v2: PrismaClient | undefined;
+  prisma_final_v7: PrismaClient | undefined;
 };
 
 const createPrisma = () => {
-    let connectionString = process.env.DATABASE_URL || "";
-    // Clean URL for HTTP fetch to avoid any pooling arguments that break it
-    connectionString = connectionString.replace(/['"]+/g, '');
-    let cleanUrl = connectionString.split('?')[0];
+    console.log("[PRISMA] Initializing with @prisma/adapter-pg...");
+    
+    const dbUrl = (process.env.DATABASE_URL || "").replace(/['"]+/g, '');
+    if (!dbUrl) {
+        console.error("[PRISMA] CRITICAL ERROR: DATABASE_URL is missing!");
+    }
 
-    const adapter = new PrismaNeonHttp(cleanUrl, { fetchOptions: {} });
+    const pool = new Pool({ 
+        connectionString: dbUrl,
+        ssl: {
+            rejectUnauthorized: false // Required for Neon
+        }
+    });
+
+    const adapter = new PrismaPg(pool);
+
     return new PrismaClient({ 
         adapter,
         log: ["error", "warn"] 
     });
 };
 
-export const prisma = globalForPrisma.prisma_v2 || createPrisma();
+export const prisma = globalForPrisma.prisma_final_v7 || createPrisma();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma_v2 = prisma;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma_final_v7 = prisma;
 
 export default prisma;
