@@ -18,6 +18,10 @@ export async function updateApplicationStatusAction(
         return { error: "Unauthorized access." };
     }
 
+    if (modificationMessage && modificationMessage.length > 255) {
+        return { error: "Message too long. Maximum 255 characters." };
+    }
+
     try {
         const application = await prisma.application.findUnique({
             where: { id: applicationId },

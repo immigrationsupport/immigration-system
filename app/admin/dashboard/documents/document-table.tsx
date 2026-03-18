@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import {
     Search,
     Filter,
-    Globe,
     Calendar,
     CheckCircle2,
     Clock,
@@ -18,6 +17,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { updateDocumentStatusAction } from "@/app/admin/dashboard/documents/actions";
+import { TruncatedText } from "@/components/ui/truncated-text";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 
 interface DocumentItem {
     id: string;
@@ -55,6 +62,10 @@ export default function DocumentTable({
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [loadingId, setLoadingId] = useState<string | null>(null);
+    const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
+
+    const isImage = (url: string) => /\.(jpg|jpeg|png|webp|gif)$/i.test(url);
+    const isPDF = (url: string) => /\.pdf$/i.test(url);
 
     const filteredDocuments = documents.filter(doc => {
         const matchesSearch =
@@ -136,15 +147,21 @@ export default function DocumentTable({
                                             <FileText size={16} />
                                         </div>
                                         <div className="max-w-[150px] md:max-w-xs">
-                                            <p className="text-sm font-bold text-gray-900 truncate leading-none mb-1" title={doc.name}>{doc.name}</p>
+                                            <p className="text-sm font-bold text-gray-900 truncate leading-none mb-1">
+                                                <TruncatedText text={doc.name} maxLength={25} />
+                                            </p>
                                             <p className="text-[10px] text-gray-400 font-black uppercase tracking-tighter">{doc.type.replace('_', ' ')}</p>
                                         </div>
                                     </div>
                                 </td>
 
                                 <td className="px-6 py-4">
-                                    <p className="text-sm font-bold text-gray-900">{doc.client.name}</p>
-                                    <p className="text-[10px] text-gray-400 mt-0.5 truncate max-w-[150px]">{doc.client.email}</p>
+                                    <p className="text-sm font-bold text-gray-900">
+                                        <TruncatedText text={doc.client.name} maxLength={15} />
+                                    </p>
+                                    <p className="text-[10px] text-gray-400 mt-0.5">
+                                        <TruncatedText text={doc.client.email} maxLength={20} />
+                                    </p>
                                 </td>
 
                                 <td className="px-6 py-4">
@@ -187,15 +204,14 @@ export default function DocumentTable({
                                 </td>
 
                                 <td className="px-6 py-4 text-right">
-                                    <a
-                                        href={doc.fileUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center justify-center gap-2 h-8 px-3 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:text-[#1E3A8A] hover:border-blue-200 transition-all shadow-sm"
-                                        title="View Document"
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 text-[10px] font-black uppercase tracking-widest gap-2"
+                                        onClick={() => setPreviewDoc(doc)}
                                     >
                                         View <ExternalLink size={12} />
-                                    </a>
+                                    </Button>
                                 </td>
                             </tr>
                         ))}
@@ -208,6 +224,54 @@ export default function DocumentTable({
                     </div>
                 )}
             </div>
+            {/* Preview Modal */}
+            <Dialog open={!!previewDoc} onOpenChange={(open) => !open && setPreviewDoc(null)}>
+                <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden border-none shadow-2xl">
+                    <DialogHeader className="px-6 py-4 border-b bg-white">
+                        <DialogTitle className="text-lg font-bold text-[#1E3A8A] flex items-center gap-2">
+                            <FileText size={20} />
+                            {previewDoc?.name}
+                        </DialogTitle>
+                        <DialogDescription className="text-xs uppercase font-black tracking-widest text-gray-400">
+                            DOC-ID: {previewDoc?.id.substring(0, 8)} | Type: {previewDoc?.type}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex-1 bg-gray-100 flex items-center justify-center overflow-auto p-4">
+                        {previewDoc && (
+                            <>
+                                {isImage(previewDoc.fileUrl) ? (
+                                    <img 
+                                        src={previewDoc.fileUrl} 
+                                        alt={previewDoc.name} 
+                                        className="max-w-full max-h-full object-contain shadow-lg rounded-sm"
+                                    />
+                                ) : isPDF(previewDoc.fileUrl) ? (
+                                    <iframe
+                                        src={`${previewDoc.fileUrl}`}
+                                        className="w-full h-full border-none bg-white shadow-lg rounded-sm"
+                                        title={previewDoc.name}
+                                    />
+                                ) : (
+                                    <div className="text-center p-12 bg-white rounded-2xl shadow-sm border border-gray-200">
+                                        <AlertCircle size={48} className="mx-auto mb-4 text-amber-500" />
+                                        <p className="text-lg font-bold text-gray-800">Preview Not Available</p>
+                                        <p className="text-sm text-gray-500 mt-2">This file type cannot be previewed directly.</p>
+                                        <a 
+                                            href={previewDoc.fileUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="mt-6 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-[#1E3A8A] text-white hover:bg-blue-800 h-10 px-4 py-2"
+                                        >
+                                            Download Instead <Download className="ml-2 h-4 w-4" />
+                                        </a>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

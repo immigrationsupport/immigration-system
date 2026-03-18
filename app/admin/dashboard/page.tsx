@@ -2,16 +2,8 @@ import React, { Suspense } from "react";
 import { Users, Briefcase, FileText, Activity, Clock } from "lucide-react";
 import prisma from "@/lib/prisma";
 import AdminStats from "@/components/dashboard/AdminStats";
+import { ActivityItem } from "@/components/dashboard/ActivityItem";
 
-function getTimeAgo(date: Date) {
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-    if (seconds < 60) return "just now";
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return date.toLocaleDateString();
-}
 
 export const dynamic = "force-dynamic";
 
@@ -65,12 +57,6 @@ export default async function AdminDashboardOverview() {
         }
     });
 
-    const getActionColor = (action: string) => {
-        if (action.includes("LOGIN")) return "bg-blue-50 text-blue-700 bg-opacity-80 border-blue-100";
-        if (action.includes("CREATE")) return "bg-emerald-50 text-emerald-700 bg-opacity-80 border-emerald-100";
-        if (action.includes("SUBMISSION")) return "bg-amber-50 text-amber-700 bg-opacity-80 border-amber-100";
-        return "bg-slate-50 text-slate-700 border-slate-100";
-    };
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto p-6 pt-0">
@@ -129,30 +115,10 @@ export default async function AdminDashboardOverview() {
                     <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                         {recentLogs.length > 0 ? (
                             recentLogs.map((log) => (
-                                <div key={log.id} className="relative pl-6 border-l-2 border-slate-50 py-1 transition-all hover:bg-slate-50 rounded-r-lg group">
-                                    <div className="absolute -left-[6px] top-2 h-2.5 w-2.5 rounded-full bg-blue-100 border-2 border-white group-hover:bg-[#1E3A8A] transition-colors"></div>
-                                    <div className="flex justify-between items-start">
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded border ${getActionColor(log.action)}`}>
-                                                    {log.action.replace(/_/g, " ")}
-                                                </span>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase">
-                                                    {getTimeAgo(new Date(log.createdAt))}
-                                                </p>
-                                            </div>
-                                            <p className="text-sm font-medium text-gray-700 leading-tight pr-4">{log.details}</p>
-                                            <div className="flex items-center gap-1.5 mt-2">
-                                                <div className="h-4 w-4 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-bold text-slate-500">
-                                                    {(log as any).author?.name?.[0] || "S"}
-                                                </div>
-                                                <p className="text-[11px] text-[#1E3A8A] font-bold">
-                                                    {(log as any).author?.name || "System"} <span className="text-gray-300 font-normal px-1">|</span> <span className="text-gray-400 capitalize">{(log as any).author?.role?.toLowerCase() || "system"}</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <ActivityItem 
+                                    key={log.id} 
+                                    log={log as any} 
+                                />
                             ))
                         ) : (
                             <div className="text-center py-20 bg-slate-50 rounded-xl border-2 border-dashed border-slate-100">

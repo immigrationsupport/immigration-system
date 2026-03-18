@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { updateApplicationAction, deleteApplicationAction } from "@/app/admin/dashboard/applications/actions";
 import ApplicationDetailsModal from "@/app/admin/dashboard/applications/application-details-modal";
+import { TruncatedText } from "@/components/ui/truncated-text";
 
 interface Application {
     id: string;
@@ -128,7 +129,7 @@ export default function ApplicationTable({
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="text-sm border-gray-200 rounded-md bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-blue-100"
+                        className="text-sm border-gray-200 rounded-md bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-blue-100 min-w-[140px]"
                     >
                         <option value="ALL">All Statuses</option>
                         <option value="PENDING">Pending</option>
@@ -160,7 +161,9 @@ export default function ApplicationTable({
                                             {app.client.name.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-gray-900 leading-none mb-1">{app.client.name}</p>
+                                             <p className="text-sm font-bold text-gray-900 leading-none mb-1">
+                                                <TruncatedText text={app.client.name} maxLength={18} />
+                                             </p>
                                             <p className="text-[10px] text-gray-400 font-mono">ID: {app.id.substring(0, 8).toUpperCase()}</p>
                                         </div>
                                     </div>
@@ -169,7 +172,7 @@ export default function ApplicationTable({
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-2 text-sm text-gray-700 font-medium">
                                         <Globe size={14} className="text-blue-400" />
-                                        {app.destination}
+                                         <TruncatedText text={app.destination} maxLength={15} />
                                     </div>
                                     <p className="text-[9px] font-black uppercase tracking-tighter text-gray-400 mt-1">{(app.type || "GENERAL").replace('_', ' ')}</p>
                                 </td>
@@ -178,12 +181,14 @@ export default function ApplicationTable({
                                     <select
                                         value={app.agent?.id || "null"}
                                         onChange={(e) => handleAgentChange(app.id, e.target.value)}
-                                        className="bg-gray-100/50 border-none text-gray-600 hover:text-[#1E3A8A] hover:bg-white rounded px-2 py-1 cursor-pointer outline-none focus:ring-1 focus:ring-blue-200 transition-all text-xs font-semibold"
+                                        className="bg-gray-100/50 border-none text-gray-600 hover:text-[#1E3A8A] hover:bg-white rounded px-2 py-1 cursor-pointer outline-none focus:ring-1 focus:ring-blue-200 transition-all text-xs font-semibold min-w-[140px] max-w-[200px] truncate"
                                         disabled={loadingId === app.id}
                                     >
                                         <option value="null">Select Agent...</option>
                                         {agents.map(a => (
-                                            <option key={a.id} value={a.id}>{a.name}</option>
+                                            <option key={a.id} value={a.id}>
+                                                {a.name.length > 20 ? a.name.substring(0, 20) + "..." : a.name}
+                                            </option>
                                         ))}
                                     </select>
                                 </td>
@@ -197,7 +202,7 @@ export default function ApplicationTable({
                                                 ${getStatusStyles(app.status).bg} 
                                                 ${getStatusStyles(app.status).text} 
                                                 ${getStatusStyles(app.status).border} 
-                                                text-[10px] font-black uppercase tracking-tighter px-2 py-1 rounded-full border outline-none cursor-pointer transition-all hover:brightness-95
+                                                text-[10px] font-black uppercase tracking-tighter px-2 py-1 rounded-full border outline-none cursor-pointer transition-all hover:brightness-95 min-w-[100px]
                                             `}
                                             disabled={loadingId === app.id}
                                         >

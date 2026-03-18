@@ -102,7 +102,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <Shield className="h-6 w-6 text-[#1E3A8A]" />
                     </div>
                     <div className="ml-4">

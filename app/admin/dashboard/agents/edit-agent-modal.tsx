@@ -57,17 +57,19 @@ export default function EditAgentModal({ agentId, currentName, currentEmail }: {
                     </div>
                     <DialogTitle className="text-2xl font-black text-gray-900">Edit Agent Account</DialogTitle>
                     <DialogDescription className="text-gray-500 font-medium">
-                        Modify descriptions or reset password for <span className="text-blue-600 font-bold">{currentName}</span>.
+                        Modify descriptions or reset password for <span className="text-blue-600 font-bold inline-block max-w-[200px] truncate align-bottom" title={currentName}>{currentName}</span>.
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                <form onSubmit={handleSubmit} className="space-y-4 py-4 w-full overflow-hidden">
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
                         <Input 
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             className="h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-blue-100 font-bold"
+                            placeholder="Max 50 characters"
+                            maxLength={50}
                             required
                         />
                     </div>

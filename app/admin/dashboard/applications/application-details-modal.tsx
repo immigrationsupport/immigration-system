@@ -32,6 +32,7 @@ interface DetailsModalProps {
 export default function ApplicationDetailsModal({ applicationId, onClose }: DetailsModalProps) {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null);
 
     useEffect(() => {
         async function fetch() {
@@ -190,14 +191,13 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                                                                     <p className="text-[9px] text-gray-400 uppercase">{doc.type}</p>
                                                                                 </div>
                                                                             </div>
-                                                                            <a
-                                                                                href={doc.fileUrl}
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
+                                                                            <button
+                                                                                onClick={() => setViewingDoc({ url: doc.fileUrl, name: doc.name })}
                                                                                 className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-700 transition-colors rounded-lg"
+                                                                                title="View in Browser"
                                                                             >
                                                                                 <ExternalLink size={14} />
-                                                                            </a>
+                                                                            </button>
                                                                         </div>
                                                                     ))}
                                                                 </div>
@@ -213,6 +213,55 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                         </div>
                     </div>
                 </div>
+
+                {/* Integrated Document Viewer Overlay */}
+                {viewingDoc && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+                        <div className="bg-[#1a1a1a] w-full max-w-6xl h-[90vh] rounded-3xl flex flex-col overflow-hidden shadow-2xl relative">
+                            {/* Toolbar */}
+                            <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+                                        <FileText size={18} />
+                                    </div>
+                                    <h3 className="text-white font-bold truncate max-w-md">{viewingDoc.name}</h3>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <a 
+                                        href={viewingDoc.url} 
+                                        download 
+                                        className="h-10 px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center gap-2 text-sm font-bold transition-all"
+                                    >
+                                        <Download size={16} /> Download
+                                    </a>
+                                    <Button 
+                                        variant="ghost" 
+                                        onClick={() => setViewingDoc(null)} 
+                                        className="h-10 w-10 text-white hover:bg-white/10 rounded-xl"
+                                    >
+                                        <X size={20} />
+                                    </Button>
+                                </div>
+                            </div>
+                            {/* Viewer */}
+                            <div className="flex-1 bg-[#121212] overflow-hidden relative flex items-center justify-center p-4">
+                                {/\.(jpe?g|png|gif|webp)$/i.test(viewingDoc.url) ? (
+                                    <img
+                                        src={viewingDoc.url}
+                                        alt={viewingDoc.name}
+                                        className="max-h-full max-w-full object-contain rounded-lg shadow-2xl"
+                                    />
+                                ) : (
+                                    <iframe 
+                                        src={`${viewingDoc.url}#toolbar=1&navpanes=0&view=FitH`}
+                                        className="w-full h-full border-none"
+                                        title="Document Viewer"
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Footer Actions */}
                 <div className="p-6 border-t bg-gray-50 rounded-b-2xl flex justify-end gap-3">

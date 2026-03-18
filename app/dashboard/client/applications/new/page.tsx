@@ -106,8 +106,9 @@ export default function AddProcedurePage() {
                                 id="notes"
                                 name="notes"
                                 rows={4}
-                                placeholder="Provide any extra details or inquiries to the consulting team."
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-sm text-gray-900 focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] sm:text-sm resize-y"
+                                maxLength={500}
+                                placeholder="Provide any extra details or inquiries... (Max 500 characters)"
+                                className="block w-full px-3 py-2 border border-gray-300 rounded-sm text-gray-900 focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] sm:text-sm resize-none"
                             />
                         </div>
                     </div>

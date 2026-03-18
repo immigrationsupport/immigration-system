@@ -34,7 +34,11 @@ export default async function AssignedApplicationsPage() {
                     email: true
                 }
             },
-            procedures: true
+            procedures: {
+                include: {
+                    documents: true
+                }
+            }
         },
         orderBy: {
             updatedAt: "desc"

@@ -69,22 +69,35 @@ export const auth = betterAuth({
             }
         },
     },
-    databaseHooks: {
-        session: {
-            create: {
-                after: async (session: any) => {
-                    if (session.user) {
-                        await prisma.auditLog.create({
+    baseHooks: {
+    session: {
+        create: {
+            after: async (session: any) => {
+                // Better-Auth hooks usually pass the session object which has userId
+                if (session.userId) {
+                    try {
+                        // 1. Fetch the actual user to get the 'name'
+                        const user = await prisma.user.findUnique({ 
+                            where: { id: session.userId } 
+                        });
+
+                        
+                        prisma.auditLog.create({
                             data: {
                                 action: "USER_LOGIN",
-                                details: `${session.user.name} (${session.user.email}) logged in.`,
-                                userId: session.user.id
+                                details: `${user?.name || 'Unknown User'} (${user?.email || 'No Email'}) logged in.`,
+                                userId: session.userId
                             }
-                        });
+                        }).catch(e => console.error("Audit Log Background Error:", e));
+
+                    } catch (error) {
+                        console.error("[AUTH_HOOK_ERROR]:", error);
                     }
                 }
             }
         }
+    }
+
     },
     trustedOrigins: ['http://localhost:3000', 'http://127.0.0.1:3000'],
 })

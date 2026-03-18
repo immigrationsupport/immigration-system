@@ -16,12 +16,21 @@ export async function createAgentAction(formData: FormData) {
         return { error: "Unauthorized access." };
     }
 
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
+    const name = (formData.get("name") as string)?.trim();
+    const email = (formData.get("email") as string)?.trim()?.toLowerCase();
     const password = formData.get("password") as string;
 
     if (!name || !email || !password) {
         return { error: "All fields are required." };
+    }
+
+    if (name.length > 50) {
+        return { error: "Name must be 50 characters or less." };
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return { error: "Invalid email format." };
     }
 
     try {
@@ -149,8 +158,20 @@ export async function updateAgentAction(agentId: string, name: string, email: st
         return { error: "Unauthorized access." };
     }
 
-    if (!name || !email) {
+    const nameTrimmed = name?.trim();
+    const emailTrimmed = email?.trim()?.toLowerCase();
+
+    if (!nameTrimmed || !emailTrimmed) {
         return { error: "Name and email are required." };
+    }
+
+    if (nameTrimmed.length > 50) {
+        return { error: "Name must be 50 characters or less." };
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailTrimmed)) {
+        return { error: "Invalid email format." };
     }
 
     try {

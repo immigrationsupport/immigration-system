@@ -65,8 +65,9 @@ export default function CreateAgentModal() {
                                     name="name"
                                     type="text"
                                     required
+                                    maxLength={50}
                                     className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-200 outline-none font-bold"
-                                    placeholder="e.g. John Agent"
+                                    placeholder="e.g. John Agent (Max 50 chars)"
                                 />
                             </div>
                             <div className="space-y-1.5">

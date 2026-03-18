@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import prisma from "@/lib/prisma";
 import CreateAgentModal from "./create-agent-modal";
 import AgentActionButtons from "./agent-actions";
+import { TruncatedText } from "@/components/ui/truncated-text";
 
 export default async function ManageAgentsPage() {
     // Fetch real agent data securely from DB
@@ -47,14 +48,18 @@ export default async function ManageAgentsPage() {
                                 agents.map((agent: any) => (
                                     <tr key={agent.id} className="hover:bg-blue-50/40 transition-all duration-200 group">
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-black text-[#1E3A8A]">
-                                                    {agent.name.substring(0, 2).toUpperCase()}
-                                                </div>
-                                                <span className="font-bold text-gray-900">{agent.name}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-gray-500 font-medium">{agent.email}</td>
+                                             <div className="flex items-center gap-3">
+                                                 <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-black text-[#1E3A8A]">
+                                                     {agent.name.substring(0, 2).toUpperCase()}
+                                                 </div>
+                                                 <span className="font-bold text-gray-900">
+                                                     <TruncatedText text={agent.name} maxLength={18} />
+                                                 </span>
+                                             </div>
+                                         </td>
+                                         <td className="px-6 py-4 text-gray-500 font-medium">
+                                             <TruncatedText text={agent.email} maxLength={25} />
+                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <span className="inline-flex items-center justify-center h-7 px-3 rounded-full bg-gray-100 text-gray-700 text-xs font-black">
                                                 {agent.assignedClients.length}

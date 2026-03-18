@@ -15,7 +15,9 @@ import {
     ChevronDown,
     ChevronUp,
     Paperclip,
-    Plus
+    Plus,
+    Download,
+    X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +33,7 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+    const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null);
 
     const handleSubmit = async () => {
         if (!confirm("Are you sure? Once submitted, you cannot edit this procedure until an agent unlocks it.")) return;
@@ -43,15 +46,56 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
     const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setUploading(true);
-        const formData = new FormData(e.currentTarget);
-        const res = await addDocumentAction(formData);
-        setUploading(false);
-        if (res.error) alert(res.error);
-        else {
-            (e.target as HTMLFormElement).reset();
-            setSelectedFileName(null);
+
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+        const file = formData.get("file") as File;
+
+        if (!file || file.size === 0) {
+            alert("Please select a file before submitting.");
+            setUploading(false);
+            return;
+        }
+
+        try {
+            // Step 1: Upload the actual file to disk via API route
+            const uploadForm = new FormData();
+            uploadForm.append("file", file);
+
+            const uploadRes = await fetch("/api/upload", {
+                method: "POST",
+                body: uploadForm,
+            });
+
+            const uploadData = await uploadRes.json();
+
+            if (!uploadRes.ok || uploadData.error) {
+                alert(uploadData.error || "File upload failed. Please try again.");
+                setUploading(false);
+                return;
+            }
+
+            // Step 2: Pass the real URL to the server action to save in DB
+            const serverFormData = new FormData();
+            serverFormData.append("procedureId", formData.get("procedureId") as string);
+            serverFormData.append("name", formData.get("name") as string);
+            serverFormData.append("type", formData.get("type") as string);
+            serverFormData.append("fileUrl", uploadData.url);
+
+            const res = await addDocumentAction(serverFormData);
+            if (res.error) {
+                alert(res.error);
+            } else {
+                form.reset();
+                setSelectedFileName(null);
+            }
+        } catch (err) {
+            alert("An unexpected error occurred. Please try again.");
+        } finally {
+            setUploading(false);
         }
     };
+
 
     const handleDeleteDoc = async (docId: string) => {
         if (!confirm("Delete this document?")) return;
@@ -62,6 +106,7 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
     };
 
     return (
+        <>
         <Card className={`overflow-hidden transition-all duration-500 rounded-3xl border-none shadow-xl ${procedure.isLocked ? "bg-gray-50/50" : "bg-white"}`}>
             <CardHeader
                 className={`flex flex-row items-center justify-between p-8 border-b border-gray-100 cursor-pointer ${procedure.isLocked ? "bg-gray-100/50" : "bg-blue-50/20"}`}
@@ -148,13 +193,12 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <a 
-                                                href={doc.fileUrl} 
-                                                target="_blank" 
+                                            <button
+                                                onClick={() => setViewingDoc({ url: doc.fileUrl, name: doc.name })}
                                                 className="bg-gray-50 hover:bg-blue-50 text-[10px] font-black text-blue-600 uppercase tracking-widest px-4 py-2 rounded-xl transition-all border border-transparent hover:border-blue-100"
                                             >
                                                 VIEW
-                                            </a>
+                                            </button>
                                             {!procedure.isLocked && (
                                                 <button onClick={() => handleDeleteDoc(doc.id)} className="text-red-400 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 transition-all border border-transparent hover:border-red-100">
                                                     <Trash className="h-4 w-4" />
@@ -331,5 +375,55 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
                 </CardContent>
             )}
         </Card>
+
+        {/* Integrated Document Viewer Overlay */}
+        {viewingDoc && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+                <div className="bg-[#1a1a1a] w-full max-w-6xl h-[90vh] rounded-3xl flex flex-col overflow-hidden shadow-2xl relative">
+                    {/* Toolbar */}
+                    <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+                        <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+                                <FileText size={18} />
+                            </div>
+                            <h3 className="text-white font-bold truncate max-w-md">{viewingDoc?.name}</h3>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <a 
+                                href={viewingDoc?.url} 
+                                download 
+                                className="h-10 px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center gap-2 text-sm font-bold transition-all"
+                            >
+                                <Download size={16} /> Download
+                            </a>
+                            <Button 
+                                variant="ghost" 
+                                onClick={() => setViewingDoc(null)} 
+                                className="h-10 w-10 text-white hover:bg-white/10 rounded-xl"
+                            >
+                                <X size={20} />
+                            </Button>
+                        </div>
+                    </div>
+                    {/* Viewer */}
+                    <div className="flex-1 bg-[#121212] overflow-hidden relative flex items-center justify-center p-4">
+                        {/\.(jpe?g|png|gif|webp)$/i.test(viewingDoc?.url || "") ? (
+                            <img
+                                src={viewingDoc?.url}
+                                alt={viewingDoc?.name}
+                                className="max-h-full max-w-full object-contain rounded-lg shadow-2xl"
+                            />
+                        ) : (
+                            <iframe 
+                                src={`${viewingDoc?.url}#toolbar=1&navpanes=0&view=FitH`}
+                                className="w-full h-full border-none"
+                                title="Document Viewer"
+                            />
+                        )}
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 }

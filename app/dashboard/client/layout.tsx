@@ -33,14 +33,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                             </div>
                             <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
                                 {navItems.map((item) => {
-                                    const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                                    const isActive = item.href === "/dashboard/client" 
+                                        ? pathname === item.href 
+                                        : pathname.startsWith(item.href);
                                     return (
                                         <Link
                                             key={item.href}
                                             href={item.href}
                                             className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${isActive
-                                                    ? "border-[#1E3A8A] text-gray-900"
-                                                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                                    ? "border-[#1E3A8A] text-[#1E3A8A]"
+                                                    : "border-transparent text-gray-400 hover:text-gray-700 hover:border-gray-200"
                                                 }`}
                                         >
                                             {item.label}

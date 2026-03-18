@@ -5,6 +5,7 @@ import { Search, Ban, UserX, Replace, UserPlus, CheckCircle2, XCircle } from "lu
 import { Input } from "@/components/ui/input";
 import { assignAgentToClientAction, toggleSuspendClientAction } from "./actions";
 import { Button } from "@/components/ui/button";
+import { TruncatedText } from "@/components/ui/truncated-text";
 
 interface Client {
     id: string;
@@ -89,21 +90,27 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                         <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-black text-[#1E3A8A]">
                                             {client.name.substring(0, 2).toUpperCase()}
                                         </div>
-                                        <span className="font-bold text-gray-900">{client.name}</span>
+                                        <span className="font-bold text-gray-900">
+                                            <TruncatedText text={client.name} maxLength={18} />
+                                        </span>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-gray-500 font-medium">{client.email}</td>
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 text-gray-500 font-medium">
+                                    <TruncatedText text={client.email} maxLength={25} />
+                                </td>
+                                <td className="px-6 py-4 max-w-[200px] truncate">
                                     {isAssigning === client.id ? (
                                         <div className="flex items-center gap-2">
                                             <select
-                                                className="border border-gray-200 rounded px-2 py-1 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                                                className="border border-gray-200 rounded px-2 py-1 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all min-w-[120px] max-w-[160px] truncate"
                                                 defaultValue={client.agentId || ""}
                                                 onChange={(e) => handleAssign(client.id, e.target.value)}
                                             >
                                                 <option value="" disabled>Select Agent</option>
                                                 {agents.map(agent => (
-                                                    <option key={agent.id} value={agent.id}>{agent.name}</option>
+                                                    <option key={agent.id} value={agent.id}>
+                                                        {agent.name.length > 20 ? agent.name.substring(0, 20) + "..." : agent.name}
+                                                    </option>
                                                 ))}
                                             </select>
                                             <button onClick={() => setIsAssigning(null)} className="text-red-400 hover:text-red-500 transition-colors">
@@ -113,7 +120,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                     ) : (
                                         <div className="flex items-center gap-2">
                                             {client.agent ? (
-                                                <span className="font-semibold text-gray-700">{client.agent.name}</span>
+                                                <span className="font-semibold text-gray-700 max-w-[150px] truncate block" title={client.agent.name}>{client.agent.name}</span>
                                             ) : (
                                                 <span className="text-[10px] font-black uppercase tracking-tighter text-gray-300 italic">Unassigned</span>
                                             )}

@@ -1,6 +1,5 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -40,7 +39,7 @@ model User {
   agent            User?             @relation("AgentClients", fields: [agentId], references: [id])
   assignedClients  User[]            @relation("AgentClients")
   assignedApps     Application[]     @relation("AgentApplications")
-
+  
   @@map("user")
 }
 

@@ -61,14 +61,11 @@ export async function addDocumentAction(formData: FormData) {
         const procedureId = formData.get("procedureId")?.toString();
         const name = formData.get("name")?.toString();
         const type = formData.get("type")?.toString();
-        const file = formData.get("file") as File;
+        const fileUrl = formData.get("fileUrl")?.toString(); // Real URL from upload API
 
-        if (!procedureId || !name || !type || !file || file.size === 0) {
+        if (!procedureId || !name || !type || !fileUrl) {
             return { error: "Missing required information. Please ensure a file and category are selected." };
         }
-
-        // MOCK STORAGE: In a real app we'd upload to S3/UploadThing here.
-        const fileUrl = `/mock-storage/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
 
         const procedure = await prisma.procedure.findUnique({
             where: { id: procedureId },

@@ -12,9 +12,14 @@ import {
     Clock,
     Activity,
     UserCog,
-    Shield
+    Shield,
+    ChevronDown,
+    ChevronUp
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { TruncatedText } from "@/components/ui/truncated-text";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface Author {
     id: string;
@@ -39,6 +44,14 @@ export default function LogsTable({
 }) {
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("ALL"); // ALL, AGENT, ANOMALY
+    const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
+
+    const toggleExpand = (id: string) => {
+        const next = new Set(expandedLogs);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        setExpandedLogs(next);
+    };
 
     const isAnomaly = (action: string, details: string) => {
         const str = (action + details).toLowerCase();
@@ -154,7 +167,25 @@ export default function LogsTable({
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 align-top">
-                                        <p className="text-sm font-medium text-gray-700 leading-snug">{log.details}</p>
+                                        <div className="space-y-1">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <p className="text-sm font-medium text-gray-700 leading-snug">
+                                                    <TruncatedText text={log.details} maxLength={80} />
+                                                </p>
+                                                <button 
+                                                    onClick={() => toggleExpand(log.id)}
+                                                    className="p-1 hover:bg-gray-100 rounded transition-colors text-gray-400 hover:text-blue-600"
+                                                    title="View Full Details"
+                                                >
+                                                    {expandedLogs.has(log.id) ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                                </button>
+                                            </div>
+                                            {expandedLogs.has(log.id) && (
+                                                <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-xs text-gray-600 animate-in slide-in-from-top-1 duration-200 shadow-inner max-h-32 overflow-y-auto custom-scrollbar">
+                                                    <p className="whitespace-pre-wrap font-mono leading-relaxed">{log.details}</p>
+                                                </div>
+                                            )}
+                                        </div>
                                         {anomalyDetected && (
                                             <div className="flex items-center gap-1 mt-1.5 text-[10px] text-red-500 font-bold uppercase tracking-wider">
                                                 <AlertTriangle size={12} /> Detected Anomaly
@@ -168,7 +199,9 @@ export default function LogsTable({
                                                     {log.author.name[0]?.toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-900 leading-tight">{log.author.name}</p>
+                                                    <p className="text-sm font-bold text-gray-900 leading-tight">
+                                                        <TruncatedText text={log.author.name} maxLength={20} />
+                                                    </p>
                                                     <div className="flex items-center gap-2 mt-0.5">
                                                         <span className={`flex items-center text-[8px] uppercase font-black px-1.5 py-0.5 rounded leading-none ${log.author.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' :
                                                             log.author.role === 'AGENT' ? 'bg-blue-100 text-blue-700' :

@@ -96,10 +96,11 @@ export default function SignUpPage() {
                                 id="name"
                                 name="name"
                                 type="text"
+                                maxLength={70}
                                 placeholder="Enter your full name"
                                 required
                                 disabled={loading}
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-sm text-gray-900 focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] sm:text-sm transition-colors disabled:bg-gray-50 disabled:text-gray-500"
+                                className="block  truncate w-full px-3 py-2 border border-gray-300 rounded-sm text-gray-900 focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] sm:text-sm transition-colors disabled:bg-gray-50 disabled:text-gray-500"
                             />
                         </div>
 
@@ -109,6 +110,7 @@ export default function SignUpPage() {
                                 id="email"
                                 name="email"
                                 type="email"
+                                maxLength={60}
                                 placeholder="Enter your email"
                                 required
                                 disabled={loading}
@@ -122,6 +124,7 @@ export default function SignUpPage() {
                                 id="phone"
                                 name="phone"
                                 type="tel"
+                                maxLength={15}
                                 placeholder="Enter your phone number"
                                 disabled={loading}
                                 className="block w-full px-3 py-2 border border-gray-300 rounded-sm text-gray-900 focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] sm:text-sm transition-colors disabled:bg-gray-50 disabled:text-gray-500"

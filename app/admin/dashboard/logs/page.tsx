@@ -7,6 +7,9 @@ export const dynamic = "force-dynamic";
 export default async function SystemLogsPage() {
     // 1. Fetch all general system logs
     const logs = await prisma.auditLog.findMany({
+        include: {
+        author: true, // This populates the 'author' field in your interface
+  },
         orderBy: {
             createdAt: "desc"
         }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { FileText, Save, Info, RefreshCcw, Loader2 } from "lucide-react";
+import { FileText, Save, Info, RefreshCcw, Loader2, ExternalLink, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { updateApplicationStatusAction } from "./actions";
@@ -23,6 +23,7 @@ interface ApplicationListProps {
 
 export default function ApplicationList({ initialApplications }: ApplicationListProps) {
     const [applications, setApplications] = useState(initialApplications);
+    const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null);
 
     return (
         <div className="grid grid-cols-1 space-y-6">
@@ -30,6 +31,7 @@ export default function ApplicationList({ initialApplications }: ApplicationList
                 <ApplicationCard
                     key={app.id}
                     app={app}
+                    onViewDoc={(doc) => setViewingDoc(doc)}
                 />
             ))}
             {applications.length === 0 && (
@@ -38,14 +40,60 @@ export default function ApplicationList({ initialApplications }: ApplicationList
                     <p className="text-gray-500 font-medium">No assigned applications found.</p>
                 </Card>
             )}
+
+            {/* Document Viewer Modal */}
+            {viewingDoc && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="bg-[#1a1a1a] w-full max-w-6xl h-[90vh] rounded-3xl flex flex-col overflow-hidden shadow-2xl relative">
+                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+                            <div className="flex items-center gap-3">
+                                <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+                                    <FileText size={18} />
+                                </div>
+                                <h3 className="text-white font-bold truncate max-w-md">{viewingDoc.name}</h3>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <a 
+                                    href={viewingDoc.url} 
+                                    download 
+                                    className="h-10 px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center gap-2 text-sm font-bold transition-all"
+                                >
+                                    <Download size={16} /> Download
+                                </a>
+                                <Button 
+                                    variant="ghost" 
+                                    onClick={() => setViewingDoc(null)} 
+                                    className="h-10 w-10 text-white hover:bg-white/10 rounded-xl"
+                                >
+                                    <X size={20} />
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="flex-1 bg-[#121212] overflow-hidden relative flex items-center justify-center p-4">
+                            {/\.(jpe?g|png|gif|webp)$/i.test(viewingDoc.url) ? (
+                                <img
+                                    src={viewingDoc.url}
+                                    alt={viewingDoc.name}
+                                    className="max-h-full max-w-full object-contain rounded-lg shadow-2xl"
+                                />
+                            ) : (
+                                <iframe 
+                                    src={`${viewingDoc.url}#toolbar=1&navpanes=0&view=FitH`}
+                                    className="w-full h-full border-none"
+                                    title="Document Viewer"
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
 
-function ApplicationCard({ app }: { app: any }) {
+function ApplicationCard({ app, onViewDoc }: { app: any, onViewDoc: (doc: any) => void }) {
     const [status, setStatus] = useState(app.status);
     const [note, setNote] = useState("");
-    const [showNotes, setShowNotes] = useState(false);
     const [loading, setLoading] = useState(false);
     const [modificationRequested, setModificationRequested] = useState(false);
     const [modMessage, setModMessage] = useState("");
@@ -132,10 +180,11 @@ function ApplicationCard({ app }: { app: any }) {
                             <div className="mt-3 space-y-3 p-4 bg-orange-50 border border-orange-200 rounded-xl shadow-inner animate-in slide-in-from-top-2">
                                 <label className="text-xs font-bold text-orange-800 uppercase tracking-wide">Reason for Modification</label>
                                 <textarea
-                                    className="w-full h-24 p-3 text-sm rounded-lg border border-orange-200 focus:ring-2 focus:ring-orange-500 outline-none shadow-sm"
-                                    placeholder="Explain why client needs to modify documents/info..."
+                                    className="w-full h-24 p-3 text-sm rounded-lg border border-orange-200 focus:ring-2 focus:ring-orange-500 outline-none shadow-sm resize-none"
+                                    placeholder="Explain why client needs to modify documents/info... (Max 255 chars)"
                                     value={modMessage}
                                     onChange={(e) => setModMessage(e.target.value)}
+                                    maxLength={255}
                                 ></textarea>
                                 <div className="flex gap-2">
                                     <Button
@@ -168,14 +217,46 @@ function ApplicationCard({ app }: { app: any }) {
                                 </label>
                             </div>
                             <textarea
-                                className="flex w-full rounded-xl border border-gray-200 bg-white p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all min-h-[100px]"
-                                placeholder="Add an internal note about this application for the notification/audit..."
+                                className="flex w-full rounded-xl border border-gray-200 bg-white p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all min-h-[100px] resize-none"
+                                placeholder="Add an internal note about this application... (Max 255 chars)"
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
+                                maxLength={255}
                             ></textarea>
                         </div>
                     </div>
                 </div>
+
+                {/* Documents Section */}
+                {app.procedures?.some((p: any) => p.documents?.length > 0) && (
+                    <div className="mt-8 pt-6 border-t border-gray-100">
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            SUBMITTED DOCUMENTS
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {app.procedures.flatMap((p: any) => p.documents || []).map((doc: any) => (
+                                <div key={doc.id} className="flex items-center justify-between p-3 bg-blue-50/30 rounded-xl border border-blue-100/50 group/doc hover:bg-white hover:shadow-sm transition-all overflow-hidden">
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                        <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-blue-600 shrink-0 border border-blue-100">
+                                            <FileText size={16} />
+                                        </div>
+                                        <div className="overflow-hidden">
+                                            <p className="text-xs font-bold text-gray-700 truncate">{doc.name}</p>
+                                            <p className="text-[9px] text-blue-500 font-bold uppercase">{doc.type}</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => onViewDoc({ url: doc.fileUrl, name: doc.name })}
+                                        className="p-1.5 bg-white border border-blue-100 text-blue-600 hover:text-blue-800 hover:border-blue-300 transition-all rounded-lg shadow-sm"
+                                        title="View Document"
+                                    >
+                                        <ExternalLink size={14} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

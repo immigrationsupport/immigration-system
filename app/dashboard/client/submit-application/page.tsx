@@ -114,8 +114,9 @@ export default function SubmitApplicationPage() {
                             <textarea
                                 id="description"
                                 name="description"
-                                className="flex min-h-[100px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
-                                placeholder="Please provide additional details..."
+                                className="flex min-h-[100px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none resize-none"
+                                placeholder="Please provide additional details... (Max 500 characters)"
+                                maxLength={500}
                                 required
                             />
                         </div>

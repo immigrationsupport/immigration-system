@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
     try {
-        const resend = new Resend(process.env.RESEND_API_KEY);
         const { fullName, email, phone, message } = await req.json();
 
         if (!fullName || !email || !message) {
@@ -15,17 +14,31 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "your_resend_api_key_here") {
-            console.error("[Contact API] RESEND_API_KEY not configured in .env");
+        // Check that Gmail credentials are configured
+        const gmailUser = process.env.GMAIL_USER;
+        const gmailPass = process.env.GMAIL_APP_PASSWORD;
+
+        if (!gmailUser || !gmailPass) {
+            console.error("[Contact API] Gmail credentials not configured.");
             return NextResponse.json(
-                { error: "Email service not configured. Please use a valid RESEND_API_KEY." },
+                { error: "Email service not configured. Please contact us directly at emilieag573@gmail.com" },
                 { status: 503 }
             );
         }
 
-        const { error } = await resend.emails.send({
-            from: "ATLE Immigration <onboarding@resend.dev>",
-            to: ["emlieag573@gmail.com"],
+        // Create Gmail SMTP transporter
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: gmailUser,
+                pass: gmailPass, // Must be a Gmail App Password, not your account password
+            },
+        });
+
+        // Send the email
+        await transporter.sendMail({
+            from: `"ATLE Immigration" <${gmailUser}>`,
+            to: "emilieag573@gmail.com",
             replyTo: email,
             subject: `New Inquiry from ${fullName}`,
             html: `
@@ -65,22 +78,13 @@ export async function POST(req: NextRequest) {
             `,
         });
 
-        if (error) {
-            console.error("[Contact API] Resend error:", error);
-            return NextResponse.json(
-                { error: "Failed to send your message. Please try again." },
-                { status: 500 }
-            );
-        }
-
         return NextResponse.json({ success: true }, { status: 200 });
 
     } catch (err: any) {
-        console.error("[Contact API] Unexpected error:", err?.message || err);
+        console.error("[Contact API] Error:", err?.message || err);
         return NextResponse.json(
-            { error: "Something went wrong. Please email us directly at emlieag573@gmail.com" },
+            { error: "Failed to send message. Please email us directly at emilieag573@gmail.com" },
             { status: 500 }
         );
     }
 }
-

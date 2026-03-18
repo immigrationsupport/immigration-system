@@ -94,6 +94,7 @@ export default function ContactPage() {
                                             value={form.fullName}
                                             onChange={handleChange}
                                             required
+                                            maxLength={50}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] text-gray-900 outline-none"
                                             placeholder="Enter your full name"
                                         />
@@ -104,6 +105,7 @@ export default function ContactPage() {
                                             <input
                                                 type="email"
                                                 id="email"
+                                                maxLength={50}
                                                 value={form.email}
                                                 onChange={handleChange}
                                                 required
@@ -131,8 +133,10 @@ export default function ContactPage() {
                                             onChange={handleChange}
                                             required
                                             rows={5}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] text-gray-900 resize-y outline-none"
-                                            placeholder="Provide details regarding your current immigration needs..."
+                                            minLength={50}
+                                            maxLength={1000}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] text-gray-900 resize-none outline-none"
+                                            placeholder="Provide details regarding your needs... (Max 1000 characters)"
                                         />
                                     </div>
                                     <button
@@ -186,10 +190,10 @@ export default function ContactPage() {
                                         <div>
                                             <h4 className="text-sm font-bold text-gray-900 mb-1">Email</h4>
                                             <a
-                                                href="mailto:emlieag573@gmail.com"
+                                                href="mailto:emilieag573@gmail.com"
                                                 className="text-gray-600 text-sm hover:text-[#1E3A8A] transition-colors"
                                             >
-                                                emlieag573@gmail.com
+                                                emilieag573@gmail.com
                                             </a>
                                         </div>
                                     </div>
