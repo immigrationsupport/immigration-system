@@ -7,11 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Upload, CheckCircle2, AlertCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { UploadButton } from "@/src/utils/uploadthing";
+import { UploadDropzone } from "@uploadthing/react";
+import { OurFileRouter } from "@/app/api/uploadthing/core";
 
 export default function SubmitApplicationPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<any[]>([]);
     const [success, setSuccess] = useState(false);
 
     // Mock file upload handler
@@ -29,6 +32,17 @@ export default function SubmitApplicationPage() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
+         const formData = new FormData(e.currentTarget);
+
+  const data = {
+    type: formData.get("type"),
+    title: formData.get("title"),
+    description: formData.get("description"),
+    files: files.map((f) => f.url), // 👈 IMPORTANT
+  };
+
+  console.log(data);
+
 
         // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -124,13 +138,27 @@ export default function SubmitApplicationPage() {
                         <div className="space-y-4">
                             <Label>Documents Upload</Label>
                             <div className="relative group p-10 border-2 border-dashed border-blue-100 rounded-3xl bg-blue-50/10 hover:bg-blue-50/50 hover:border-blue-400 transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center text-center">
-                                <Input
-                                    type="file"
-                                    multiple
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                    onChange={handleFileChange}
-                                    accept=".pdf,.jpg,.jpeg,.png"
-                                />
+                                <div className="absolute inset-0 z-20 w-full h-full opacity-0">
+                                    <UploadButton
+                                        endpoint="documentUploader"
+                                        appearance={{
+                                            button: "w-full h-full cursor-pointer",
+                                            container: "w-full h-full",
+                                            allowedContent: "hidden",
+                                        }}
+                                        onUploadBegin={() => setLoading(true)}
+                                        onClientUploadComplete={(res) => {
+                                            if (res) {
+                                                setFiles((prev) => [...prev, ...res]);
+                                            }
+                                            setLoading(false);
+                                        }}
+                                        onUploadError={(error: Error) => {
+                                            setLoading(false);
+                                            alert(`ERROR! ${error.message}`);
+                                        }}
+                                    />
+                                </div>
                                 <div className="bg-white p-4 rounded-2xl shadow-sm mb-4 group-hover:scale-110 transition-transform">
                                     <Upload className="h-8 w-8 text-blue-600" />
                                 </div>
