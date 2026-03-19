@@ -44,7 +44,7 @@ export default async function ClientDashboard() {
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{totalApps}</div>
-                        <p className="text-[10px] text-gray-400 font-bold mt-1">ALL SUBMISSIONS</p>
+                        <p className="text-[10px] text-gray-400 font-bold mt-1"></p>
                     </CardContent>
                 </Card>
 
@@ -56,7 +56,7 @@ export default async function ClientDashboard() {
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{pendingApps}</div>
-                        <p className="text-[10px] text-amber-600 font-bold mt-1">AWAITING REVIEW</p>
+                        <p className="text-[10px] text-amber-600 font-bold mt-1"></p>
                     </CardContent>
                 </Card>
 
@@ -68,7 +68,7 @@ export default async function ClientDashboard() {
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{approvedApps}</div>
-                        <p className="text-[10px] text-emerald-600 font-bold mt-1">OFFICIALLY APPROVED</p>
+                        <p className="text-[10px] text-emerald-600 font-bold mt-1"></p>
                     </CardContent>
                 </Card>
 
@@ -80,7 +80,7 @@ export default async function ClientDashboard() {
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{rejectedApps}</div>
-                        <p className="text-[10px] text-red-600 font-bold mt-1">REVISION NEEDED</p>
+                        <p className="text-[10px] text-red-600 font-bold mt-1"></p>
                     </CardContent>
                 </Card>
             </div>
@@ -136,7 +136,7 @@ export default async function ClientDashboard() {
                                             <td className="px-8 py-5 text-right">
                                                 <Link href={`/dashboard/client/applications/${app.id}`}>
                                                     <button className="inline-flex items-center gap-2 bg-white border border-gray-200 text-[#1E3A8A] px-4 py-2 rounded-xl text-xs font-black shadow-sm hover:bg-[#1E3A8A] hover:text-white hover:border-[#1E3A8A] transition-all">
-                                                        OPEN HUB <ArrowRight className="h-3 w-3" />
+                                                        View application <ArrowRight className="h-3 w-3" />
                                                     </button>
                                                 </Link>
                                             </td>
