@@ -2,8 +2,14 @@ import "dotenv/config";
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import prisma from '@/lib/prisma'
+import { multiSession } from "better-auth/plugins"
 
 export const auth = betterAuth({
+    plugins: [
+        multiSession({
+            maximumSessions: 5,
+        })
+    ],
     database: prismaAdapter(prisma, {
         provider: 'postgresql',
     }),
@@ -33,7 +39,10 @@ export const auth = betterAuth({
                 type: "string",
                 defaultValue: "CLIENT",
             },
-
+            status: {
+                type: "string",
+                defaultValue: "PENDING",
+            },
             isSuspended: {
                 type: "boolean",
                 defaultValue: false

@@ -15,9 +15,10 @@ model User {
   password         String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-  role             Role     @default(CLIENT)
-  profileCompleted Boolean  @default(false)
-  isSuspended      Boolean  @default(false)
+  role             Role       @default(CLIENT)
+  profileCompleted Boolean    @default(false)
+  isSuspended      Boolean    @default(false)
+  status           UserStatus @default(PENDING)
 
   // Personal Information
   dateOfBirth      DateTime?
@@ -156,6 +157,12 @@ enum Role {
   ADMIN
   AGENT
   CLIENT
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  REJECTED
 }
 
 enum MaritalStatus {

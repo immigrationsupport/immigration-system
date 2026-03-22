@@ -56,7 +56,15 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                                 {session?.user?.name || "Client User"}
                             </div>
                             <button
-                                onClick={() => signOut()}
+                                onClick={async () => {
+                                    await signOut({
+                                        fetchOptions: {
+                                            onSuccess: () => {
+                                                window.location.href = "/sign-in";
+                                            }
+                                        }
+                                    });
+                                }}
                                 className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
                             >
                                 <LogOut className="w-4 h-4 mr-2" />

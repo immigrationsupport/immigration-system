@@ -115,3 +115,38 @@ export async function toggleSuspendClientAction(clientId: string, currentlySuspe
         return { error: "Failed to update suspension status." };
     }
 }
+
+export async function validateClientAction(clientId: string) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || (session.user as any).role !== "ADMIN") {
+        return { error: "Unauthorized access." };
+    }
+
+    try {
+        const client = await prisma.user.findUnique({ where: { id: clientId } });
+        if (!client) return { error: "Client not found." };
+        if (client.status !== "PENDING") return { error: "Client is already validated." };
+
+        await prisma.user.update({
+            where: { id: clientId },
+            data: { status: "ACTIVE" }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "VALIDATE_CLIENT",
+                details: `Client ${client.name} (${client.email}) was validated by Admin.`,
+                userId: session.user.id,
+                targetId: clientId
+            }
+        });
+
+        revalidatePath("/admin/dashboard/clients");
+        return { success: true };
+    } catch (e: any) {
+        return { error: "Failed to validate client." };
+    }
+}

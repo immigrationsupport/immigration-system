@@ -47,7 +47,7 @@ export default async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    const { role, profileCompleted, isSuspended } = session.user as any;
+    const { role, profileCompleted, isSuspended, status } = session.user as any;
     const userRole = (role || "CLIENT").toUpperCase();
 
     // 2. Suspension Check
@@ -61,6 +61,16 @@ export default async function middleware(request: NextRequest) {
     if (userRole === "CLIENT" && !profileCompleted && pathname !== "/complete-profile" && !pathname.startsWith("/api")) {
         url.pathname = "/complete-profile";
         return NextResponse.redirect(url);
+    }
+
+    // 3.5 Pending Access Restriction
+    if (userRole === "CLIENT" && status === "PENDING" && !pathname.startsWith("/api")) {
+        const restrictedPaths = ["/dashboard/client/submit-application", "/applications/new", "/dashboard/client/applications/new"];
+        if (restrictedPaths.some(p => pathname.startsWith(p))) {
+            url.pathname = "/dashboard/client";
+            url.searchParams.set("restricted", "true");
+            return NextResponse.redirect(url);
+        }
     }
 
     // 4. Role-based Protections

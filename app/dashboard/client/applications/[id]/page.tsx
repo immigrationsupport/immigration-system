@@ -36,6 +36,8 @@ export default async function ApplicationHubPage(props: { params: Promise<{ id: 
         notFound();
     }
 
+    const isPending = (session.user as any).status === "PENDING";
+
     return (
         <div className="space-y-8 max-w-7xl mx-auto px-4 py-8 bg-gray-50/30 min-h-screen">
             {/* Country Header */}
@@ -66,7 +68,7 @@ export default async function ApplicationHubPage(props: { params: Promise<{ id: 
             {/* Procedures Section */}
             <div className="grid grid-cols-1 gap-12">
                 {application.procedures.map((proc) => (
-                    <ProcedureDetails key={proc.id} procedure={proc} />
+                    <ProcedureDetails key={proc.id} procedure={proc} isPending={isPending} />
                 ))}
             </div>
         </div>

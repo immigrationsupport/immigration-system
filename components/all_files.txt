@@ -1,0 +1,1034 @@
+============================================================
+  DIRECTORY TREE
+============================================================
+
+components/
+├── dashboard/
+│   ├── ActivityItem.tsx
+│   ├── AdminStats.tsx
+│   ├── Header.tsx
+│   └── Sidebar.tsx
+├── ui/
+│   ├── alert-dialog.tsx
+│   ├── button.tsx
+│   ├── card.tsx
+│   ├── dialog.tsx
+│   ├── input.tsx
+│   ├── label.tsx
+│   ├── textarea.tsx
+│   ├── tooltip.tsx
+│   └── truncated-text.tsx
+├── collect.py
+├── Footer.tsx
+└── Navbar.tsx
+
+============================================================
+  FILE INDEX  (16 files total)
+============================================================
+
+Footer.tsx
+Navbar.tsx
+collect.py
+dashboard\ActivityItem.tsx
+dashboard\AdminStats.tsx
+dashboard\Header.tsx
+dashboard\Sidebar.tsx
+ui\alert-dialog.tsx
+ui\button.tsx
+ui\card.tsx
+ui\dialog.tsx
+ui\input.tsx
+ui\label.tsx
+ui\textarea.tsx
+ui\tooltip.tsx
+ui\truncated-text.tsx
+
+============================================================
+  FILE CONTENTS  (15 readable text files)
+============================================================
+
+------------------------------------------------------------
+File: Footer.tsx | Lines: 52
+Path: Footer.tsx
+------------------------------------------------------------
+import Link from "next/link";
+import { Mail, Phone, MapPin } from "lucide-react";
+
+export default function Footer() {
+    return (
+        <footer className="bg-white border-t border-gray-200 mt-auto">
+            <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 border-b border-gray-200 pb-8">
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <div className="w-5 h-5 bg-[#1E3A8A] mr-2 rounded-sm flex items-center justify-center">
+                                <span className="text-white text-xs font-serif">A</span>
+                            </div>
+                            ATLE Immigration
+                        </h3>
+                        <p className="text-gray-600 text-sm max-w-sm leading-relaxed">
+                            Professional immigration consultancy delivering secure, transparent, and accurate visa and residency processing globally.
+                        </p>
+                    </div>
+                    <div className="flex flex-col space-y-3">
+                        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">Our Offices</h3>
+                        <div className="flex items-center text-gray-600 text-sm">
+                            <Mail className="w-4 h-4 mr-3 text-[#1E3A8A]" />
+                            <a href="mailto:emlieag573@gmail.com" className="hover:text-gray-900 transition-colors">emlieag573@gmail.com</a>
+                        </div>
+                        <div className="flex items-center text-gray-600 text-sm">
+                            <Phone className="w-4 h-4 mr-3 text-[#1E3A8A]" />
+                            <span>+237680703365</span>
+                        </div>
+                        <div className="flex items-start text-gray-600 text-sm">
+                            <MapPin className="w-4 h-4 mr-3 text-[#1E3A8A] mt-0.5 flex-shrink-0" />
+                            <span>DOUALA CAMEROUN<br />Bonamoussadi , carrefour maison blanche</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-sm text-gray-500">
+                    <div>
+                        &copy; {new Date().getFullYear()} ATLE Immigration Consultancy.
+                    </div>
+                    <div className="flex space-x-6">
+                        <Link href="/privacy" className="hover:text-gray-900 transition-colors">
+                            Privacy Policy
+                        </Link>
+                        <Link href="/terms" className="hover:text-gray-900 transition-colors">
+                            Terms of Service
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    );
+}
+
+------------------------------------------------------------
+File: Navbar.tsx | Lines: 46
+Path: Navbar.tsx
+------------------------------------------------------------
+"use client";
+
+import { LogIn } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation"; 
+
+export default function Navbar() {
+    // Removed useLocale and router as they were only used for i18n switching
+    const pathname = usePathname();
+
+    return (
+        <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-20">
+                    <div className="flex-shrink-0 flex items-center">
+                        <Link href="/" className="text-xl font-bold text-[#1E3A8A] tracking-wide flex items-center">
+                            <div className="w-8 h-8 bg-[#1E3A8A] mr-3 rounded-sm flex items-center justify-center">
+                                <span className="text-white text-lg font-serif">A</span>
+                            </div>
+                            ATLE Immigration
+                        </Link>
+                    </div>
+
+                    <div className="hidden md:flex items-center space-x-8">
+                        <Link href="/" className={`font-medium text-sm transition-colors ${pathname === '/' ? 'text-[#1E3A8A]' : 'text-gray-600 hover:text-[#1E3A8A]'}`}>Home</Link>
+                        <Link href="/services" className={`font-medium text-sm transition-colors ${pathname === '/services' ? 'text-[#1E3A8A]' : 'text-gray-600 hover:text-[#1E3A8A]'}`}>Services</Link>
+                        <Link href="/about" className={`font-medium text-sm transition-colors ${pathname === '/about' ? 'text-[#1E3A8A]' : 'text-gray-600 hover:text-[#1E3A8A]'}`}>About</Link>
+                        <Link href="/contact" className={`font-medium text-sm transition-colors ${pathname === '/contact' ? 'text-[#1E3A8A]' : 'text-gray-600 hover:text-[#1E3A8A]'}`}>Contact</Link>
+                    </div>
+
+                    <div className="hidden sm:flex sm:items-center space-x-4">
+                        {/* Language Selector Removed entirely */}
+
+                        <Link
+                            href="/sign-in"
+                            className="inline-flex items-center justify-center px-4 py-2 border border-[#1E3A8A] text-[#1E3A8A] hover:bg-blue-50 bg-white rounded-sm text-sm font-semibold transition-colors"
+                        >
+                            <LogIn className="w-4 h-4 mr-2" />
+                            Login
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    );
+}
+
+------------------------------------------------------------
+File: ActivityItem.tsx | Lines: 104
+Path: dashboard\ActivityItem.tsx
+------------------------------------------------------------
+"use client";
+
+import React, { useState } from "react";
+import { ChevronDown, ChevronUp, Clock, Info } from "lucide-react";
+import { TruncatedText } from "@/components/ui/truncated-text";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+
+interface ActivityItemProps {
+    log: {
+        id: string;
+        action: string;
+        details: string | null;
+        createdAt: Date | string;
+        author: { name: string; role: string } | null;
+    };
+}
+
+const getTimeAgo = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return date.toLocaleDateString();
+};
+
+const getActionColor = (action: string) => {
+    if (action.includes("LOGIN")) return "bg-blue-50 text-blue-700 bg-opacity-80 border-blue-100";
+    if (action.includes("CREATE")) return "bg-emerald-50 text-emerald-700 bg-opacity-80 border-emerald-100";
+    if (action.includes("SUBMISSION")) return "bg-amber-50 text-amber-700 bg-opacity-80 border-amber-100";
+    return "bg-slate-50 text-slate-700 border-slate-100";
+};
+
+export function ActivityItem({ log }: ActivityItemProps) {
+    const [showDetails, setShowDetails] = useState(false);
+
+    return (
+        <div className="relative pl-6 border-l-2 border-slate-50 py-1 transition-all hover:bg-slate-50 rounded-r-lg group">
+            <div className="absolute -left-[6px] top-2 h-2.5 w-2.5 rounded-full bg-blue-100 border-2 border-white group-hover:bg-[#1E3A8A] transition-colors"></div>
+            <div className="flex justify-between items-start">
+                <div className="space-y-1 flex-1">
+                    <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded border ${getActionColor(log.action)}`}>
+                            {log.action.replace(/_/g, " ")}
+                        </span>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase">
+                            {getTimeAgo(new Date(log.createdAt))}
+                        </p>
+                    </div>
+                    <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-medium text-gray-700 leading-tight pr-4">
+                            <TruncatedText text={log.details || ""} maxLength={60} />
+                        </p>
+                        <button 
+                            onClick={() => setShowDetails(true)}
+                            className="p-1 text-gray-400 hover:text-[#1E3A8A] transition-colors"
+                            title="View Details"
+                        >
+                            <ChevronDown size={14} className="opacity-0 group-hover:opacity-100" />
+                        </button>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                        <div className="h-4 w-4 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-bold text-slate-500">
+                            {log.author?.name?.[0] || "S"}
+                        </div>
+                        <p className="text-[11px] text-[#1E3A8A] font-bold">
+                            <TruncatedText text={log.author?.name || "System"} maxLength={20} /> <span className="text-gray-300 font-normal px-1">|</span> <span className="text-gray-400 capitalize">{log.author?.role?.toLowerCase() || "system"}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <Dialog open={showDetails} onOpenChange={setShowDetails}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-[#1E3A8A]">
+                            <Info size={18} />
+                            Activity Details
+                        </DialogTitle>
+                        <DialogDescription className="text-xs font-black uppercase tracking-widest text-gray-400">
+                            {log.action.replace(/_/g, " ")} | {new Date(log.createdAt).toLocaleString()}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                            {log.details || "No details provided."}
+                        </p>
+                    </div>
+                    <div className="mt-4 flex items-center gap-2 text-[11px] font-bold text-gray-400">
+                        <Clock size={12} />
+                        Author: {log.author?.name || "System"} ({log.author?.role || "SYSTEM"})
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+}
+
+------------------------------------------------------------
+File: AdminStats.tsx | Lines: 60
+Path: dashboard\AdminStats.tsx
+------------------------------------------------------------
+import Link from "next/link";
+import { Users, Briefcase, FileText } from "lucide-react";
+import prisma from "@/lib/prisma";
+
+export default async function AdminStats() {
+    const [totalClients, totalAgents, totalApplications] = await Promise.all([
+        prisma.user.count({ where: { role: "CLIENT" } }),
+        prisma.user.count({ where: { role: "AGENT" } }),
+        prisma.application.count(),
+    ]);
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {/* Total Clients Card */}
+            <Link 
+                href="/admin/dashboard/clients"
+                className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group" 
+                style={{ borderRadius: "16px" }}
+            >
+                <div className="p-4 rounded-2xl bg-blue-50 text-[#1E3A8A] group-hover:bg-[#1E3A8A] group-hover:text-white transition-all duration-300">
+                    <Users size={26} />
+                </div>
+                <div>
+                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">Total Clients</p>
+                    <h3 className="text-3xl font-black text-gray-900 mt-0.5">{totalClients.toLocaleString()}</h3>
+                </div>
+            </Link>
+
+            {/* Total Agents Card */}
+            <Link 
+                href="/admin/dashboard/agents"
+                className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group" 
+                style={{ borderRadius: "16px" }}
+            >
+                <div className="p-4 rounded-2xl bg-indigo-50 text-indigo-700 group-hover:bg-indigo-700 group-hover:text-white transition-all duration-300">
+                    <Briefcase size={26} />
+                </div>
+                <div>
+                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">Total Agents</p>
+                    <h3 className="text-3xl font-black text-gray-900 mt-0.5">{totalAgents.toLocaleString()}</h3>
+                </div>
+            </Link>
+
+            {/* Total Applications Card */}
+            <Link 
+                href="/admin/dashboard/applications"
+                className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group" 
+                style={{ borderRadius: "16px" }}
+            >
+                <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-700 group-hover:bg-emerald-700 group-hover:text-white transition-all duration-300">
+                    <FileText size={26} />
+                </div>
+                <div>
+                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">Live Applications</p>
+                    <h3 className="text-3xl font-black text-gray-900 mt-0.5">{totalApplications.toLocaleString()}</h3>
+                </div>
+            </Link>
+        </div>
+    );
+}
+
+------------------------------------------------------------
+File: Header.tsx | Lines: 50
+Path: dashboard\Header.tsx
+------------------------------------------------------------
+"use client";
+
+import { Bell, Menu, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { signOut } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+
+interface HeaderProps {
+    title: string;
+    onMenuClick?: () => void;
+    showLogout?: boolean;
+}
+
+export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) {
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        await signOut();
+        router.push("/sign-in");
+    };
+
+    return (
+        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 sticky top-0 z-20">
+            <div className="flex items-center gap-4">
+                <Button variant="outline" className="md:hidden" onClick={onMenuClick}>
+                    <Menu className="h-6 w-6" />
+                </Button>
+                <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
+            </div>
+
+            <div className="flex items-center gap-4">
+                <Button variant="outline" className="text-gray-500 relative">
+                    <Bell className="h-5 w-5" />
+                    <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full"></span>
+                </Button>
+
+                {showLogout && (
+                    <Button
+                        variant="ghost"
+                        onClick={handleLogout}
+                        className="text-gray-600 hover:text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        <span className="hidden sm:inline">Logout</span>
+                    </Button>
+                )}
+            </div>
+        </header>
+    );
+}
+
+------------------------------------------------------------
+File: Sidebar.tsx | Lines: 92
+Path: dashboard\Sidebar.tsx
+------------------------------------------------------------
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LogOut, LayoutDashboard, Users, UserCog, FileText, Settings as SettingsIcon, Briefcase, FolderSearch, List, MessageSquare } from "lucide-react";
+import { signOut } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+
+// Map strings to their respective Lucide icons
+const iconMap: Record<string, any> = {
+    LayoutDashboard,
+    Users,
+    UserCog,
+    FileText,
+    SettingsIcon,
+    Briefcase,
+    FolderSearch,
+    List,
+    MessageSquare
+};
+
+interface SidebarItem {
+    icon: string;
+    label: string;
+    href: string;
+}
+
+interface SidebarProps {
+    items: SidebarItem[];
+    userRole: string;
+    userName: string;
+}
+
+export function Sidebar({ items, userRole, userName }: SidebarProps) {
+    const pathname = usePathname();
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        await signOut();
+        router.push("/sign-in");
+    };
+
+    return (
+        <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 z-30">
+            <div className="flex items-center justify-center h-16 border-b border-gray-200 px-6">
+                <span className="text-xl font-bold text-[var(--color-primary)] tracking-wide">ATLE Immigration</span>
+            </div>
+
+            <div className="p-4 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[var(--color-secondary)] flex items-center justify-center text-[var(--color-primary)] font-bold">
+                        {userName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="overflow-hidden">
+                        <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
+                        <p className="text-xs text-gray-500 capitalize">{userRole}</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+                {items.map((item) => {
+                    const isActive = pathname === item.href;
+                    const IconComponent = iconMap[item.icon] || LayoutDashboard;
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${isActive
+                                ? "bg-[var(--color-secondary)] text-[var(--color-primary)]"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                }`}
+                        >
+                            <IconComponent className={`mr-3 h-5 w-5 ${isActive ? "text-[var(--color-primary)]" : "text-gray-400"}`} />
+                            {item.label}
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            <div className="p-4 border-t border-gray-200">
+                <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors"
+                >
+                    <LogOut className="mr-3 h-5 w-5" />
+                    Logout
+                </button>
+            </div>
+        </aside>
+    );
+}
+
+------------------------------------------------------------
+File: alert-dialog.tsx | Lines: 140
+Path: ui\alert-dialog.tsx
+------------------------------------------------------------
+"use client"
+
+import * as React from "react"
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+
+const AlertDialog = AlertDialogPrimitive.Root
+
+const AlertDialogTrigger = AlertDialogPrimitive.Trigger
+
+const AlertDialogPortal = AlertDialogPrimitive.Portal
+
+const AlertDialogOverlay = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Overlay
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+    ref={ref}
+  />
+))
+AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
+
+const AlertDialogContent = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPortal>
+    <AlertDialogOverlay />
+    <AlertDialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-gray-200 bg-white p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
+    />
+  </AlertDialogPortal>
+))
+AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
+
+const AlertDialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-2 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+)
+AlertDialogHeader.displayName = "AlertDialogHeader"
+
+const AlertDialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+)
+AlertDialogFooter.displayName = "AlertDialogFooter"
+
+const AlertDialogTitle = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Title
+    ref={ref}
+    className={cn("text-lg font-semibold", className)}
+    {...props}
+  />
+))
+AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName
+
+const AlertDialogDescription = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-gray-500", className)}
+    {...props}
+  />
+))
+AlertDialogDescription.displayName =
+  AlertDialogPrimitive.Description.displayName
+
+const AlertDialogAction = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Action>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Action
+    ref={ref}
+    className={cn("inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] shadow-sm h-10 px-4 py-2", className)}
+    {...props}
+  />
+))
+AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName
+
+const AlertDialogCancel = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Cancel
+    ref={ref}
+    className={cn(
+      "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 h-10 px-4 py-2 mt-2 sm:mt-0",
+      className
+    )}
+    {...props}
+  />
+))
+AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
+
+export {
+  AlertDialog,
+  AlertDialogPortal,
+  AlertDialogOverlay,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+}
+
+------------------------------------------------------------
+File: button.tsx | Lines: 56
+Path: ui\button.tsx
+------------------------------------------------------------
+import * as React from "react"
+
+const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    variant?: 'primary' | 'secondary' | 'outline' | 'ghost',
+    size?: 'default' | 'sm' | 'lg' | 'icon',
+    fullWidth?: boolean
+}>(
+    ({ className, variant = 'primary', size = 'default', fullWidth, ...props }, ref) => {
+        const baseStyles = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+
+        let variantStyles = ""
+        switch (variant) {
+            case 'primary':
+                variantStyles = "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] shadow-sm"
+                break
+            case 'secondary':
+                variantStyles = "bg-gray-100 text-gray-900 hover:bg-gray-200/80"
+                break
+            case 'outline':
+                variantStyles = "border border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+                break
+            case 'ghost':
+                variantStyles = "hover:bg-gray-100 hover:text-gray-900"
+                break
+        }
+
+        let sizeStyles = ""
+        switch (size) {
+            case 'default':
+                sizeStyles = "h-10 px-4 py-2"
+                break
+            case 'sm':
+                sizeStyles = "h-9 rounded-md px-3"
+                break
+            case 'lg':
+                sizeStyles = "h-11 rounded-md px-8"
+                break
+            case 'icon':
+                sizeStyles = "h-10 w-10"
+                break
+        }
+
+        const widthStyles = fullWidth ? "w-full" : ""
+
+        return (
+            <button
+                ref={ref}
+                className={`${baseStyles} ${variantStyles} ${sizeStyles} ${widthStyles} ${className}`}
+                {...props}
+            />
+        )
+    }
+)
+Button.displayName = "Button"
+
+export { Button }
+
+------------------------------------------------------------
+File: card.tsx | Lines: 60
+Path: ui\card.tsx
+------------------------------------------------------------
+import * as React from "react"
+
+const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+    ({ className, ...props }, ref) => (
+        <div
+            ref={ref}
+            className={`rounded-lg border border-gray-200 bg-white text-gray-950 shadow-sm ${className}`}
+            {...props}
+        />
+    )
+)
+Card.displayName = "Card"
+
+const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+    ({ className, ...props }, ref) => (
+        <div
+            ref={ref}
+            className={`flex flex-col space-y-1.5 p-6 ${className}`}
+            {...props}
+        />
+    )
+)
+CardHeader.displayName = "CardHeader"
+const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
+  ({ className, ...props }, ref) => (
+    <p ref={ref} className={`text-sm text-muted-foreground ${className}`} {...props} />
+  )
+)
+CardDescription.displayName = "CardDescription"
+
+const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
+    ({ className, ...props }, ref) => (
+        <h3
+            ref={ref}
+            className={`text-2xl font-semibold leading-none tracking-tight ${className}`}
+            {...props}
+        />
+    )
+)
+CardTitle.displayName = "CardTitle"
+
+const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+    ({ className, ...props }, ref) => (
+        <div ref={ref} className={`p-6 pt-0 ${className}`} {...props} />
+    )
+)
+CardContent.displayName = "CardContent"
+
+const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+    ({ className, ...props }, ref) => (
+        <div
+            ref={ref}
+            className={`flex items-center p-6 pt-0 ${className}`}
+            {...props}
+        />
+    )
+)
+CardFooter.displayName = "CardFooter"
+
+export { Card, CardHeader, CardTitle,CardDescription,CardContent, CardFooter }
+
+------------------------------------------------------------
+File: dialog.tsx | Lines: 121
+Path: ui\dialog.tsx
+------------------------------------------------------------
+"use client"
+
+import * as React from "react"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { X } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const Dialog = DialogPrimitive.Root
+
+const DialogTrigger = DialogPrimitive.Trigger
+
+const DialogPortal = DialogPrimitive.Portal
+
+const DialogClose = DialogPrimitive.Close
+
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+  />
+))
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-gray-200 bg-white p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
+    >
+      {children}
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100 data-[state=open]:text-gray-500">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+))
+DialogContent.displayName = DialogPrimitive.Content.displayName
+
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+)
+DialogHeader.displayName = "DialogHeader"
+
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+)
+DialogFooter.displayName = "DialogFooter"
+
+const DialogTitle = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Title
+    ref={ref}
+    className={cn(
+      "text-lg font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+))
+DialogTitle.displayName = DialogPrimitive.Title.displayName
+
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-gray-500", className)}
+    {...props}
+  />
+))
+DialogDescription.displayName = DialogPrimitive.Description.displayName
+
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+}
+
+------------------------------------------------------------
+File: input.tsx | Lines: 20
+Path: ui\input.tsx
+------------------------------------------------------------
+import * as React from "react"
+
+export interface InputProps
+    extends React.InputHTMLAttributes<HTMLInputElement> { }
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+    ({ className, type, ...props }, ref) => {
+        return (
+            <input
+                type={type}
+                className={`flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+                ref={ref}
+                {...props}
+            />
+        )
+    }
+)
+Input.displayName = "Input"
+
+export { Input }
+
+------------------------------------------------------------
+File: label.tsx | Lines: 14
+Path: ui\label.tsx
+------------------------------------------------------------
+import * as React from "react"
+
+const Label = React.forwardRef<HTMLLabelElement, React.LabelHTMLAttributes<HTMLLabelElement>>(
+    ({ className, ...props }, ref) => (
+        <label
+            ref={ref}
+            className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}
+            {...props}
+        />
+    )
+)
+Label.displayName = "Label"
+
+export { Label }
+
+------------------------------------------------------------
+File: textarea.tsx | Lines: 23
+Path: ui\textarea.tsx
+------------------------------------------------------------
+import * as React from "react"
+import { cn } from "@/lib/utils"
+
+export interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <textarea
+        className={cn(
+          "flex min-h-[80px] w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Textarea.displayName = "Textarea"
+
+export { Textarea }
+
+------------------------------------------------------------
+File: tooltip.tsx | Lines: 31
+Path: ui\tooltip.tsx
+------------------------------------------------------------
+"use client";
+
+import * as React from "react";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+
+import { cn } from "@/lib/utils";
+
+const TooltipProvider = TooltipPrimitive.Provider;
+
+const Tooltip = TooltipPrimitive.Root;
+
+const TooltipTrigger = TooltipPrimitive.Trigger;
+
+const TooltipContent = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
+>(({ className, sideOffset = 4, ...props }, ref) => (
+  <TooltipPrimitive.Content
+    ref={ref}
+    sideOffset={sideOffset}
+    className={cn(
+      "z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+      className
+    )}
+    style={{ backgroundColor: "#1e293b", color: "#f8fafc", fontSize: "0.75rem", border: "none" }}
+    {...props}
+  />
+));
+TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };
+
+------------------------------------------------------------
+File: truncated-text.tsx | Lines: 41
+Path: ui\truncated-text.tsx
+------------------------------------------------------------
+"use client";
+
+import React from "react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+interface TruncatedTextProps {
+    text: string;
+    maxLength?: number;
+    className?: string;
+}
+
+export function TruncatedText({ text, maxLength = 20, className = "" }: TruncatedTextProps) {
+    if (!text) return null;
+    
+    const isTruncated = text.length > maxLength;
+    const displayText = isTruncated ? `${text.substring(0, maxLength)}...` : text;
+
+    if (!isTruncated) {
+        return <span className={className}>{text}</span>;
+    }
+
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <span className={`cursor-help underline decoration-dotted decoration-gray-300 ${className}`}>
+                        {displayText}
+                    </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p className="max-w-xs break-words">{text}</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    );
+}
+

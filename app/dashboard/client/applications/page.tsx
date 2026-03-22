@@ -16,6 +16,8 @@ export default async function MyApplicationsPage() {
 
     if (!session) return null;
 
+    const isPending = (session.user as any).status === "PENDING";
+
     const applications = await prisma.application.findMany({
         where: { clientId: session.user.id },
         include: {
@@ -33,13 +35,20 @@ export default async function MyApplicationsPage() {
                     <h1 className="text-4xl font-extrabold tracking-tight text-gray-900" style={{ color: "#1E3A8A" }}>My Applications</h1>
                     <p className="text-gray-500 mt-2 text-lg">Track your applications and procedures across different countries.</p>
                 </div>
-                <Link
-                    href="/applications/new"
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-xl shadow-lg text-white bg-[#1E3A8A] hover:bg-blue-900 transition-all hover:scale-105 font-bold"
-                >
-                    <Plus className="w-5 h-5 mr-2" />
-                    New Application
-                </Link>
+                {isPending ? (
+                    <div className="inline-flex items-center justify-center px-6 py-3 rounded-xl shadow-sm text-gray-500 bg-gray-100 cursor-not-allowed font-bold" title="Awaiting admin validation">
+                        <Plus className="w-5 h-5 mr-2" />
+                        New Application
+                    </div>
+                ) : (
+                    <Link
+                        href="/applications/new"
+                        className="inline-flex items-center justify-center px-6 py-3 rounded-xl shadow-lg text-white bg-[#1E3A8A] hover:bg-blue-900 transition-all hover:scale-105 font-bold"
+                    >
+                        <Plus className="w-5 h-5 mr-2" />
+                        New Application
+                    </Link>
+                )}
             </div>
 
             {applications.length === 0 ? (
@@ -47,9 +56,13 @@ export default async function MyApplicationsPage() {
                     <Globe className="h-16 w-16 text-gray-200 mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-gray-900">No applications found</h3>
                     <p className="text-gray-500 mt-2 max-w-xs mx-auto">Start your journey by creating your first application for a destination country.</p>
-                    <Link href="/applications/new">
-                        <Button className="mt-6 bg-[#1E3A8A] rounded-lg px-8">Get Started</Button>
-                    </Link>
+                    {isPending ? (
+                        <Button disabled className="mt-6 bg-gray-300 rounded-lg px-8">Awaiting Validation</Button>
+                    ) : (
+                        <Link href="/applications/new">
+                            <Button className="mt-6 bg-[#1E3A8A] rounded-lg px-8">Get Started</Button>
+                        </Link>
+                    )}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-8">

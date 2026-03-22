@@ -30,9 +30,10 @@ import { UploadButton } from "@/src/utils/uploadthing";
 const UploadDropzone = generateUploadDropzone<OurFileRouter>();
 interface ProcedureDetailsProps {
     procedure: any;
+    isPending?: boolean;
 }
 
-export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
+export default function ProcedureDetails({ procedure, isPending }: ProcedureDetailsProps) {
     const [isExpanded, setIsExpanded] = useState(true);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -49,6 +50,11 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
 
     const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if (isPending) {
+            alert("Your account is awaiting admin validation.");
+            return;
+        }
 
         if (!uploadedFile) {
             alert("Please upload a file first.");
@@ -84,6 +90,11 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
 
 
     const handleDeleteDoc = async (docId: string) => {
+        if (isPending) {
+            alert("Your account is awaiting admin validation.");
+            return;
+        }
+
         if (!confirm("Delete this document?")) return;
         setLoading(true);
         const res = await deleteDocumentAction(docId);
@@ -184,7 +195,7 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
                                                 >
                                                     VIEW
                                                 </button>
-                                                {!procedure.isLocked && (
+                                                {!procedure.isLocked && !isPending && (
                                                     <button onClick={() => handleDeleteDoc(doc.id)} className="text-red-400 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 transition-all border border-transparent hover:border-red-100">
                                                         <Trash className="h-4 w-4" />
                                                     </button>
@@ -202,7 +213,7 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
                                     )}
                                 </div>
 
-                                {!procedure.isLocked && (
+                                {!procedure.isLocked && !isPending && (
                                     <form onSubmit={handleUpload} className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-2xl space-y-6 relative overflow-hidden group/form">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 transition-transform duration-700 group-hover/form:scale-150 opacity-20" />
 
@@ -337,7 +348,7 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
                                 </div>
 
                                 {/* Procedure Submission Button */}
-                                {!procedure.isLocked ? (
+                                {!procedure.isLocked && !isPending ? (
                                     <div className="p-8 bg-gradient-to-br from-blue-900 to-[#1e3a8a] rounded-3xl shadow-2xl relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 p-4 opacity-10">
                                             <AlertCircle className="h-12 w-12 transition-transform duration-700 group-hover:scale-125" />
@@ -353,6 +364,14 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
                                                 {loading ? <Loader2 className="animate-spin h-5 w-5" /> : "YES, SUBMIT PROCEDURE"}
                                             </Button>
                                         </div>
+                                    </div>
+                                ) : isPending ? (
+                                    <div className="p-8 bg-amber-50 border border-amber-100 rounded-3xl flex flex-col items-center text-center">
+                                        <div className="bg-amber-100 p-3 rounded-2xl text-amber-600 mb-4 shadow-sm">
+                                            <AlertCircle className="h-7 w-7" />
+                                        </div>
+                                        <h4 className="text-amber-900 font-black text-lg mb-1 uppercase tracking-tight">Account Awaiting Validation</h4>
+                                        <p className="text-amber-700/70 text-xs font-semibold max-w-xs">You cannot add documents or submit procedures until your account has been validated by an administrator.</p>
                                     </div>
                                 ) : (
                                     <div className="p-8 bg-red-50 border border-red-100 rounded-3xl flex flex-col items-center text-center">

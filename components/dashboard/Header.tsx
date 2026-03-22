@@ -15,8 +15,11 @@ export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) 
     const router = useRouter();
 
     const handleLogout = async () => {
-        await signOut();
-        router.push("/sign-in");
+        await signOut({
+            fetchOptions: {
+                onSuccess: () => router.push("/admin/login")
+            }
+        });
     };
 
     return (

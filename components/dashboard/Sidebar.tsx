@@ -36,8 +36,13 @@ export function Sidebar({ items, userRole, userName }: SidebarProps) {
     const router = useRouter();
 
     const handleLogout = async () => {
-        await signOut();
-        router.push("/sign-in");
+        await signOut({
+            fetchOptions: {
+                onSuccess: () => {
+                    router.push(userRole.toUpperCase() === "CLIENT" ? "/sign-in" : "/admin/login");
+                }
+            }
+        });
     };
 
     return (
