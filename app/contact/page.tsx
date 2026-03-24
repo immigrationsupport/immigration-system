@@ -87,7 +87,7 @@ export default function ContactPage() {
                                         </div>
                                     )}
                                     <div>
-                                        <label htmlFor="fullName" className="block text-sm font-semibold text-gray-800 mb-2">Legal Full Name{" *"}</label>
+                                        <label htmlFor="fullName" className="block text-sm font-semibold text-gray-800 mb-2">Legal Full Name</label>
                                         <input
                                             type="text"
                                             id="fullName"
@@ -101,7 +101,7 @@ export default function ContactPage() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-2">Email Address{" *"}</label>
+                                            <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-2">Email Address</label>
                                             <input
                                                 type="email"
                                                 id="email"
@@ -126,7 +126,7 @@ export default function ContactPage() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label htmlFor="message" className="block text-sm font-semibold text-gray-800 mb-2">Inquiry Details{" *"}</label>
+                                        <label htmlFor="message" className="block text-sm font-semibold text-gray-800 mb-2">Inquiry Details</label>
                                         <textarea
                                             id="message"
                                             value={form.message}
