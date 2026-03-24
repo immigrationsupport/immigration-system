@@ -136,7 +136,7 @@ export default function ContactPage() {
                                             minLength={50}
                                             maxLength={1000}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] text-gray-900 resize-none outline-none"
-                                            placeholder="Provide details regarding your needs... (Max 1000 characters)"
+                                            placeholder="Provide details regarding your needs... "
                                         />
                                     </div>
                                     <button
