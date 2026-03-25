@@ -8,7 +8,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
 
-      <main className="flex-grow bg-blue-900">
+      <main className="flex-grow bg-white">
         {/* Hero Section */}
         <section className="bg-slate-50 border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
