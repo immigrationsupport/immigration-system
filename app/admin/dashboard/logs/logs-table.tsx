@@ -84,21 +84,21 @@ export default function LogsTable({
     const getActionStyles = (action: string) => {
         const a = action.toUpperCase();
         if (a.includes("DELETE") || a.includes("REMOVE") || a.includes("FAIL") || a.includes("REJECT") || a.includes("SUSPEND")) {
-            return { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", icon: <ShieldAlert size={14} /> };
+            return { bg: "bg-gray-50", text: "text-red-700", icon: <ShieldAlert size={14} /> };
         }
         if (a.includes("SEND_MESSAGE") || a.includes("NOTIFICATION")) {
-            return { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200", icon: <Activity size={14} /> };
+            return { bg: "bg-gray-50", text: "text-blue-700", icon: <Activity size={14} /> };
         }
         if (a.includes("UPDATE") || a.includes("MODIFY") || a.includes("ASSIGN")) {
-            return { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", icon: <RefreshCw size={14} /> };
+            return { bg: "bg-gray-50", text: "text-amber-700", icon: <RefreshCw size={14} /> };
         }
         if (a.includes("CREATE") || a.includes("ADD") || a.includes("UPLOAD") || a.includes("VERIFY")) {
-            return { bg: "bg-green-50", text: "text-green-700", border: "border-green-200", icon: <Activity size={14} /> };
+            return { bg: "bg-gray-50", text: "text-green-700", icon: <Activity size={14} /> };
         }
         if (a.includes("LOGIN") || a.includes("AUTH")) {
-            return { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200", icon: <UserCircle size={14} /> };
+            return { bg: "bg-gray-50", text: "text-purple-700", icon: <UserCircle size={14} /> };
         }
-        return { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200", icon: <FileText size={14} /> };
+        return { bg: "bg-gray-50", text: "text-blue-700", icon: <FileText size={14} /> };
     };
 
     return (
@@ -161,7 +161,7 @@ export default function LogsTable({
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 align-top">
-                                        <div className={`flex items-center gap-2 w-fit px-2.5 py-1 rounded-full border ${styles.bg} ${styles.border} ${styles.text}`}>
+                                        <div className={`flex items-center gap-2 w-fit px-2.5  ${styles.bg} ${styles.text}`}>
                                             {styles.icon}
                                             <span className="text-[10px] font-black uppercase tracking-widest leading-none">{log.action.replace(/_/g, " ")}</span>
                                         </div>
@@ -170,7 +170,7 @@ export default function LogsTable({
                                         <div className="space-y-1">
                                             <div className="flex items-start justify-between gap-2">
                                                 <p className="text-sm font-medium text-gray-700 leading-snug">
-                                                    <TruncatedText text={log.details} maxLength={80} />
+                                                    <TruncatedText text={log.details} maxLength={50} />
                                                 </p>
                                                 <button 
                                                     onClick={() => toggleExpand(log.id)}
@@ -188,7 +188,7 @@ export default function LogsTable({
                                         </div>
                                         {anomalyDetected && (
                                             <div className="flex items-center gap-1 mt-1.5 text-[10px] text-red-500 font-bold uppercase tracking-wider">
-                                                <AlertTriangle size={12} /> Detected Anomaly
+                                                
                                             </div>
                                         )}
                                     </td>
@@ -198,9 +198,9 @@ export default function LogsTable({
                                                 <div className="h-8 w-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 text-[10px] font-black">
                                                     {log.author.name[0]?.toUpperCase()}
                                                 </div>
-                                                <div>
+                                                <div className="flex items-center gap-2">
                                                     <p className="text-sm font-bold text-gray-900 leading-tight">
-                                                        <TruncatedText text={log.author.name} maxLength={20} />
+                                                        <TruncatedText text={log.author.name} maxLength={10} />
                                                     </p>
                                                     <div className="flex items-center gap-2 mt-0.5">
                                                         <span className={`flex items-center text-[8px] uppercase font-black px-1.5 py-0.5 rounded leading-none ${log.author.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' :
@@ -209,7 +209,6 @@ export default function LogsTable({
                                                             }`}>
                                                             {log.author.role}
                                                         </span>
-                                                        <span className="text-[10px] text-gray-400 truncate max-w-[120px]">{log.author.email || "unknown"}</span>
                                                     </div>
                                                 </div>
                                             </div>

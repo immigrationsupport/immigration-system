@@ -5,29 +5,26 @@ import { Pool } from "pg";
 
 // Explicit initialization for Prisma 7 with pg adapter
 const globalForPrisma = global as unknown as {
-  prisma_final_v7: PrismaClient | undefined;
+    prisma_final_v7: PrismaClient | undefined;
 };
 
 const createPrisma = () => {
     console.log("[PRISMA] Initializing with @prisma/adapter-pg...");
-    
+
     const dbUrl = (process.env.DATABASE_URL || "").replace(/['"]+/g, '');
     if (!dbUrl) {
         console.error("[PRISMA] CRITICAL ERROR: DATABASE_URL is missing!");
     }
 
-    const pool = new Pool({ 
+    const pool = new Pool({
         connectionString: dbUrl,
-        ssl: {
-            rejectUnauthorized: false // Required for Neon
-        }
     });
 
     const adapter = new PrismaPg(pool);
 
-    return new PrismaClient({ 
+    return new PrismaClient({
         adapter,
-        log: ["error", "warn"] 
+        log: ["error", "warn"]
     });
 };
 

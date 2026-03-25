@@ -6,7 +6,6 @@ import { LogOut, LayoutDashboard, Users, UserCog, FileText, Settings as Settings
 import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
-// Map strings to their respective Lucide icons
 const iconMap: Record<string, any> = {
     LayoutDashboard,
     Users,
@@ -39,7 +38,7 @@ export function Sidebar({ items, userRole, userName }: SidebarProps) {
         await signOut({
             fetchOptions: {
                 onSuccess: () => {
-                    router.push(userRole.toUpperCase() === "CLIENT" ? "/sign-in" : "/admin/login");
+                    router.push("/sign-in");
                 }
             }
         });
@@ -65,7 +64,7 @@ export function Sidebar({ items, userRole, userName }: SidebarProps) {
 
             <nav className="flex-1 overflow-y-auto p-4 space-y-1">
                 {items.map((item) => {
-                    const isActive = pathname === item.href;
+                    const isActive = pathname === item.href || pathname.endsWith(item.href);
                     const IconComponent = iconMap[item.icon] || LayoutDashboard;
                     return (
                         <Link

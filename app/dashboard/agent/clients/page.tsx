@@ -46,7 +46,7 @@ export default async function AssignedClientsPage() {
                 <CardHeader className="bg-white border-b border-gray-50 py-6">
                     <CardTitle className="text-lg font-bold flex items-center gap-2 text-gray-800">
                         <Users className="h-5 w-5 text-blue-600" />
-                        Client Roster
+                        My Clients
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -55,7 +55,7 @@ export default async function AssignedClientsPage() {
                             <thead className="bg-gray-50/50 text-gray-400 uppercase text-[10px] font-black tracking-widest">
                                 <tr>
                                     <th className="px-6 py-4">Client Detail</th>
-                                    <th className="px-6 py-4">Application ID</th>
+                                    <th className="px-6 py-4">Latest Application</th>
                                     <th className="px-6 py-4">Status</th>
                                     <th className="px-6 py-4">Documents</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
@@ -114,7 +114,7 @@ export default async function AssignedClientsPage() {
                                         <td colSpan={5} className="px-6 py-20 text-center">
                                             <UserX className="h-12 w-12 text-gray-200 mx-auto mb-3" />
                                             <h3 className="text-gray-900 font-bold">No clients assigned yet</h3>
-                                            <p className="text-gray-500 text-sm max-w-xs mx-auto mt-1">When an administrator assigns clients to you, they will appear here in your roster.</p>
+                                            <p className="text-gray-500 text-sm max-w-xs mx-auto mt-1">When an administrator assigns clients to you, they will appear here.</p>
                                         </td>
                                     </tr>
                                 )}

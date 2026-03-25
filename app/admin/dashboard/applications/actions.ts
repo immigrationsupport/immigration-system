@@ -17,7 +17,7 @@ export async function deleteApplicationAction(applicationId: string) {
     try {
         const application = await prisma.application.findUnique({
             where: { id: applicationId },
-            select: { id: true }
+            include: { client: true }
         });
 
         if (!application) return { error: "Application not found." };
@@ -53,7 +53,7 @@ export async function deleteApplicationAction(applicationId: string) {
             await tx.auditLog.create({
                 data: {
                     action: "DELETE_APPLICATION",
-                    details: `Application ${applicationId} permanently deleted by Admin.`,
+                    details: `Application for ${application.client.name} (${application.country}) permanently deleted by Admin.`,
                     userId: session.user.id
                 }
             });
@@ -85,7 +85,8 @@ export async function updateApplicationAction(
 
     try {
         const oldApp = await prisma.application.findUnique({
-            where: { id: applicationId }
+            where: { id: applicationId },
+            include: { client: true }
         });
 
         if (!oldApp) return { error: "Application not found." };
@@ -103,7 +104,7 @@ export async function updateApplicationAction(
         await prisma.auditLog.create({
             data: {
                 action: "UPDATE_APPLICATION",
-                details: `Application ${applicationId} updated by Admin. Changes: ${JSON.stringify(data)}`,
+                details: `Application for ${oldApp.client.name} updated by Admin. Changes: ${JSON.stringify(data)}`,
                 userId: session.user.id
             }
         });
@@ -115,3 +116,4 @@ export async function updateApplicationAction(
         return { error: e.message || "Failed to update application." };
     }
 }
+

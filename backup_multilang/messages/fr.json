@@ -44,22 +44,57 @@
   "navigation": {
     "navbar": {
       "home": "Accueil",
-      "about": "À propos",
+      "about": "À Propos",
       "services": "Services",
-      "contact": "Nous contacter",
-      "dashboard": "Tableau de bord",
+      "contact": "Contact",
+      "dashboard": "Tableau de Bord",
       "profile": "Profil",
       "logout": "Déconnexion",
       "language": "Langue",
-      "english": "English",
-      "french": "Français"
+      "english": "Anglais",
+      "french": "Français",
+      "login": "Connexion"
+    },
+    "dashboard": {
+      "logout": "Déconnexion",
+      "client": {
+        "atleClient": "ATLE Client",
+        "overview": "Tableau de Bord",
+        "applications": "Demandes",
+        "messages": "Messages Officiels",
+        "profile": "Profil"
+      },
+      "agent": {
+        "atleAgent": "ATLE Agent",
+        "overview": "Aperçu",
+        "applications": "Toutes les Demandes",
+        "profile": "Profil",
+        "clients": "Clients"
+      },
+      "admin": {
+        "atleAdmin": "ATLE Admin",
+        "overview": "Tableau de Bord",
+        "clients": "Clients",
+        "agents": "Agents",
+        "applications": "Demandes",
+        "documentsMonitoring": "Suivi des Documents",
+        "auditLogs": "Journaux d'Audit"
+      }
+    },
+    "footer": {
+      "description": "Cabinet de conseil professionnel en immigration offrant un traitement des visas et des résidences sécurisé, transparent et précis à l'échelle mondiale.",
+      "offices": "Nos Bureaux",
+      "privacy": "Politique de Confidentialité",
+      "terms": "Conditions d'Utilisation",
+      "copyright": "ATLE Immigration Consultancy.",
+      "address": "DOUALA, CAMEROUN\nBonamoussadi, carrefour maison blanche"
     }
   },
   "home": {
     "hero": {
       "title": "Votre partenaire d'immigration de confiance",
       "subtitle": "Orientation experte et traitement sécurisé des documents pour les particuliers et les entreprises navigant dans le processus d'immigration mondiale.",
-      "ctaButton": "Commencez votre parcours",
+      "ctaButton": "Commencer",
       "ctaSecondary": "Se connecter"
     },
     "services": {
@@ -183,19 +218,33 @@
       "button": "Se connecter",
       "forgotPassword": "Mot de passe oublié ?",
       "noAccount": "Vous n'avez pas de compte ?",
-      "signUp": "S'inscrire ici"
+      "signUp": "S'inscrire ici",
+      "suspendedError": "Votre compte a été suspendu. Veuillez contacter l'agence.",
+      "allFieldsRequired": "Tous les champs sont obligatoires.",
+      "invalidCredentials": "E-mail ou mot de passe invalide.",
+      "googleLoginFailed": "La connexion Google a échoué. Veuillez réessayer."
     },
     "signUp": {
       "title": "S'inscrire",
       "subtitle": "Créez votre compte pour commencer.",
       "fullName": "Nom complet",
+      "fullNamePlaceholder": "Entrez votre nom complet",
       "email": "Adresse e-mail",
+      "emailPlaceholder": "Entrez votre e-mail",
       "password": "Mot de passe",
+      "passwordPlaceholder": "Entrez votre mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
       "button": "Créer un compte",
-      "agreeTerms": "J'accepte les conditions et conditions d'utilisation",
-      "haveAccount": "Vous avez déjà un compte ?",
-      "signIn": "Se connecter ici"
+      "googleSignUp": "S'inscrire avec Google",
+      "alreadyHaveAccount": "Vous avez déjà un compte ?",
+      "login": "Se connecter ici",
+      "allFieldsRequired": "Tous les champs sont obligatoires.",
+      "invalidEmail": "Veuillez entrer une adresse e-mail valide.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères.",
+      "error": "Échec de la création du compte.",
+      "unexpectedError": "Une erreur inattendue s'est produite. Veuillez réessayer."
     },
     "adminLogin": {
       "title": "Connexion administrateur",
@@ -204,7 +253,9 @@
       "emailPlaceholder": "staff@example.com",
       "password": "Mot de passe",
       "button": "Connexion",
-      "invalidCredentials": "E-mail ou mot de passe invalide"
+      "invalidCredentials": "E-mail ou mot de passe invalide",
+      "loading": "Connexion en cours...",
+      "authorizedAccessOnly": "Accès réservé au personnel autorisé."
     }
   },
   "dashboard": {
@@ -225,7 +276,12 @@
       "pathway": "Voie / Pays",
       "type": "Type",
       "lastUpdate": "Dernière mise à jour",
-      "action": "Action"
+      "status": "Statut",
+      "action": "Action",
+      "pendingApprovalTitle": "Votre compte est en attente de validation par l'administrateur.",
+      "pendingApprovalDesc": "Vous avez un accès limité jusqu'à ce que votre compte soit approuvé. Vous ne pouvez pas créer de demandes ni télécharger des documents.",
+      "viewApplication": "Voir la demande",
+      "noApplications": "Aucune demande trouvée. Commencez par choisir une voie."
     },
     "agentDashboard": {
       "title": "Aperçu de l'agent",
@@ -239,15 +295,29 @@
       "viewAllWork": "Voir tout le travail",
       "applicant": "Demandeur",
       "pathways": "Voies",
-      "myProfile": "Mon profil"
+      "lastUpdate": "Dernière mise à jour",
+      "status": "Statut",
+      "action": "Action",
+      "myProfile": "Mon profil",
+      "viewClientDetails": "Voir les détails du client",
+      "noActivity": "Aucune activité récente trouvée."
     },
     "adminDashboard": {
-      "title": "Tableau de bord administrateur",
-      "overview": "Aperçu",
-      "totalAgents": "Total des agents",
-      "totalClients": "Total des clients",
-      "activeApplications": "Demandes actives",
-      "quickActions": "Actions rapides"
+      "title": "Tableau de bord admin",
+      "pipeline": "Pipeline des demandes",
+      "liveActivity": "Flux d'activité en direct",
+      "noActivityPulse": "Aucune activité détectée.",
+      "stats": {
+        "totalClients": "Clients totaux",
+        "totalAgents": "Agents totaux",
+        "liveApplications": "Demandes en direct"
+      },
+      "statuses": {
+        "pendingReview": "En attente d'examen",
+        "inReview": "En cours d'examen",
+        "approved": "Approuvé",
+        "rejected": "Rejeté"
+      }
     }
   },
   "applications": {

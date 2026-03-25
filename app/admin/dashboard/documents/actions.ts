@@ -30,7 +30,7 @@ export async function updateDocumentStatusAction(documentId: string, status: str
         await prisma.auditLog.create({
             data: {
                 action: "UPDATE_DOCUMENT_STATUS",
-                details: `Document ${documentId} status updated to ${status} by Admin.`,
+                details: `Document "${doc.name}" status updated to ${status} by Admin.`,
                 userId: session.user.id
             }
         });

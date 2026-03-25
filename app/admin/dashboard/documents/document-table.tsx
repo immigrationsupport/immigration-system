@@ -90,9 +90,9 @@ export default function DocumentTable({
 
     const getStatusStyles = (status: string) => {
         switch (status) {
-            case "VERIFIED": return { bg: "bg-green-50", text: "text-green-700", border: "border-green-200", icon: <CheckCircle2 size={14} /> };
-            case "REJECTED": return { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", icon: <XCircle size={14} /> };
-            case "UPLOADED": return { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", icon: <Clock size={14} /> };
+            case "VERIFIED": return { bg: "bg-gray-50", text: "text-green-700", border: "border-gray-200", icon: <CheckCircle2 size={14} /> };
+            case "REJECTED": return { bg: "bg-gray-50", text: "text-red-700", border: "border-gray-200", icon: <XCircle size={14} /> };
+            case "UPLOADED": return { bg: "bg-gray-50", text: "text-amber-700", border: "border-gray-200", icon: <Clock size={14} /> };
             default: return { bg: "bg-gray-50", text: "text-gray-700", border: "border-gray-200", icon: <AlertCircle size={14} /> };
         }
     };
@@ -143,14 +143,13 @@ export default function DocumentTable({
                             <tr key={doc.id} className="hover:bg-blue-50/40 transition-all duration-200 group">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="h-9 w-9 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600 font-bold border border-orange-100">
+                                        <div className="h-9 w-9 rounded-lg bg-gray-50 flex items-center justify-center text-gray-600 font-bold border border-gray-100">
                                             <FileText size={16} />
                                         </div>
                                         <div className="max-w-[150px] md:max-w-xs">
                                             <p className="text-sm font-bold text-gray-900 truncate leading-none mb-1">
                                                 <TruncatedText text={doc.name} maxLength={25} />
                                             </p>
-                                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-tighter">{doc.type.replace('_', ' ')}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -159,17 +158,12 @@ export default function DocumentTable({
                                     <p className="text-sm font-bold text-gray-900">
                                         <TruncatedText text={doc.client.name} maxLength={15} />
                                     </p>
-                                    <p className="text-[10px] text-gray-400 mt-0.5">
-                                        <TruncatedText text={doc.client.email} maxLength={20} />
-                                    </p>
+                    
                                 </td>
 
                                 <td className="px-6 py-4">
                                     <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-500 bg-gray-100/50 w-fit px-2 py-0.5 rounded border border-gray-100 uppercase tracking-tighter">
-                                            App: {doc.application.id.substring(0, 8).toUpperCase()}
-                                        </div>
-                                        <div className="flex items-center gap-1.5 text-[10px] font-black text-blue-700 bg-blue-50/50 w-fit px-2 py-0.5 rounded border border-blue-100 uppercase tracking-tighter">
+                                        <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-700 bg-blue-50/50 w-fit px-2  uppercase tracking-tighter">
                                             Proc: {(doc.procedure.type || "GENERAL").replace('_', ' ')}
                                         </div>
                                     </div>

@@ -53,7 +53,7 @@ export default function AgentActionButtons({ agentId, agentName, agentEmail, isS
                 className={`p-2 transition-all rounded-lg ${
                     isSuspended 
                     ? "text-green-600 hover:bg-green-50" 
-                    : "text-gray-400 hover:text-orange-500 hover:bg-orange-50"
+                    : "text-gray-400 text-orange-500"
                 }`} 
                 title={isSuspended ? "Unsuspend Agent" : "Suspend Agent"}
             >
@@ -63,7 +63,7 @@ export default function AgentActionButtons({ agentId, agentName, agentEmail, isS
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <button 
-                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all rounded-lg" 
+                        className="p-2 text-gray-400 text-red-500 transition-all rounded-lg" 
                         title="Delete Agent"
                     >
                         <Trash2 size={16} />

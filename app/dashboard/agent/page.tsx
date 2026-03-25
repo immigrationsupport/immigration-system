@@ -63,28 +63,28 @@ export default async function AgentDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="border-none shadow-lg shadow-blue-50/50 rounded-2xl overflow-hidden">
+                <Card className="border border-gray-100 bg-white shadow-sm rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group ">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-xs font-black text-gray-400 uppercase tracking-widest">Assigned Cases</CardTitle>
-                        <Briefcase className="h-4 w-4 text-blue-500" />
+                        <CardTitle className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Applications</CardTitle>
+                        <Briefcase className="h-4 w-4 text-black-500" />
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{assignedApps}</div>
                     </CardContent>
                 </Card>
-                <Card className="border-none shadow-lg shadow-yellow-50/50 rounded-2xl overflow-hidden">
+                <Card className="border border-gray-100 bg-white shadow-sm  rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
                         <CardTitle className="text-xs font-black text-gray-400 uppercase tracking-widest">In Review</CardTitle>
-                        <Clock className="h-4 w-4 text-yellow-500" />
+                        <Clock className="h-4 w-4 text-black-500" />
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{inReviewApps}</div>
                     </CardContent>
                 </Card>
-                <Card className="border-none shadow-lg shadow-green-50/50 rounded-2xl overflow-hidden">
+                <Card className="border border-gray-100 bg-white shadow-sm rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
                         <CardTitle className="text-xs font-black text-gray-400 uppercase tracking-widest">Completed</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-black-500" />
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{completedApps}</div>
@@ -97,7 +97,7 @@ export default async function AgentDashboard() {
                     <div className="flex justify-between items-center">
                         <CardTitle className="text-lg font-black text-gray-800 uppercase tracking-tight">Recent Activity</CardTitle>
                         <Link href="/dashboard/agent/applications">
-                            <Button variant="ghost" className="text-xs font-bold text-blue-600 hover:bg-blue-50">View All Work</Button>
+                            <Button variant="ghost" className="text-xs font-bold text-blue-600 hover:bg-blue-50">View All</Button>
                         </Link>
                     </div>
                 </CardHeader>
@@ -107,7 +107,7 @@ export default async function AgentDashboard() {
                             <thead className="bg-gray-50/50 text-gray-400 uppercase text-[10px] font-black tracking-widest">
                                 <tr>
                                     <th className="px-6 py-4">Applicant</th>
-                                    <th className="px-6 py-4">Pathways</th>
+                                    <th className="px-6 py-4">Visa Type</th>
                                     <th className="px-6 py-4">Last Update</th>
                                     <th className="px-6 py-4">Status</th>
                                     <th className="px-6 py-4 text-right">Action</th>
@@ -134,9 +134,9 @@ export default async function AgentDashboard() {
                                         </td>
                                         <td className="px-6 py-5">
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${app.status === "APPROVED" ? "bg-green-100 text-green-700" :
-                                                    app.status === "REJECTED" ? "bg-red-100 text-red-700" :
-                                                        app.status === "IN_REVIEW" ? "bg-yellow-100 text-yellow-700" :
-                                                            "bg-blue-100 text-blue-700"
+                                                    app.status === "REJECTED" ? "bg-gra-100 text-red-700" :
+                                                        app.status === "IN_REVIEW" ? "bg-gray-100 text-yellow-700" :
+                                                            "bg-gray-100 text-blue-700"
                                                 }`}>
                                                 {app.status.replace("_", " ")}
                                             </span>

@@ -51,11 +51,22 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
         }
     };
 
-    const handleToggleSuspend = async (clientId: string, isSuspended: boolean) => {
-        const res = await toggleSuspendClientAction(clientId, isSuspended);
-        if (res.error) alert(res.error);
-        else window.location.reload();
-    };
+    const handleToggleSuspend = async (clientId: string, isCurrentlySuspended: boolean) => {
+    const action = isCurrentlySuspended ? "unsuspend" : "suspend";
+
+
+    const confirmed = window.confirm(`Are you sure you want to ${action} this client?`);
+
+    if (confirmed) {
+        const res = await toggleSuspendClientAction(clientId, isCurrentlySuspended);
+        
+        if (res.error) {
+            alert(res.error);
+        } else {
+            window.location.reload();
+        }
+    }
+};
 
     const handleValidate = async (clientId: string) => {
         if (!confirm("Are you sure you want to validate this client? This grants them full access.")) return;
@@ -139,8 +150,8 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                     <div className="flex flex-col gap-1">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter w-max ${
                                             client.status === "PENDING"
-                                            ? "bg-amber-50 text-amber-600 border border-amber-100"
-                                            : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                            ? "bg-gray-50 text-amber-600 border border-gray-100"
+                                            : "bg-gray-50 text-emerald-600 border border-gray-100"
                                         }`}>
                                             {client.status === "PENDING" ? "Pending" : "Validated"}
                                         </span>
@@ -154,7 +165,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <div className="flex items-center justify-end gap-1  transition-all duration-300">
                                         {client.status === "PENDING" && (
                                             <button
                                                 className="p-1.5 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg shadow-sm transition-all bg-white"
@@ -165,7 +176,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                             </button>
                                         )}
                                         <button
-                                            className="p-1.5 text-gray-400 hover:text-[#1E3A8A] hover:bg-white rounded-lg shadow-sm transition-all disabled:opacity-50"
+                                            className="p-1.5 text-gray-400 hover:text-[#1E3A8A] hover:bg-white rounded-lg  transition-all disabled:opacity-50"
                                             title={client.isSuspended ? "Cannot assign agent to suspended client" : "Assign/Reassign Agent"}
                                             disabled={client.isSuspended}
                                             onClick={() => setIsAssigning(client.id)}
@@ -174,7 +185,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                         </button>
 
                                         <button
-                                            className={`p-1.5 rounded-lg shadow-sm transition-all bg-white ${client.isSuspended ? "text-emerald-500 hover:bg-emerald-50" : "text-orange-400 hover:bg-orange-50"}`}
+                                            className={`p-1.5 rounded-lg  transition-all bg-white ${client.isSuspended ? "text-emerald-500 hover:bg-emerald-50" : "text-orange-400 hover:bg-orange-50"}`}
                                             title={client.isSuspended ? "Unsuspend Client" : "Suspend Client"}
                                             onClick={() => handleToggleSuspend(client.id, client.isSuspended)}
                                         >

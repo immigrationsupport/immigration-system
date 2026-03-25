@@ -19,6 +19,11 @@ export async function sendOfficialMessageAction(clientId: string, subject: strin
     }
 
     try {
+        const client = await prisma.user.findUnique({
+            where: { id: clientId },
+            select: { name: true }
+        });
+
         await prisma.$transaction(async (tx) => {
             // 1. Create OfficialMessage
             await tx.officialMessage.create({
@@ -34,7 +39,7 @@ export async function sendOfficialMessageAction(clientId: string, subject: strin
             await tx.auditLog.create({
                 data: {
                     action: "SEND_MESSAGE",
-                    details: `Official message sent to client (${clientId}): ${subject}`,
+                    details: `Official message sent to ${client?.name || "client"}: "${subject}"`,
                     userId: session.user.id,
                     targetId: clientId,
                 }

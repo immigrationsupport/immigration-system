@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -7,40 +7,37 @@ datasource db {
 }
 
 model User {
-  id               String   @id @default(uuid())
+  id               String            @id @default(uuid())
   name             String
-  email            String   @unique
-  emailVerified    Boolean  @default(false)
+  email            String            @unique
+  emailVerified    Boolean           @default(false)
   image            String?
-  password         String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  role             Role       @default(CLIENT)
-  profileCompleted Boolean    @default(false)
-  isSuspended      Boolean    @default(false)
-  status           UserStatus @default(PENDING)
-
-  // Personal Information
-  dateOfBirth      DateTime?
-  nationality      String?
-  maritalStatus    MaritalStatus?
-  numberOfChildren Int            @default(0)
-  phoneNumber      String?
-  address          String?
-
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   agentId          String?
+  password         String?
+  isSuspended      Boolean           @default(false)
+  address          String?
+  dateOfBirth      DateTime?
+  maritalStatus    MaritalStatus?
+  nationality      String?
+  numberOfChildren Int               @default(0)
+  phoneNumber      String?
+  profileCompleted Boolean           @default(false)
+  role             Role              @default(CLIENT)
+  status           UserStatus        @default(PENDING)
+  assignedApps     Application[]     @relation("AgentApplications")
   applications     Application[]     @relation("ClientApplications")
+  authoredLogs     AuditLog[]        @relation("AuthorLogs")
   documents        Document[]
   messages         Message[]
+  receivedMessages OfficialMessage[] @relation("ReceivedMessages")
+  sentMessages     OfficialMessage[] @relation("SentMessages")
   accounts         Account[]
   sessions         Session[]
-  sentMessages     OfficialMessage[] @relation("SentMessages")
-  receivedMessages OfficialMessage[] @relation("ReceivedMessages")
-  authoredLogs     AuditLog[]        @relation("AuthorLogs")
   agent            User?             @relation("AgentClients", fields: [agentId], references: [id])
   assignedClients  User[]            @relation("AgentClients")
-  assignedApps     Application[]     @relation("AgentApplications")
-  
+
   @@map("user")
 }
 
@@ -99,20 +96,20 @@ model Application {
   updatedAt  DateTime          @updatedAt
   clientId   String
   agentId    String?
-  client     User              @relation("ClientApplications", fields: [clientId], references: [id])
   agent      User?             @relation("AgentApplications", fields: [agentId], references: [id])
+  client     User              @relation("ClientApplications", fields: [clientId], references: [id])
   procedures Procedure[]
 }
 
 model Procedure {
   id            String          @id @default(uuid())
-  type          ProcedureType
   description   String?
   status        ProcedureStatus @default(PENDING)
-  isLocked      Boolean         @default(false)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   applicationId String
+  isLocked      Boolean         @default(false)
+  type          ProcedureType
   documents     Document[]
   messages      Message[]
   application   Application     @relation(fields: [applicationId], references: [id])
@@ -135,22 +132,32 @@ model OfficialMessage {
   senderId   String
   receiverId String
   createdAt  DateTime @default(now())
-
-  sender   User @relation("SentMessages", fields: [senderId], references: [id])
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
 }
 
 model Document {
   id          String         @id @default(uuid())
   name        String
   fileUrl     String
-  type        DocumentType   @default(OTHER)
   status      DocumentStatus @default(UPLOADED)
   uploadedAt  DateTime       @default(now())
   procedureId String
   uploaderId  String
+  type        DocumentType   @default(OTHER)
   procedure   Procedure      @relation(fields: [procedureId], references: [id])
   uploader    User           @relation(fields: [uploaderId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  details   String?
+  userId    String?
+  createdAt DateTime @default(now())
+  logNumber Int      @unique @default(autoincrement())
+  targetId  String?
+  author    User?    @relation("AuthorLogs", fields: [userId], references: [id])
 }
 
 enum Role {
@@ -216,15 +223,4 @@ enum ProcedureStatus {
   APPROVED
   REJECTED
   ACTION_REQUIRED
-}
-
-model AuditLog {
-  id        String   @id @default(uuid())
-  logNumber Int      @unique @default(autoincrement())
-  action    String
-  details   String?
-  userId    String?
-  targetId  String?
-  author    User?    @relation("AuthorLogs", fields: [userId], references: [id])
-  createdAt DateTime @default(now())
 }

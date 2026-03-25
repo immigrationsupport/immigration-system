@@ -30,19 +30,19 @@ export default async function AgentProfilePage() {
                 <div className="text-center md:text-left space-y-2">
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">{agent.name}</h1>
                     <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                        <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-blue-100 text-[#1E3A8A] shadow-sm">
+                        <span className="inline-flex items-center px-4 py-1.5 text-sm font-bold bg-white-100 text-[#1E3A8A] ">
                             <Shield className="w-4 h-4 mr-2" /> Authorized Agent
                         </span>
-                        <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-green-100 text-green-700 shadow-sm">
+                        <span className="inline-flex items-center px-4 py-1.5  text-sm font-bold bg-white-100 text-green-700 ">
                             <CheckCircle2 className="w-4 h-4 mr-2" /> Active Status
                         </span>
                     </div>
-                    <p className="text-gray-500 font-medium max-w-md">Dedicated immigration specialist assisting clients with their journey to new opportunities.</p>
+                
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="border-none shadow-lg rounded-2xl overflow-hidden">
+                <Card className="border-none overflow-hidden">
                     <CardHeader className="bg-gray-50/50 border-b border-gray-100 py-6">
                         <CardTitle className="text-xl font-bold flex items-center gap-2">
                             <User className="w-5 h-5 text-[#1E3A8A]" /> Personal Information
@@ -50,7 +50,7 @@ export default async function AgentProfilePage() {
                     </CardHeader>
                     <CardContent className="p-8 space-y-6">
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-blue-50 rounded-xl text-blue-700">
+                            <div className="p-3 bg-blue-50 rounded-xl text-gray-700">
                                 <Mail className="w-5 h-5" />
                             </div>
                             <div>
@@ -60,7 +60,7 @@ export default async function AgentProfilePage() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-blue-50 rounded-xl text-blue-700">
+                            <div className="p-3 bg-blue-50 rounded-xl text-gray-700">
                                 <Phone className="w-5 h-5" />
                             </div>
                             <div>
@@ -70,7 +70,7 @@ export default async function AgentProfilePage() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-blue-50 rounded-xl text-blue-700">
+                            <div className="p-3 bg-blue-50 rounded-xl text-gray-700">
                                 <MapPin className="w-5 h-5" />
                             </div>
                             <div>
@@ -81,15 +81,15 @@ export default async function AgentProfilePage() {
                     </CardContent>
                 </Card>
 
-                <Card className="border-none shadow-lg rounded-2xl overflow-hidden">
+                <Card className="border-none   overflow-hidden">
                     <CardHeader className="bg-gray-50/50 border-b border-gray-100 py-6">
                         <CardTitle className="text-xl font-bold flex items-center gap-2">
                             <Award className="w-5 h-5 text-[#1E3A8A]" /> Professional Details
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8 space-y-6">
+                    <CardContent className="p-8 space-y-6 border-gray-100">
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-blue-50 rounded-xl text-blue-700">
+                            <div className="p-3 bg-blue-50 rounded-xl text-gray-700">
                                 <Calendar className="w-5 h-5" />
                             </div>
                             <div>
@@ -99,7 +99,7 @@ export default async function AgentProfilePage() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-blue-50 rounded-xl text-blue-700">
+                            <div className="p-3 bg-blue-50 rounded-xl text-gray-700">
                                 <CreditCard className="w-5 h-5" />
                             </div>
                             <div>
@@ -110,7 +110,7 @@ export default async function AgentProfilePage() {
 
                         <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
                             <p className="text-sm font-bold text-[#1E3A8A]">Profile Note</p>
-                            <p className="text-sm text-blue-600/80 mt-1 italic">As an agent, you have permission to manage applications and update client records. Please ensure all data handling remains confidential.</p>
+                            <p className="text-sm text-black-600/80 mt-1 italic">As an agent, you have permission to manage applications and update client records. Please ensure all data handling remains confidential.</p>
                         </div>
                     </CardContent>
                 </Card>

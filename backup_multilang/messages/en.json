@@ -52,15 +52,50 @@
       "logout": "Logout",
       "language": "Language",
       "english": "English",
-      "french": "Français"
+      "french": "Français",
+      "login": "Login"
+    },
+    "dashboard": {
+      "logout": "Logout",
+      "client": {
+        "atleClient": "ATLE Client",
+        "overview": "Dashboard",
+        "applications": "Applications",
+        "messages": "Official Messages",
+        "profile": "Profile"
+      },
+      "agent": {
+        "atleAgent": "ATLE Agent",
+        "overview": "Overview",
+        "applications": "All Applications",
+        "profile": "Profile",
+        "clients": "Clients"
+      },
+      "admin": {
+        "atleAdmin": "ATLE Admin",
+        "overview": "Dashboard",
+        "clients": "Clients",
+        "agents": "Agents",
+        "applications": "Applications",
+        "documentsMonitoring": "Documents Monitoring",
+        "auditLogs": "Audit Logs"
+      }
+    },
+    "footer": {
+      "description": "Professional immigration consultancy delivering secure, transparent, and accurate visa and residency processing globally.",
+      "offices": "Our Offices",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "copyright": "ATLE Immigration Consultancy.",
+      "address": "DOUALA, CAMEROON\nBonamoussadi, carrefour maison blanche"
     }
   },
   "home": {
     "hero": {
       "title": "Your Trusted Immigration Partner",
       "subtitle": "Expert guidance and secure document processing for individuals and businesses navigating the global immigration process.",
-      "ctaButton": "Start Your Journey",
-      "ctaSecondary": "Sign In"
+      "ctaButton": "Get Started",
+      "ctaSecondary": "Login"
     },
     "services": {
       "title": "Core Immigration Services",
@@ -180,22 +215,36 @@
       "subtitle": "Welcome back. Please enter your details.",
       "email": "Email Address",
       "password": "Password",
-      "button": "Sign In",
+      "button": "Login",
       "forgotPassword": "Forgot password?",
       "noAccount": "Don't have an account?",
-      "signUp": "Sign up here"
+      "signUp": "Sign up here",
+      "suspendedError": "Your account has been suspended. Please contact the agency.",
+      "allFieldsRequired": "All fields are required.",
+      "invalidCredentials": "Invalid email or password.",
+      "googleLoginFailed": "Google login failed. Please try again."
     },
     "signUp": {
       "title": "Register",
       "subtitle": "Create your account to get started.",
       "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
       "email": "Email Address",
+      "emailPlaceholder": "Enter your email",
       "password": "Password",
+      "passwordPlaceholder": "Enter your password",
       "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
       "button": "Create Account",
-      "agreeTerms": "I agree to the terms and conditions",
-      "haveAccount": "Already have an account?",
-      "signIn": "Sign in here"
+      "googleSignUp": "Sign Up with Google",
+      "alreadyHaveAccount": "Already have an account?",
+      "login": "Login here",
+      "allFieldsRequired": "All fields are required.",
+      "invalidEmail": "Please enter a valid email address.",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 8 characters long.",
+      "error": "Failed to create account.",
+      "unexpectedError": "An unexpected error occurred. Please try again."
     },
     "adminLogin": {
       "title": "Admin Login",
@@ -204,7 +253,9 @@
       "emailPlaceholder": "staff@example.com",
       "password": "Password",
       "button": "Login",
-      "invalidCredentials": "Invalid email or password"
+      "invalidCredentials": "Invalid email or password",
+      "loading": "Signing in...",
+      "authorizedAccessOnly": "Authorized staff access only."
     }
   },
   "dashboard": {
@@ -225,7 +276,12 @@
       "pathway": "Pathway / Country",
       "type": "Type",
       "lastUpdate": "Last Update",
-      "action": "Action"
+      "status": "Status",
+      "action": "Action",
+      "pendingApprovalTitle": "Your account is awaiting admin validation.",
+      "pendingApprovalDesc": "You have limited access until your account is approved. You cannot create applications or upload documents.",
+      "viewApplication": "View application",
+      "noApplications": "No applications found. Start by choosing a pathway."
     },
     "agentDashboard": {
       "title": "Agent Overview",
@@ -239,13 +295,30 @@
       "viewAllWork": "View All Work",
       "applicant": "Applicant",
       "pathways": "Pathways",
-      "myProfile": "My Profile"
+      "lastUpdate": "Last Update",
+      "status": "Status",
+      "action": "Action",
+      "myProfile": "My Profile",
+      "viewClientDetails": "View Client Details",
+      "noActivity": "No recent activity found."
     },
     "adminDashboard": {
       "title": "Admin Dashboard",
+      "pipeline": "Application Pipeline",
+      "liveActivity": "Live Activity Feed",
+      "noActivityPulse": "No recent activity pulse detected.",
+      "stats": {
+        "totalClients": "Total Clients",
+        "totalAgents": "Total Agents",
+        "liveApplications": "Live Applications"
+      },
+      "statuses": {
+        "pendingReview": "Pending Review",
+        "inReview": "In Review",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
       "overview": "Overview",
-      "totalAgents": "Total Agents",
-      "totalClients": "Total Clients",
       "activeApplications": "Active Applications",
       "quickActions": "Quick Actions"
     }

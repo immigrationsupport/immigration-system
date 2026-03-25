@@ -1,25 +1,17 @@
 import React, { Suspense } from "react";
-import { Users, Briefcase, FileText, Activity, Clock } from "lucide-react";
+import { Activity, Clock } from "lucide-react";
 import prisma from "@/lib/prisma";
 import AdminStats from "@/components/dashboard/AdminStats";
 import { ActivityItem } from "@/components/dashboard/ActivityItem";
 
-
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardOverview() {
-    // 1. Fetch statistics
-    const [totalClients, totalAgents, totalApplications, statusGroups] = await Promise.all([
-        prisma.user.count({ where: { role: "CLIENT" } }),
-        prisma.user.count({ where: { role: "AGENT" } }),
-        prisma.application.count(),
-        prisma.application.groupBy({
-            by: ["status"],
-            _count: {
-                _all: true,
-            },
-        }),
-    ]);
+    // Fetch status groups and recent activity
+    const statusGroups = await prisma.application.groupBy({
+        by: ["status"],
+        _count: { _all: true },
+    });
 
     // 2. Fetch recent activities (Resilient Fetch to bypass stale cache issues)
     const logs = await prisma.auditLog.findMany({
@@ -69,7 +61,7 @@ export default async function AdminDashboardOverview() {
                 <div className="bg-white shadow-sm border border-gray-100 p-6" style={{ borderRadius: "12px" }}>
                     <div className="flex items-center gap-2 mb-6 border-b border-gray-50 pb-4">
                         <Activity className="h-5 w-5 text-[#1E3A8A]" />
-                        <h2 className="text-lg font-bold text-gray-900">Application Pipeline</h2>
+                        <h2 className="text-lg font-bold text-gray-900">Applications by Status</h2>
                     </div>
                     <div className="space-y-4">
                         <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-100 transition-colors hover:bg-white">
@@ -108,7 +100,7 @@ export default async function AdminDashboardOverview() {
                     <div className="flex items-center justify-between mb-6 border-b border-gray-50 pb-4">
                         <div className="flex items-center gap-2">
                             <Clock className="h-5 w-5 text-[#1E3A8A]" />
-                            <h2 className="text-lg font-bold text-gray-800">Live Activity Feed</h2>
+                            <h2 className="text-lg font-bold text-gray-800">Recent Activity</h2>
                         </div>
                     </div>
 
@@ -123,7 +115,7 @@ export default async function AdminDashboardOverview() {
                         ) : (
                             <div className="text-center py-20 bg-slate-50 rounded-xl border-2 border-dashed border-slate-100">
                                 <Activity className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-                                <p className="text-sm text-gray-400 font-medium">No recent activity pulse detected.</p>
+                                <p className="text-sm text-gray-400 font-medium">No activity recorded yet.</p>
                             </div>
                         )}
                     </div>

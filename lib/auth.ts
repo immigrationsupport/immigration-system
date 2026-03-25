@@ -5,16 +5,18 @@ import prisma from '@/lib/prisma'
 import { multiSession } from "better-auth/plugins"
 
 export const auth = betterAuth({
-    plugins: [
-        multiSession({
-            maximumSessions: 5,
-        })
-    ],
     database: prismaAdapter(prisma, {
         provider: 'postgresql',
     }),
     baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
     secret: process.env.BETTER_AUTH_SECRET,
+    /*
+    plugins: [
+        multiSession({
+            maximumSessions: 5,
+        })
+    ],
+    */
 
     debug: true,
     socialProviders: {
@@ -79,33 +81,33 @@ export const auth = betterAuth({
         },
     },
     baseHooks: {
-    session: {
-        create: {
-            after: async (session: any) => {
-                // Better-Auth hooks usually pass the session object which has userId
-                if (session.userId) {
-                    try {
-                        // 1. Fetch the actual user to get the 'name'
-                        const user = await prisma.user.findUnique({ 
-                            where: { id: session.userId } 
-                        });
+        session: {
+            create: {
+                after: async (session: any) => {
+                    // Better-Auth hooks usually pass the session object which has userId
+                    if (session.userId) {
+                        try {
+                            // 1. Fetch the actual user to get the 'name'
+                            const user = await prisma.user.findUnique({ 
+                                where: { id: session.userId } 
+                            });
 
-                        
-                        prisma.auditLog.create({
-                            data: {
-                                action: "USER_LOGIN",
-                                details: `${user?.name || 'Unknown User'} (${user?.email || 'No Email'}) logged in.`,
-                                userId: session.userId
-                            }
-                        }).catch(e => console.error("Audit Log Background Error:", e));
+                            
+                            await prisma.auditLog.create({
+                                data: {
+                                    action: "USER_LOGIN",
+                                    details: `${user?.name || 'Unknown User'} (${user?.email || 'No Email'}) logged in.`,
+                                    userId: session.userId
+                                }
+                            });
 
-                    } catch (error) {
-                        console.error("[AUTH_HOOK_ERROR]:", error);
+                        } catch (error) {
+                            console.error("[AUTH_HOOK_ERROR]:", error);
+                        }
                     }
                 }
             }
         }
-    }
 
     },
     trustedOrigins: ['http://localhost:3000', 'http://127.0.0.1:3000'],

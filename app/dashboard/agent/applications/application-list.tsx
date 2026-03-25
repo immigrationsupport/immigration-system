@@ -115,7 +115,7 @@ function ApplicationCard({ app, onViewDoc }: { app: any, onViewDoc: (doc: any) =
             <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gray-50/50 border-b">
                 <div className="flex gap-4 items-center">
                     <div className="bg-blue-100 p-2 rounded-lg">
-                        <FileText className="h-6 w-6 text-blue-700" />
+                        <FileText className="h-6 w-6 text-black-700" />
                     </div>
                     <div>
                         <CardTitle className="text-xl font-bold text-gray-900 tracking-tight">
@@ -237,12 +237,11 @@ function ApplicationCard({ app, onViewDoc }: { app: any, onViewDoc: (doc: any) =
                             {app.procedures.flatMap((p: any) => p.documents || []).map((doc: any) => (
                                 <div key={doc.id} className="flex items-center justify-between p-3 bg-blue-50/30 rounded-xl border border-blue-100/50 group/doc hover:bg-white hover:shadow-sm transition-all overflow-hidden">
                                     <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-blue-600 shrink-0 border border-blue-100">
+                                        <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-black-600 shrink-0 border border-blue-100">
                                             <FileText size={16} />
                                         </div>
                                         <div className="overflow-hidden">
                                             <p className="text-xs font-bold text-gray-700 truncate">{doc.name}</p>
-                                            <p className="text-[9px] text-blue-500 font-bold uppercase">{doc.type}</p>
                                         </div>
                                     </div>
                                     <button

@@ -35,9 +35,9 @@ export default async function ClientDashboard() {
                 <h1 className="text-3xl font-black text-[#1E3A8A] tracking-tight uppercase">Dashboard Overview</h1>
                 <p className="text-gray-500 font-medium">Track your immigration status and document progress.</p>
             </div>
-            
+
             {isPending && (
-                <div className="bg-amber-50 border border-amber-200 text-amber-800 px-6 py-4 rounded-xl flex items-center gap-3 shadow-sm">
+                <div className="bg-gray-50 border border-amber-200 text-amber-800 px-6 py-4 rounded-xl flex items-center gap-3 shadow-sm">
                     <Clock className="h-6 w-6 text-amber-500" />
                     <div>
                         <h3 className="font-bold text-lg">Your account is awaiting admin validation.</h3>
@@ -48,10 +48,10 @@ export default async function ClientDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Total Applications */}
-                <Card className="border-none shadow-lg shadow-blue-50/50 rounded-2xl overflow-hidden group hover:shadow-xl transition-all">
+                <Card className="border border-gray-100 bg-white shadow-sm shadow-blue-50/50 rounded-3xl transition-all hover:shadow-lg hover:-translate-y-1 group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Cases</CardTitle>
-                        <FileText className="h-4 w-4 text-blue-500 group-hover:scale-110 transition-transform" />
+                        <CardTitle className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Total Cases</CardTitle>
+                        <FileText className="h-4 w-4 text-black-500 group-hover:scale-110 transition-transform" />
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{totalApps}</div>
@@ -60,10 +60,10 @@ export default async function ClientDashboard() {
                 </Card>
 
                 {/* Pending */}
-                <Card className="border-none shadow-lg shadow-amber-50/50 rounded-2xl overflow-hidden group hover:shadow-xl transition-all">
+                <Card className="border border-gray-100 bg-white shadow-lg shadow-blue-50/50 rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-[10px] font-black text-gray-400 uppercase tracking-widest">In Process</CardTitle>
-                        <Clock className="h-4 w-4 text-amber-500 group-hover:scale-110 transition-transform" />
+                        <CardTitle className="text-[10px] font-black text-gray-500 uppercase tracking-widest">In Process</CardTitle>
+                        <Clock className="h-4 w-4 text-black-500 group-hover:scale-110 transition-transform" />
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{pendingApps}</div>
@@ -72,10 +72,10 @@ export default async function ClientDashboard() {
                 </Card>
 
                 {/* Approved */}
-                <Card className="border-none shadow-lg shadow-emerald-50/50 rounded-2xl overflow-hidden group hover:shadow-xl transition-all">
+                <Card className="border border-gray-100 bg-white shadow-lg shadow-blue-50/50 rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Success</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+                        <CardTitle className="text-[10px]  text-green-500 uppercase tracking-widest">Success</CardTitle>
+                        <CheckCircle className="h-4 w-4 text-black-500 group-hover:scale-110 transition-transform" />
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{approvedApps}</div>
@@ -84,10 +84,10 @@ export default async function ClientDashboard() {
                 </Card>
 
                 {/* Rejected */}
-                <Card className="border-none shadow-lg shadow-red-50/50 rounded-2xl overflow-hidden group hover:shadow-xl transition-all">
+                <Card className="border border-gray-100 bg-white shadow-lg shadow-blue-50/50 rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Action Req.</CardTitle>
-                        <XCircle className="h-4 w-4 text-red-500 group-hover:scale-110 transition-transform" />
+                        <CardTitle className="text-[10px] font-black text-red-500 uppercase tracking-widest">Action Req.</CardTitle>
+                        <XCircle className="h-4 w-4 text-black-500 group-hover:scale-110 transition-transform" />
                     </CardHeader>
                     <CardContent className="bg-white">
                         <div className="text-3xl font-black text-gray-900">{rejectedApps}</div>
@@ -107,7 +107,7 @@ export default async function ClientDashboard() {
                         <table className="w-full text-sm text-left">
                             <thead className="bg-gray-50/50 text-gray-400 uppercase text-[10px] font-black tracking-widest">
                                 <tr>
-                                    <th className="px-8 py-4">Pathway / Country</th>
+                                    <th className="px-8 py-4">Country</th>
                                     <th className="px-8 py-4">Type</th>
                                     <th className="px-8 py-4">Last Update</th>
                                     <th className="px-8 py-4">Status</th>
@@ -120,7 +120,6 @@ export default async function ClientDashboard() {
                                         <tr key={app.id} className="hover:bg-blue-50/30 transition-colors group">
                                             <td className="px-8 py-5">
                                                 <div className="font-bold text-gray-900 text-base">{app.country}</div>
-                                                <div className="text-[10px] text-gray-400 font-black uppercase tracking-tighter">Reference: #{app.id.slice(0, 8)}</div>
                                             </td>
                                             <td className="px-8 py-5">
                                                 <div className="flex gap-1 flex-wrap">
@@ -135,12 +134,11 @@ export default async function ClientDashboard() {
                                                 {new Date(app.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                             </td>
                                             <td className="px-8 py-5">
-                                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tight ${
-                                                    app.status === "APPROVED" ? "bg-emerald-100 text-emerald-700" :
-                                                    app.status === "REJECTED" ? "bg-red-100 text-red-700" :
-                                                    app.status === "IN_REVIEW" ? "bg-amber-100 text-amber-700" :
-                                                    "bg-blue-100 text-blue-700"
-                                                }`}>
+                                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tight ${app.status === "APPROVED" ? "bg-emerald-100 text-emerald-700" :
+                                                        app.status === "REJECTED" ? "bg-red-100 text-red-700" :
+                                                            app.status === "IN_REVIEW" ? "bg-amber-100 text-amber-700" :
+                                                                "bg-blue-100 text-blue-700"
+                                                    }`}>
                                                     {app.status.replace("_", " ")}
                                                 </span>
                                             </td>

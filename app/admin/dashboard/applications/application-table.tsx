@@ -103,10 +103,10 @@ export default function ApplicationTable({
 
     const getStatusStyles = (status: string) => {
         switch (status) {
-            case "APPROVED": return { bg: "bg-green-50", text: "text-green-700", border: "border-green-200", icon: <CheckCircle2 size={14} /> };
-            case "REJECTED": return { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", icon: <XCircle size={14} /> };
-            case "PENDING": return { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", icon: <Clock size={14} /> };
-            default: return { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200", icon: <AlertCircle size={14} /> };
+            case "APPROVED": return { bg: "bg-gray-50", text: "text-green-700", border: "border-gray-200", icon: <CheckCircle2 size={14} /> };
+            case "REJECTED": return { bg: "bg-gray-50", text: "text-red-700", border: "border-gray-200", icon: <XCircle size={14} /> };
+            case "PENDING": return { bg: "bg-gray-50", text: "text-amber-700", border: "border-gray-200", icon: <Clock size={14} /> };
+            default: return { bg: "bg-gray-50", text: "text-blue-700", border: "border-gray-200", icon: <AlertCircle size={14} /> };
         }
     };
 
@@ -223,25 +223,25 @@ export default function ApplicationTable({
                                 </td>
 
                                 <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <div className="flex items-center justify-end gap-1  transition-all duration-300">
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-white shadow-sm"
+                                            className="h-10 w-10 p-0 text-blue-600 hover:text-blue-700 hover:bg-white "
                                             onClick={() => setSelectedAppId(app.id)}
                                             title="View Details"
                                         >
-                                            <Eye size={16} />
+                                            <Eye size={22} />
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-white shadow-sm"
+                                            className="h-10 w-10 p-0 text-red-500 hover:text-red-700 hover:bg-white"
                                             onClick={() => handleDelete(app.id)}
                                             disabled={loadingId === app.id}
                                             title="Delete Application"
                                         >
-                                            <Trash2 size={16} />
+                                            <Trash2 size={22} />
                                         </Button>
                                     </div>
                                 </td>
