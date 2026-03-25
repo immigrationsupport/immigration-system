@@ -42,8 +42,8 @@ export default function Footer() {
                         <div className="flex items-start text-gray-600 text-sm">
                             <MapPin className="w-4 h-4 mr-3 text-[#1E3A8A] mt-0.5 flex-shrink-0" />
                             <span className="whitespace-pre-wrap">
-                                Your Office Address Here,{"\n"}
-                                City, Country
+                                DOUALA, CAMEROUN<br />
+                                Bonamoussadi, carrefour maison blanche
                             </span>
                         </div>
                     </div>
