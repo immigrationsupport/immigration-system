@@ -87,7 +87,7 @@ export default function ContactPage() {
                                         </div>
                                     )}
                                     <div>
-                                        <label htmlFor="fullName" className="block text-sm font-semibold text-gray-800 mb-2">Legal Full Name{" *"}</label>
+                                        <label htmlFor="fullName" className="block text-sm font-semibold text-gray-800 mb-2">Legal Full Name</label>
                                         <input
                                             type="text"
                                             id="fullName"
@@ -101,7 +101,7 @@ export default function ContactPage() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-2">Email Address{" *"}</label>
+                                            <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-2">Email Address</label>
                                             <input
                                                 type="email"
                                                 id="email"
@@ -126,7 +126,7 @@ export default function ContactPage() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label htmlFor="message" className="block text-sm font-semibold text-gray-800 mb-2">Inquiry Details{" *"}</label>
+                                        <label htmlFor="message" className="block text-sm font-semibold text-gray-800 mb-2">Inquiry Details</label>
                                         <textarea
                                             id="message"
                                             value={form.message}
@@ -136,7 +136,7 @@ export default function ContactPage() {
                                             minLength={50}
                                             maxLength={1000}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-sm focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] text-gray-900 resize-none outline-none"
-                                            placeholder="Provide details regarding your needs... (Max 1000 characters)"
+                                            placeholder="Provide details regarding your needs... "
                                         />
                                     </div>
                                     <button
