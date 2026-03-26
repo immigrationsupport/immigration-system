@@ -63,33 +63,45 @@ export default async function AgentDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="border border-gray-100 bg-white shadow-sm rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group ">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Applications</CardTitle>
-                        <Briefcase className="h-4 w-4 text-black-500" />
-                    </CardHeader>
-                    <CardContent className="bg-white">
-                        <div className="text-3xl font-black text-gray-900">{assignedApps}</div>
-                    </CardContent>
-                </Card>
-                <Card className="border border-gray-100 bg-white shadow-sm  rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-xs font-black text-gray-400 uppercase tracking-widest">In Review</CardTitle>
-                        <Clock className="h-4 w-4 text-black-500" />
-                    </CardHeader>
-                    <CardContent className="bg-white">
-                        <div className="text-3xl font-black text-gray-900">{inReviewApps}</div>
-                    </CardContent>
-                </Card>
-                <Card className="border border-gray-100 bg-white shadow-sm rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-xs font-black text-gray-400 uppercase tracking-widest">Completed</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-black-500" />
-                    </CardHeader>
-                    <CardContent className="bg-white">
-                        <div className="text-3xl font-black text-gray-900">{completedApps}</div>
-                    </CardContent>
-                </Card>
+                <div
+
+                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
+                    style={{ borderRadius: "16px" }}
+                >
+                    <div className="p-4 rounded-2xl bg-blue-50 text-[#1E3A8A] group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
+                        <Briefcase size={26} color="black" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Total Applications</p>
+                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{assignedApps}</h3>
+                    </div>
+                </div>
+                <div
+
+                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
+                    style={{ borderRadius: "16px" }}
+                >
+                    <div className="p-4 rounded-2xl bg-yellow-50 text-[#1E3A8A] group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300">
+                        <Clock size={26} color="black" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">In Review</p>
+                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{inReviewApps}</h3>
+                    </div>
+                </div>
+                <div
+
+                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
+                    style={{ borderRadius: "16px" }}
+                >
+                    <div className="p-4 rounded-2xl bg-green-50 text-[#1E3A8A] group-hover:bg-green-500 group-hover:text-white transition-all duration-300">
+                        <CheckCircle size={26} color="black" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Completed</p>
+                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{completedApps}</h3>
+                    </div>
+                </div>
             </div>
 
             <Card className="border-none shadow-xl shadow-gray-200/50 rounded-2xl overflow-hidden">

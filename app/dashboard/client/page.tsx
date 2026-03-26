@@ -48,52 +48,62 @@ export default async function ClientDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Total Applications */}
-                <Card className="border border-gray-100 bg-white shadow-sm shadow-blue-50/50 rounded-3xl transition-all hover:shadow-lg hover:-translate-y-1 group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Total Cases</CardTitle>
-                        <FileText className="h-4 w-4 text-black-500 group-hover:scale-110 transition-transform" />
-                    </CardHeader>
-                    <CardContent className="bg-white">
-                        <div className="text-3xl font-black text-gray-900">{totalApps}</div>
-                        <p className="text-[10px] text-gray-400 font-bold mt-1"></p>
-                    </CardContent>
-                </Card>
+                <div
+
+                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
+                    style={{ borderRadius: "16px" }}
+                >
+                    <div className="p-4 rounded-2xl bg-blue-50 text-[#1E3A8A] group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
+                        <FileText size={26} color="black" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Total Cases</p>
+                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{totalApps}</h3>
+                    </div>
+                </div>
 
                 {/* Pending */}
-                <Card className="border border-gray-100 bg-white shadow-lg shadow-blue-50/50 rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-[10px] font-black text-gray-500 uppercase tracking-widest">In Process</CardTitle>
-                        <Clock className="h-4 w-4 text-black-500 group-hover:scale-110 transition-transform" />
-                    </CardHeader>
-                    <CardContent className="bg-white">
-                        <div className="text-3xl font-black text-gray-900">{pendingApps}</div>
-                        <p className="text-[10px] text-amber-600 font-bold mt-1"></p>
-                    </CardContent>
-                </Card>
+                <div
 
+                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
+                    style={{ borderRadius: "16px" }}
+                >
+                    <div className="p-4 rounded-2xl bg-amber-50 text-[#1E3A8A] group-hover:bg-amber-500 group-hover:text-white transition-all duration-300">
+                        <Clock size={26} color="black" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Pending</p>
+                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{pendingApps}</h3>
+                    </div>
+                </div>
                 {/* Approved */}
-                <Card className="border border-gray-100 bg-white shadow-lg shadow-blue-50/50 rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-[10px]  text-green-500 uppercase tracking-widest">Success</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-black-500 group-hover:scale-110 transition-transform" />
-                    </CardHeader>
-                    <CardContent className="bg-white">
-                        <div className="text-3xl font-black text-gray-900">{approvedApps}</div>
-                        <p className="text-[10px] text-emerald-600 font-bold mt-1"></p>
-                    </CardContent>
-                </Card>
+                <div
 
+                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
+                    style={{ borderRadius: "16px" }}
+                >
+                    <div className="p-4 rounded-2xl bg-green-50 text-[#1E3A8A] group-hover:bg-green-500 group-hover:text-white transition-all duration-300">
+                        <CheckCircle size={26} color="black" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Success</p>
+                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{approvedApps}</h3>
+                    </div>
+                </div>
                 {/* Rejected */}
-                <Card className="border border-gray-100 bg-white shadow-lg shadow-blue-50/50 rounded-2xl transition-all hover:shadow-lg hover:-translate-y-1 group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-white">
-                        <CardTitle className="text-[10px] font-black text-red-500 uppercase tracking-widest">Action Req.</CardTitle>
-                        <XCircle className="h-4 w-4 text-black-500 group-hover:scale-110 transition-transform" />
-                    </CardHeader>
-                    <CardContent className="bg-white">
-                        <div className="text-3xl font-black text-gray-900">{rejectedApps}</div>
-                        <p className="text-[10px] text-red-600 font-bold mt-1"></p>
-                    </CardContent>
-                </Card>
+                <div
+
+                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
+                    style={{ borderRadius: "16px" }}
+                >
+                    <div className="p-4 rounded-2xl bg-red-50 text-[#1E3A8A] group-hover:bg-red-500 group-hover:text-white transition-all duration-300">
+                        <XCircle size={26} color="black" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Action Req.</p>
+                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{rejectedApps}</h3>
+                    </div>
+                </div>
             </div>
 
             <Card className="border-none shadow-xl shadow-gray-200/50 rounded-3xl overflow-hidden mt-8">
@@ -135,9 +145,9 @@ export default async function ClientDashboard() {
                                             </td>
                                             <td className="px-8 py-5">
                                                 <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tight ${app.status === "APPROVED" ? "bg-emerald-100 text-emerald-700" :
-                                                        app.status === "REJECTED" ? "bg-red-100 text-red-700" :
-                                                            app.status === "IN_REVIEW" ? "bg-amber-100 text-amber-700" :
-                                                                "bg-blue-100 text-blue-700"
+                                                    app.status === "REJECTED" ? "bg-red-100 text-red-700" :
+                                                        app.status === "IN_REVIEW" ? "bg-amber-100 text-amber-700" :
+                                                            "bg-blue-100 text-blue-700"
                                                     }`}>
                                                     {app.status.replace("_", " ")}
                                                 </span>
