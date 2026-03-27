@@ -64,7 +64,7 @@ export default function Footer() {
 
                 {/* Bottom */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-blue-300">
-                    <div>&copy; {new Date().getFullYear()} ATLE Immigration. All rights reserved.</div>
+                    <div>&copy;ATLE Immigration</div>
                     <div className="flex gap-6">
                         <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
                         <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
