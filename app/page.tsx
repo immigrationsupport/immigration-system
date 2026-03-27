@@ -34,8 +34,8 @@ export default function Home() {
             {/* Left */}
             <div className="flex-1 pb-6">
               <h1 className="text-[52px] lg:text-[58px] font-extrabold text-[#0f1f4b] leading-[1.1] mb-5" style={{ fontFamily: "Georgia, serif" }}>
-                Immigration <br />
-                <span className="text-[#1E3A8A]">File management system</span>
+                Your Trusted<br />
+                <span className="text-[#1E3A8A]">Immigration Partner</span>
               </h1>
               <p className="text-[16px] text-slate-500 leading-[1.75] max-w-md mb-8">
                 Expert guidance and secure document processing for individuals and businesses navigating the global immigration process with confidence.
