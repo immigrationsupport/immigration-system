@@ -76,13 +76,13 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
     };
 
     return (
-        <div className="bg-white p-6 shadow-sm border border-gray-100" style={{ borderRadius: "8px" }}>
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="bg-[#F9FAFB] p-6 lg:p-8 shadow-sm border border-gray-200" style={{ borderRadius: "8px" }}>
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <div className="relative flex-1 md:w-1/2">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-4 top-3.5 h-5 w-5 text-[#374151]" />
                     <Input
                         placeholder="Search clients..."
-                        className="pl-9 h-10 bg-gray-50 border-gray-200"
+                        className="pl-12 h-12 bg-white border-gray-300 text-[16px] placeholder-[#6B7280]"
                         style={{ borderRadius: "8px" }}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -91,37 +91,37 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
             </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left border-separate border-spacing-0">
+                <table className="w-full text-left border-separate border-spacing-0">
                     <thead>
-                        <tr className="bg-gray-50/80">
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 first:rounded-tl-xl whitespace-nowrap">Client Name</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Email</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Assigned Agent</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Status</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 text-right last:rounded-tr-xl">Actions</th>
+                        <tr className="bg-gray-100/80">
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">Client Name</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Email</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Assigned Agent</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Status</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-100">
                         {filteredClients.map((client) => (
                             <tr key={client.id} className="hover:bg-blue-50/40 transition-all duration-200 group">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-black text-[#1E3A8A]">
+                                <td className="px-6 py-5">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-[14px] font-bold text-[#1E3A8A]">
                                             {client.name.substring(0, 2).toUpperCase()}
                                         </div>
-                                        <span className="font-bold text-gray-900">
-                                            <TruncatedText text={client.name} maxLength={18} />
+                                        <span className="font-extrabold text-[16px] lg:text-[18px] text-[#111827]">
+                                            <TruncatedText text={client.name} maxLength={20} />
                                         </span>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-gray-500 font-medium">
+                                <td className="px-6 py-5 text-[#374151] font-semibold text-[16px] lg:text-[18px]">
                                     <TruncatedText text={client.email} maxLength={25} />
                                 </td>
-                                <td className="px-6 py-4 max-w-[200px] truncate">
+                                <td className="px-6 py-5 max-w-[200px] truncate text-[16px] lg:text-[18px]">
                                     {isAssigning === client.id ? (
                                         <div className="flex items-center gap-2">
                                             <select
-                                                className="border border-gray-200 rounded px-2 py-1 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all min-w-[120px] max-w-[160px] truncate"
+                                                className="border border-gray-300 rounded px-3 py-2 text-[16px] bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all min-w-[120px] max-w-[180px] truncate"
                                                 defaultValue={client.agentId || ""}
                                                 onChange={(e) => handleAssign(client.id, e.target.value)}
                                             >
@@ -132,64 +132,64 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                                     </option>
                                                 ))}
                                             </select>
-                                            <button onClick={() => setIsAssigning(null)} className="text-red-400 hover:text-red-500 transition-colors">
-                                                <XCircle size={16} />
+                                            <button onClick={() => setIsAssigning(null)} className="text-red-500 hover:text-red-600 transition-colors">
+                                                <XCircle size={20} />
                                             </button>
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-2">
                                             {client.agent ? (
-                                                <span className="font-semibold text-gray-700 max-w-[150px] truncate block" title={client.agent.name}>{client.agent.name}</span>
+                                                <span className="font-bold text-[#374151] max-w-[150px] truncate block" title={client.agent.name}>{client.agent.name}</span>
                                             ) : (
-                                                <span className="text-[10px] font-black uppercase tracking-tighter text-gray-300 italic">Unassigned</span>
+                                                <span className="text-[14px] font-bold uppercase tracking-tighter text-gray-400 italic">Unassigned</span>
                                             )}
                                         </div>
                                     )}
                                 </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex flex-col gap-1">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter w-max ${
+                                <td className="px-6 py-5">
+                                    <div className="flex flex-col gap-2">
+                                        <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[14px] font-bold uppercase tracking-tight w-max ${
                                             client.status === "PENDING"
-                                            ? "bg-gray-50 text-amber-600 border border-gray-100"
-                                            : "bg-gray-50 text-emerald-600 border border-gray-100"
+                                            ? "bg-amber-100 text-amber-800 border-amber-200"
+                                            : "bg-emerald-100 text-emerald-800 border-emerald-200"
                                         }`}>
                                             {client.status === "PENDING" ? "Pending" : "Validated"}
                                         </span>
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter w-max ${
+                                        <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[14px] font-bold uppercase tracking-tight w-max ${
                                             client.isSuspended 
-                                            ? "bg-red-50 text-red-600 border border-red-100" 
+                                            ? "bg-red-100 text-red-800 border-red-200" 
                                             : "hidden"
                                         }`}>
-                                
+                                            
                                         </span>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-1  transition-all duration-300">
+                                <td className="px-6 py-5 text-right">
+                                    <div className="flex items-center justify-end gap-2 transition-all duration-300">
                                         {client.status === "PENDING" && (
                                             <button
-                                                className="p-1.5 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg shadow-sm transition-all bg-white"
+                                                className="p-2 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg shadow-sm transition-all bg-white"
                                                 title="Validate Client"
                                                 onClick={() => handleValidate(client.id)}
                                             >
-                                                <CheckCircle2 size={16} />
+                                                <CheckCircle2 size={20} />
                                             </button>
                                         )}
                                         <button
-                                            className="p-1.5 text-gray-400 hover:text-[#1E3A8A] hover:bg-white rounded-lg  transition-all disabled:opacity-50"
+                                            className="p-2 text-[#374151] hover:text-[#1E3A8A] hover:bg-white rounded-lg transition-all disabled:opacity-50"
                                             title={client.isSuspended ? "Cannot assign agent to suspended client" : "Assign/Reassign Agent"}
                                             disabled={client.isSuspended}
                                             onClick={() => setIsAssigning(client.id)}
                                         >
-                                            <Replace size={16} />
+                                            <Replace size={20} />
                                         </button>
 
                                         <button
-                                            className={`p-1.5 rounded-lg  transition-all bg-white ${client.isSuspended ? "text-emerald-500 hover:bg-emerald-50" : "text-orange-400 hover:bg-orange-50"}`}
+                                            className={`p-2 rounded-lg transition-all bg-white ${client.isSuspended ? "text-emerald-600 hover:bg-emerald-50" : "text-red-500 hover:bg-red-50"}`}
                                             title={client.isSuspended ? "Unsuspend Client" : "Suspend Client"}
                                             onClick={() => handleToggleSuspend(client.id, client.isSuspended)}
                                         >
-                                            <Ban size={16} />
+                                            <Ban size={20} />
                                         </button>
                                     </div>
                                 </td>
@@ -197,7 +197,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                         ))}
                         {filteredClients.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-gray-400 font-bold uppercase tracking-widest text-xs">
+                                <td colSpan={5} className="px-6 py-12 text-center text-[#374151] font-bold uppercase tracking-widest text-[16px]">
                                     No clients found matching your search.
                                 </td>
                             </tr>

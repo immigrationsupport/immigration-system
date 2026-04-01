@@ -98,25 +98,25 @@ export default function DocumentTable({
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-[#F9FAFB] rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Table Filters */}
-            <div className="p-4 border-b border-gray-50 bg-gray-50/30 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="p-6 lg:p-8 border-b border-gray-200 bg-[#F9FAFB] flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="relative w-full md:w-96">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#374151]" />
                     <Input
                         placeholder="Search doc name, client, or App ID..."
-                        className="pl-9 bg-white border-gray-200 focus:ring-blue-100"
+                        className="pl-12 h-12 text-[16px] bg-white border-gray-300 focus:ring-blue-100 placeholder-[#6B7280]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
 
-                <div className="flex items-center gap-2 w-full md:w-auto">
-                    <Filter className="h-4 w-4 text-gray-400" />
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    <Filter className="h-5 w-5 text-[#374151]" />
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="text-sm border-gray-200 rounded-md bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-blue-100"
+                        className="text-[16px] border border-gray-300 rounded-md bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100 min-w-[160px]"
                     >
                         <option value="ALL">All Statuses</option>
                         <option value="UPLOADED">Uploaded (Awaiting Review)</option>
@@ -129,47 +129,46 @@ export default function DocumentTable({
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-separate border-spacing-0">
                     <thead>
-                        <tr className="bg-gray-50/80">
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 first:rounded-tl-xl whitespace-nowrap">Document Details</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Client & Uploader</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Context Reference</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Review Status</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Uploaded At</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 text-right last:rounded-tr-xl">Preview</th>
+                        <tr className="bg-gray-100/80">
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">Document Details</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Client & Uploader</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Context Reference</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Review Status</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Uploaded At</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">Preview</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-100">
                         {filteredDocuments.map((doc) => (
                             <tr key={doc.id} className="hover:bg-blue-50/40 transition-all duration-200 group">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-9 w-9 rounded-lg bg-gray-50 flex items-center justify-center text-gray-600 font-bold border border-gray-100">
-                                            <FileText size={16} />
+                                <td className="px-6 py-5">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center text-[#374151] font-bold border border-gray-200">
+                                            <FileText size={20} />
                                         </div>
-                                        <div className="max-w-[150px] md:max-w-xs">
-                                            <p className="text-sm font-bold text-gray-900 truncate leading-none mb-1">
-                                                <TruncatedText text={doc.name} maxLength={25} />
+                                        <div className="max-w-[200px] md:max-w-xs">
+                                            <p className="text-[16px] lg:text-[18px] font-extrabold text-[#111827] truncate leading-none mb-1.5">
+                                                <TruncatedText text={doc.name} maxLength={30} />
                                             </p>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td className="px-6 py-4">
-                                    <p className="text-sm font-bold text-gray-900">
-                                        <TruncatedText text={doc.client.name} maxLength={15} />
+                                <td className="px-6 py-5">
+                                    <p className="text-[16px] lg:text-[18px] font-bold text-[#374151]">
+                                        <TruncatedText text={doc.client.name} maxLength={20} />
                                     </p>
-                    
                                 </td>
 
-                                <td className="px-6 py-4">
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-700 bg-blue-50/50 w-fit px-2  uppercase tracking-tighter">
+                                <td className="px-6 py-5">
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center gap-2 text-[12px] lg:text-[14px] font-bold text-[#374151] bg-blue-50 w-fit px-3 py-1 uppercase tracking-tight rounded">
                                             Proc: {(doc.procedure.type || "GENERAL").replace('_', ' ')}
                                         </div>
                                     </div>
                                 </td>
 
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-5">
                                     <div className="flex items-center gap-2">
                                         <select
                                             value={doc.status}
@@ -178,7 +177,7 @@ export default function DocumentTable({
                                                 ${getStatusStyles(doc.status).bg} 
                                                 ${getStatusStyles(doc.status).text} 
                                                 ${getStatusStyles(doc.status).border} 
-                                                text-[10px] font-black uppercase tracking-tighter px-2.5 py-1 rounded-full border outline-none cursor-pointer transition-all hover:brightness-95
+                                                text-[14px] font-extrabold uppercase tracking-tight px-3 py-1.5 rounded-full border outline-none cursor-pointer transition-all hover:brightness-95 min-w-[150px]
                                             `}
                                             disabled={loadingId === doc.id}
                                         >
@@ -186,25 +185,25 @@ export default function DocumentTable({
                                             <option value="VERIFIED">Approved (Verified)</option>
                                             <option value="REJECTED">Rejected</option>
                                         </select>
-                                        {loadingId === doc.id && <Loader2 size={12} className="animate-spin text-blue-400" />}
+                                        {loadingId === doc.id && <Loader2 size={16} className="animate-spin text-blue-500" />}
                                     </div>
                                 </td>
 
-                                <td className="px-6 py-4 text-gray-500 text-xs font-medium">
-                                    <div className="flex items-center gap-1.5 whitespace-nowrap">
-                                        <Calendar size={13} className="text-gray-300" />
+                                <td className="px-6 py-5 text-[#4B5563] text-[16px] lg:text-[18px] font-bold">
+                                    <div className="flex items-center gap-2 whitespace-nowrap">
+                                        <Calendar size={18} className="text-[#9CA3AF]" />
                                         {new Date(doc.uploadedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
                                 </td>
 
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-5 text-right">
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-8 text-[10px] font-black uppercase tracking-widest gap-2"
+                                        className="h-12 px-6 text-[14px] font-extrabold uppercase tracking-widest gap-2"
                                         onClick={() => setPreviewDoc(doc)}
                                     >
-                                        View <ExternalLink size={12} />
+                                        View <ExternalLink size={16} />
                                     </Button>
                                 </td>
                             </tr>
@@ -212,9 +211,9 @@ export default function DocumentTable({
                     </tbody>
                 </table>
                 {filteredDocuments.length === 0 && (
-                    <div className="py-20 flex flex-col items-center justify-center text-gray-400">
-                        <FileText size={40} className="mb-3 opacity-20" />
-                        <p className="text-sm font-medium">No documents match your filters.</p>
+                    <div className="py-24 flex flex-col items-center justify-center text-[#6B7280]">
+                        <FileText size={50} className="mb-4 opacity-30" />
+                        <p className="text-[18px] font-bold">No documents match your filters.</p>
                     </div>
                 )}
             </div>

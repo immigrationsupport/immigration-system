@@ -34,6 +34,11 @@ export async function submitProcedureAction(procedureId: string) {
             }
         });
 
+        await prisma.application.update({
+            where: { id: procedure.applicationId },
+            data: { status: "SUBMITTED" }
+        });
+
         // Audit Log
         await prisma.auditLog.create({
             data: {

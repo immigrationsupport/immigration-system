@@ -53,28 +53,28 @@ export default function Navbar() {
                     </div>
 
                     {/* Desktop Navigation Links */}
-                    <div className="hidden lg:flex items-center space-x-8">
+                    <div className="hidden lg:flex items-center space-x-10">
                         <Link 
                             href="/" 
-                            className={`font-medium text-sm transition-colors ${isActive('/') ? 'text-[#1E3A8A]' : 'text-gray-600 hover:text-[#1E3A8A]'}`}
+                            className={`font-bold text-[16px] lg:text-[18px] transition-colors ${isActive('/') ? 'text-[#1E3A8A]' : 'text-[#374151] hover:text-[#1E3A8A]'}`}
                         >
                             Home
                         </Link>
                         <Link 
                             href="/services" 
-                            className={`font-medium text-sm transition-colors ${isActive('/services') ? 'text-[#1E3A8A]' : 'text-gray-600 hover:text-[#1E3A8A]'}`}
+                            className={`font-bold text-[16px] lg:text-[18px] transition-colors ${isActive('/services') ? 'text-[#1E3A8A]' : 'text-[#374151] hover:text-[#1E3A8A]'}`}
                         >
                             Services
                         </Link>
                         <Link 
                             href="/about" 
-                            className={`font-medium text-sm transition-colors ${isActive('/about') ? 'text-[#1E3A8A]' : 'text-gray-600 hover:text-[#1E3A8A]'}`}
+                            className={`font-bold text-[16px] lg:text-[18px] transition-colors ${isActive('/about') ? 'text-[#1E3A8A]' : 'text-[#374151] hover:text-[#1E3A8A]'}`}
                         >
                             About Us
                         </Link>
                         <Link 
                             href="/contact" 
-                            className={`font-medium text-sm transition-colors ${isActive('/contact') ? 'text-[#1E3A8A]' : 'text-gray-600 hover:text-[#1E3A8A]'}`}
+                            className={`font-bold text-[16px] lg:text-[18px] transition-colors ${isActive('/contact') ? 'text-[#1E3A8A]' : 'text-[#374151] hover:text-[#1E3A8A]'}`}
                         >
                             Contact
                         </Link>
@@ -92,15 +92,15 @@ export default function Navbar() {
                                 placeholder="Search here..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] text-sm transition-colors"
+                                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-md leading-5 bg-gray-50 placeholder-[#6B7280] focus:outline-none focus:placeholder-[#4B5563] focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] text-[16px] font-medium transition-colors"
                             />
                         </form>
 
                         <Link
                             href="/sign-in"
-                            className="inline-flex items-center justify-center px-4 py-2 border border-[#1E3A8A] text-[#1E3A8A] hover:bg-blue-50 bg-white rounded-sm text-sm font-semibold transition-colors"
+                            className="inline-flex items-center justify-center px-6 py-2.5 border-2 border-[#1E3A8A] text-[#1E3A8A] hover:bg-blue-50 bg-white rounded-md text-[16px] font-extrabold transition-colors"
                         >
-                            <LogIn className="w-4 h-4 mr-2" />
+                            <LogIn className="w-5 h-5 mr-2" />
                              Login
                         </Link>
                     </div>

@@ -18,6 +18,11 @@ const createPrisma = () => {
 
     const pool = new Pool({
         connectionString: dbUrl,
+        connectionTimeoutMillis: 15000, // 15 seconds to handle Neon cold starts
+    });
+
+    pool.on('error', (err) => {
+        console.error('[PRISMA-POOL] Unexpected error on idle client', err);
     });
 
     const adapter = new PrismaPg(pool);

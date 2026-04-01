@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import {
@@ -21,6 +21,7 @@ export default function AdminDashboardLayout({
 }) {
     const { data: session, isPending } = useSession();
     const router = useRouter();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
         // Simple role-based protection
@@ -29,10 +30,6 @@ export default function AdminDashboardLayout({
             if (!session) {
                 router.push("/admin/login");
             }
-            // Optional: you can check a specific role field e.g., session.user.role === 'admin'
-            // else if (session.user?.role !== "admin") {
-            //      router.push("/admin/login");
-            // }
         }
     }, [session, isPending, router]);
 
@@ -58,13 +55,19 @@ export default function AdminDashboardLayout({
                 items={adminSidebarItems}
                 userRole="Admin"
                 userName={session?.user?.name || "System Admin"}
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
             />
 
             {/* Main Content wrapper */}
-            <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative">
-                <Header title="" showLogout={true} />
+            <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative max-w-full">
+                <Header 
+                    title="" 
+                    showLogout={true} 
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                />
 
-                <main className="flex-1 p-6 md:p-8 overflow-y-auto w-full mx-auto" style={{ backgroundColor: "#F9FAFB" }}>
+                <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full mx-auto" style={{ backgroundColor: "#F9FAFB" }}>
                     {children}
                 </main>
             </div>

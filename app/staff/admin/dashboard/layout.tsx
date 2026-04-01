@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import {
@@ -14,6 +16,8 @@ export default function AdminDashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     const adminSidebarItems = [
         {
             icon: "LayoutDashboard",
@@ -49,13 +53,19 @@ export default function AdminDashboardLayout({
                 items={adminSidebarItems}
                 userRole="Administrator"
                 userName="Admin User"
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
             />
 
             {/* Main Content wrapper */}
-            <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative">
-                <Header title="Admin Dashboard" showLogout={true} />
+            <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative max-w-full">
+                <Header 
+                    title="Admin Dashboard" 
+                    showLogout={true} 
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                />
 
-                <main className="flex-1 p-6 md:p-8 overflow-y-auto w-full max-w-7xl mx-auto">
+                <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full max-w-7xl mx-auto">
                     {children}
                 </main>
             </div>

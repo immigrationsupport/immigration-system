@@ -19,10 +19,12 @@ import {
     AlertCircle,
     UserCircle2,
     Mail,
-    Phone
+    Phone,
+    Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getApplicationDetails } from "@/app/admin/dashboard/applications/details-actions";
+import { getApplicationDetails, unlockApplication, validateApplication } from "@/app/admin/dashboard/applications/details-actions";
+import { toast } from "sonner";
 
 interface DetailsModalProps {
     applicationId: string;
@@ -33,16 +35,42 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null);
+    const [actionLoading, setActionLoading] = useState<"unlock" | "validate" | null>(null);
+
+    const fetchDetails = async () => {
+        setLoading(true);
+        const res = await getApplicationDetails(applicationId);
+        if (res.success) setData(res.application);
+        setLoading(false);
+    };
 
     useEffect(() => {
-        async function fetch() {
-            setLoading(true);
-            const res = await getApplicationDetails(applicationId);
-            if (res.success) setData(res.application);
-            setLoading(false);
-        }
-        fetch();
+        fetchDetails();
     }, [applicationId]);
+
+    const handleUnlock = async () => {
+        setActionLoading("unlock");
+        const res = await unlockApplication(applicationId);
+        if (res.success) {
+            toast.success("Application unlocked successfully.");
+            fetchDetails();
+        } else {
+            toast.error(res.error || "Failed to unlock.");
+        }
+        setActionLoading(null);
+    };
+
+    const handleValidate = async () => {
+        setActionLoading("validate");
+        const res = await validateApplication(applicationId);
+        if (res.success) {
+            toast.success("Application validated successfully.");
+            fetchDetails();
+        } else {
+            toast.error(res.error || "Failed to validate.");
+        }
+        setActionLoading(null);
+    };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
@@ -86,6 +114,19 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                 </div>
 
                 <div className="p-8 space-y-8">
+                    {/* Lock Status Banner */}
+                    {(data.status === "SUBMITTED" || data.status === "VALIDATED") && (
+                        <div className="bg-red-50/80 border border-red-200 p-5 rounded-2xl flex items-center gap-4 text-red-700 shadow-sm animate-in slide-in-from-top-4 duration-500">
+                            <div className="bg-white p-2.5 rounded-xl shadow-sm border border-red-100">
+                                <Lock className="h-6 w-6 text-red-600" />
+                            </div>
+                            <div>
+                                <h4 className="font-extrabold text-[15px] uppercase tracking-wide">Application Locked by Submission</h4>
+                                <p className="text-sm font-medium opacity-90 mt-0.5">The client has submitted this application. Their profile and procedures are now read-only to them. Unlock the application to grant edit access back to the client.</p>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Left Column: People */}
                         <div className="space-y-6 lg:col-span-1">
@@ -264,7 +305,29 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                 )}
 
                 {/* Footer Actions */}
-                <div className="p-6 border-t bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+                <div className="p-6 border-t bg-gray-50 rounded-b-2xl flex justify-between gap-3">
+                    <div className="flex gap-2">
+                        {(data.status === "SUBMITTED" || data.status === "VALIDATED") && (
+                            <Button 
+                                variant="outline" 
+                                onClick={handleUnlock} 
+                                disabled={actionLoading !== null}
+                                className="rounded-xl font-bold px-8 h-11 border-blue-200 text-blue-700 hover:bg-blue-50"
+                            >
+                                {actionLoading === "unlock" ? "Unlocking..." : "Unlock Application"}
+                            </Button>
+                        )}
+                        {data.status !== "VALIDATED" && (
+                            <Button 
+                                variant="primary" 
+                                onClick={handleValidate} 
+                                disabled={actionLoading !== null}
+                                className="rounded-xl font-bold px-8 h-11 bg-green-600 hover:bg-green-700 text-white"
+                            >
+                                {actionLoading === "validate" ? "Validating..." : "Validate Application"}
+                            </Button>
+                        )}
+                    </div>
                     <Button variant="outline" onClick={onClose} className="rounded-xl font-bold px-8 h-11 border-gray-200">
                         Close Overview
                     </Button>

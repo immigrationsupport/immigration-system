@@ -102,37 +102,37 @@ export default function LogsTable({
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-[#F9FAFB] rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Toolbar */}
-            <div className="p-4 border-b border-gray-50 bg-gray-50/30 flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div className="p-6 lg:p-8 border-b border-gray-200 bg-[#F9FAFB] flex flex-col md:flex-row gap-4 justify-between items-center">
                 <div className="relative w-full md:w-96">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#374151]" />
                     <Input
                         placeholder="Search action, details, or user..."
-                        className="pl-9 bg-white border-gray-200 focus:ring-blue-100 placeholder:text-gray-400"
+                        className="pl-12 h-12 text-[16px] bg-white border-gray-300 focus:ring-blue-100 placeholder-[#6B7280]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
 
-                <div className="flex gap-2 p-1 bg-gray-100 rounded-lg w-full md:w-auto">
+                <div className="flex gap-3 p-1 bg-gray-100 rounded-lg w-full md:w-auto">
                     <button
                         onClick={() => setTypeFilter("ALL")}
-                        className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-md transition-all ${typeFilter === "ALL" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                        className={`flex-1 md:flex-none px-6 py-2.5 text-[14px] lg:text-[16px] font-bold rounded-md transition-all ${typeFilter === "ALL" ? "bg-white text-gray-900 shadow-sm" : "text-[#4B5563] hover:text-[#111827]"}`}
                     >
                         All Activity
                     </button>
                     <button
                         onClick={() => setTypeFilter("AGENT")}
-                        className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 ${typeFilter === "AGENT" ? "bg-blue-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                        className={`flex-1 md:flex-none px-6 py-2.5 text-[14px] lg:text-[16px] font-bold rounded-md transition-all flex items-center justify-center gap-2 ${typeFilter === "AGENT" ? "bg-[#1E3A8A] text-white shadow-sm" : "text-[#4B5563] hover:text-[#111827]"}`}
                     >
-                        <UserCog size={14} /> Agent Actions
+                        <UserCog size={18} /> Agent Actions
                     </button>
                     <button
                         onClick={() => setTypeFilter("ANOMALY")}
-                        className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 ${typeFilter === "ANOMALY" ? "bg-red-600 text-white shadow-sm hover:bg-red-700" : "text-gray-500 hover:text-red-600"}`}
+                        className={`flex-1 md:flex-none px-6 py-2.5 text-[14px] lg:text-[16px] font-bold rounded-md transition-all flex items-center justify-center gap-2 ${typeFilter === "ANOMALY" ? "bg-red-600 text-white shadow-sm hover:bg-red-700" : "text-[#4B5563] hover:text-red-600"}`}
                     >
-                        <ShieldAlert size={14} /> Anomalies
+                        <ShieldAlert size={18} /> Anomalies
                     </button>
                 </div>
             </div>
@@ -140,72 +140,72 @@ export default function LogsTable({
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-separate border-spacing-0">
                     <thead>
-                        <tr className="bg-gray-50/80">
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 first:rounded-tl-xl whitespace-nowrap">Ref #</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Action Event</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 w-1/3">Context / Target Details</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 whitespace-nowrap">Author Profile</th>
-                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] border-b border-gray-100 last:rounded-tr-xl">Timestamp</th>
+                        <tr className="bg-gray-100/80">
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">Ref #</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Action Event</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 w-1/3">Context / Target Details</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Author Profile</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 last:rounded-tr-xl">Timestamp</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-100">
                         {filteredLogs.map((log) => {
                             const styles = getActionStyles(log.action);
                             const anomalyDetected = isAnomaly(log.action, log.details);
 
                             return (
                                 <tr key={log.id} className={`hover:bg-blue-50/40 transition-all duration-200 group ${anomalyDetected && typeFilter === 'ANOMALY' ? 'bg-red-50/20' : ''}`}>
-                                    <td className="px-6 py-4 align-top">
-                                        <span className="inline-flex text-[10px] font-black text-slate-500 bg-gray-100/50 px-2 py-1 rounded border border-gray-100">
+                                    <td className="px-6 py-5 align-top">
+                                        <span className="inline-flex text-[14px] font-extrabold text-[#6B7280] bg-gray-100 px-3 py-1.5 rounded border border-gray-200">
                                             LOG-{log.logNumber.toString().padStart(4, '0')}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 align-top">
-                                        <div className={`flex items-center gap-2 w-fit px-2.5  ${styles.bg} ${styles.text}`}>
+                                    <td className="px-6 py-5 align-top">
+                                        <div className={`flex items-center gap-2 w-fit px-3 py-1 rounded ${styles.bg} ${styles.text}`}>
                                             {styles.icon}
-                                            <span className="text-[10px] font-black uppercase tracking-widest leading-none">{log.action.replace(/_/g, " ")}</span>
+                                            <span className="text-[14px] font-extrabold uppercase tracking-widest leading-none">{log.action.replace(/_/g, " ")}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 align-top">
+                                    <td className="px-6 py-5 align-top">
                                         <div className="space-y-1">
                                             <div className="flex items-start justify-between gap-2">
-                                                <p className="text-sm font-medium text-gray-700 leading-snug">
-                                                    <TruncatedText text={log.details} maxLength={50} />
+                                                <p className="text-[16px] lg:text-[18px] font-medium text-[#374151] leading-snug">
+                                                    <TruncatedText text={log.details} maxLength={30} />
                                                 </p>
                                                 <button 
                                                     onClick={() => toggleExpand(log.id)}
                                                     className="p-1 hover:bg-gray-100 rounded transition-colors text-gray-400 hover:text-blue-600"
                                                     title="View Full Details"
                                                 >
-                                                    {expandedLogs.has(log.id) ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                                    {expandedLogs.has(log.id) ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                                 </button>
                                             </div>
                                             {expandedLogs.has(log.id) && (
-                                                <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-xs text-gray-600 animate-in slide-in-from-top-1 duration-200 shadow-inner max-h-32 overflow-y-auto custom-scrollbar">
+                                                <div className="mt-3 p-4 bg-white rounded-lg border border-gray-200 text-[14px] text-[#4B5563] animate-in slide-in-from-top-1 duration-200 shadow-inner max-h-48 overflow-y-auto custom-scrollbar">
                                                     <p className="whitespace-pre-wrap font-mono leading-relaxed">{log.details}</p>
                                                 </div>
                                             )}
                                         </div>
                                         {anomalyDetected && (
-                                            <div className="flex items-center gap-1 mt-1.5 text-[10px] text-red-500 font-bold uppercase tracking-wider">
+                                            <div className="flex items-center gap-1 mt-2 text-[12px] text-red-600 font-extrabold uppercase tracking-wider">
                                                 
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 align-top">
+                                    <td className="px-6 py-5 align-top">
                                         {log.author ? (
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-8 w-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 text-[10px] font-black">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-10 w-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-[#1E3A8A] text-[14px] font-extrabold">
                                                     {log.author.name[0]?.toUpperCase()}
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <p className="text-sm font-bold text-gray-900 leading-tight">
+                                                    <p className="text-[16px] lg:text-[18px] font-extrabold text-[#111827] leading-tight">
                                                         <TruncatedText text={log.author.name} maxLength={10} />
                                                     </p>
                                                     <div className="flex items-center gap-2 mt-0.5">
-                                                        <span className={`flex items-center text-[8px] uppercase font-black px-1.5 py-0.5 rounded leading-none ${log.author.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' :
-                                                            log.author.role === 'AGENT' ? 'bg-blue-100 text-blue-700' :
-                                                                'bg-gray-100 text-gray-700'
+                                                        <span className={`flex items-center text-[10px] lg:text-[12px] uppercase font-bold px-2 py-1 rounded leading-none ${log.author.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-800' :
+                                                            log.author.role === 'AGENT' ? 'bg-blue-100 text-blue-800' :
+                                                                'bg-gray-200 text-gray-800'
                                                             }`}>
                                                             {log.author.role}
                                                         </span>
@@ -213,20 +213,20 @@ export default function LogsTable({
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="flex items-center gap-2 text-gray-400 bg-gray-50/50 w-fit px-2.5 py-1.5 rounded-lg border border-gray-100">
-                                                <Shield size={12} className="text-slate-400" />
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">System Core</span>
+                                            <div className="flex items-center gap-2 text-[#6B7280] bg-gray-100 w-fit px-3 py-1.5 rounded-lg border border-gray-200">
+                                                <Shield size={16} className="text-[#6B7280]" />
+                                                <span className="text-[12px] font-extrabold uppercase tracking-widest text-[#6B7280]">System Core</span>
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 align-top">
-                                        <div className="flex flex-col gap-1 text-[11px] font-medium text-gray-500">
-                                            <div className="flex items-center gap-1.5">
-                                                <Calendar size={12} className="text-gray-400" />
+                                    <td className="px-6 py-5 align-top">
+                                        <div className="flex flex-col gap-2 text-[14px] lg:text-[16px] font-medium text-[#4B5563]">
+                                            <div className="flex items-center gap-2">
+                                                <Calendar size={16} className="text-[#9CA3AF]" />
                                                 {new Date(log.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                             </div>
-                                            <div className="flex items-center gap-1.5 text-gray-400">
-                                                <Clock size={12} />
+                                            <div className="flex items-center gap-2 text-[#6B7280]">
+                                                <Clock size={16} />
                                                 {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </div>
@@ -237,10 +237,10 @@ export default function LogsTable({
                     </tbody>
                 </table>
                 {filteredLogs.length === 0 && (
-                    <div className="py-24 flex flex-col items-center justify-center text-gray-400 bg-gray-50/50">
-                        <ShieldAlert size={48} className="mb-4 text-gray-300" />
-                        <p className="text-base font-bold text-gray-600">No logs found</p>
-                        <p className="text-sm mt-1 text-gray-400">Try adjusting your search or filters.</p>
+                    <div className="py-24 flex flex-col items-center justify-center text-[#6B7280]">
+                        <ShieldAlert size={50} className="mb-4 opacity-30" />
+                        <p className="text-[18px] font-bold">No logs found</p>
+                        <p className="text-[16px] mt-2">Try adjusting your search or filters.</p>
                     </div>
                 )}
             </div>

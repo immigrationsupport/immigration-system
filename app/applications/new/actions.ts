@@ -26,11 +26,12 @@ export async function createFullApplicationAction(data: {
             data: {
                 country: data.country,
                 clientId: session.user.id,
+                status: "IN_PROGRESS",
                 procedures: {
                     create: data.procedures.map(p => ({
                         type: p.type as any,
                         description: p.description,
-                        status: "PENDING",
+                        status: "IN_PROGRESS",
                         isLocked: false
                     }))
                 }
