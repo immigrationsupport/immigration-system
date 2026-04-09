@@ -27,12 +27,24 @@ interface SidebarProps {
     items: SidebarItem[];
     userRole: string;
     userName: string;
+    isOpen?: boolean;
+    onClose?: () => void;
 }
 
-export function Sidebar({ items, userRole, userName }: SidebarProps) {
+export function Sidebar({ items, userRole, userName, isOpen: externalIsOpen, onClose }: SidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
-    const [isOpen, setIsOpen] = useState(false);
+    const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+    const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+    
+    const toggleSidebar = (value: boolean) => {
+        if (onClose && !value) {
+            onClose();
+        } else {
+            setInternalIsOpen(value);
+        }
+    };
 
     const handleLogout = async () => {
         const role = userRole.toUpperCase();
@@ -63,7 +75,7 @@ export function Sidebar({ items, userRole, userName }: SidebarProps) {
                     ATLE Immigration
                 </span>
                 <button
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => toggleSidebar(false)}
                     className="md:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100 shrink-0"
                     aria-label="Close menu"
                 >
@@ -93,7 +105,7 @@ export function Sidebar({ items, userRole, userName }: SidebarProps) {
                         <Link
                             key={item.href}
                             href={item.href}
-                            onClick={() => setIsOpen(false)}
+                            onClick={() => toggleSidebar(false)}
                             className={`flex items-center px-3 xl:px-4 py-3 text-sm font-medium rounded-xl transition-all ${
                                 isActive
                                     ? "bg-[var(--color-secondary)] text-[var(--color-primary)] shadow-sm"
@@ -129,7 +141,7 @@ export function Sidebar({ items, userRole, userName }: SidebarProps) {
             {/* ── Mobile top bar ── */}
             <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 shadow-sm">
                 <button
-                    onClick={() => setIsOpen(true)}
+                    onClick={() => toggleSidebar(true)}
                     className="p-2 rounded-md text-gray-500 hover:bg-gray-100"
                     aria-label="Open menu"
                 >
@@ -148,7 +160,7 @@ export function Sidebar({ items, userRole, userName }: SidebarProps) {
             {isOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => toggleSidebar(false)}
                 />
             )}
 

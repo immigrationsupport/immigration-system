@@ -67,12 +67,13 @@ export default async function MyApplicationsPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {applications.map((app) => {
-                        const appTypeLabel = {
+                        const appTypeMapping: Record<string, string> = {
                             PR: "Permanent Residency",
                             WORK: "Work Permit",
                             STUDY: "Study Visa",
                             SCHOLARSHIP: "Scholarship"
-                        }[app.type as keyof typeof appTypeLabel] || "General Application";
+                        };
+                        const appTypeLabel = appTypeMapping[app.type] || "General Application";
 
                         return (
                             <Card key={app.id} className="overflow-hidden border-none shadow-xl shadow-blue-50/50 hover:shadow-2xl hover:shadow-blue-100/50 transition-all rounded-[32px] bg-white group border border-transparent hover:border-blue-100">
