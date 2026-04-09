@@ -30,16 +30,16 @@ export async function getApplicationDetails(applicationId: string) {
                         email: true
                     }
                 },
-                procedures: {
+                steps: {
                     include: {
-                        documents: {
+                        Document: {
                             orderBy: {
                                 uploadedAt: "desc"
                             }
                         }
                     },
                     orderBy: {
-                        createdAt: "desc"
+                        updatedAt: "asc"
                     }
                 }
             }
@@ -50,7 +50,7 @@ export async function getApplicationDetails(applicationId: string) {
         const mappedApp = {
             ...app,
             destination: app.country,
-            type: app.procedures[0]?.type || "GENERAL"
+            type: app.steps[0]?.type || "GENERAL"
         };
 
         return { success: true, application: mappedApp };
@@ -66,7 +66,7 @@ export async function unlockApplication(applicationId: string) {
             data: { status: "IN_PROGRESS" }
         });
 
-        await prisma.procedure.updateMany({
+        await prisma.applicationStep.updateMany({
             where: { applicationId },
             data: { isLocked: false }
         });
@@ -87,7 +87,7 @@ export async function validateApplication(applicationId: string) {
             include: { client: true }
         });
 
-        await prisma.procedure.updateMany({
+        await prisma.applicationStep.updateMany({
             where: { applicationId },
             data: { isLocked: true }
         });

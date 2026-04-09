@@ -66,9 +66,9 @@ export default function AddProcedurePage() {
                                     type="text"
                                     id="destinationCountry"
                                     name="destinationCountry"
-                                    placeholder="e.g. Canada, USA, UK"
-                                    required
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-sm text-gray-900 focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] sm:text-sm"
+                                    value="Canada"
+                                    readOnly
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-sm text-gray-500 bg-gray-50 sm:text-sm cursor-not-allowed"
                                 />
                             </div>
                         </div>

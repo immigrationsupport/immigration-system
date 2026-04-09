@@ -47,7 +47,7 @@ interface DocumentItem {
         id: string;
         destination: string;
     };
-    procedure: {
+    step: {
         id: string;
         type: string;
     };
@@ -163,7 +163,7 @@ export default function DocumentTable({
                                 <td className="px-6 py-5">
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-center gap-2 text-[12px] lg:text-[14px] font-bold text-[#374151] bg-blue-50 w-fit px-3 py-1 uppercase tracking-tight rounded">
-                                            Proc: {(doc.procedure.type || "GENERAL").replace('_', ' ')}
+                                            Step: {(doc.step.type || "GENERAL").replace('_', ' ')}
                                         </div>
                                     </div>
                                 </td>

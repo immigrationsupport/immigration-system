@@ -16,7 +16,6 @@ export async function completeProfileAction(formData: FormData) {
     const nationality = formData.get("nationality") as string;
     const maritalStatus = formData.get("maritalStatus") as string;
     const numberOfChildren = parseInt(formData.get("numberOfChildren") as string || "0");
-    const phoneNumber = formData.get("phoneNumber") as string;
     const address = formData.get("address") as string;
 
     if (!dateOfBirth || !nationality || !maritalStatus || !address) {
@@ -31,7 +30,6 @@ export async function completeProfileAction(formData: FormData) {
                 nationality,
                 maritalStatus: maritalStatus as any,
                 numberOfChildren,
-                phoneNumber,
                 address,
                 profileCompleted: true
             }

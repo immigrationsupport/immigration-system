@@ -89,40 +89,27 @@ model Verification {
 }
 
 model Application {
-  id         String            @id @default(uuid())
-  country    String
-  status     ApplicationStatus @default(PENDING)
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
-  clientId   String
-  agentId    String?
-  agent      User?             @relation("AgentApplications", fields: [agentId], references: [id])
-  client     User              @relation("ClientApplications", fields: [clientId], references: [id])
-  procedures Procedure[]
-}
-
-model Procedure {
-  id            String          @id @default(uuid())
-  description   String?
-  status        ProcedureStatus @default(PENDING)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  applicationId String
-  isLocked      Boolean         @default(false)
-  type          ProcedureType
-  documents     Document[]
-  messages      Message[]
-  application   Application     @relation(fields: [applicationId], references: [id])
+  id        String            @id @default(uuid())
+  country   String
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  clientId  String
+  agentId   String?
+  type      ApplicationType   @default(PR)
+  agent     User?             @relation("AgentApplications", fields: [agentId], references: [id])
+  client    User              @relation("ClientApplications", fields: [clientId], references: [id])
+  steps     ApplicationStep[]
 }
 
 model Message {
-  id          String    @id @default(uuid())
+  id          String          @id @default(uuid())
   content     String
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime        @default(now())
   procedureId String
   senderId    String
-  procedure   Procedure @relation(fields: [procedureId], references: [id])
-  sender      User      @relation(fields: [senderId], references: [id])
+  Procedure   ApplicationStep @relation(fields: [procedureId], references: [id])
+  sender      User            @relation(fields: [senderId], references: [id])
 }
 
 model OfficialMessage {
@@ -137,16 +124,16 @@ model OfficialMessage {
 }
 
 model Document {
-  id          String         @id @default(uuid())
+  id          String          @id @default(uuid())
   name        String
   fileUrl     String
-  status      DocumentStatus @default(UPLOADED)
-  uploadedAt  DateTime       @default(now())
+  status      DocumentStatus  @default(UPLOADED)
+  uploadedAt  DateTime        @default(now())
   procedureId String
   uploaderId  String
-  type        DocumentType   @default(OTHER)
-  procedure   Procedure      @relation(fields: [procedureId], references: [id])
-  uploader    User           @relation(fields: [uploaderId], references: [id])
+  type        DocumentType    @default(OTHER)
+  Procedure   ApplicationStep @relation(fields: [procedureId], references: [id])
+  uploader    User            @relation(fields: [uploaderId], references: [id])
 }
 
 model AuditLog {
@@ -158,6 +145,22 @@ model AuditLog {
   logNumber Int      @unique @default(autoincrement())
   targetId  String?
   author    User?    @relation("AuthorLogs", fields: [userId], references: [id])
+}
+
+model ApplicationStep {
+  id            String          @id @default(uuid())
+  description   String?
+  status        ProcedureStatus @default(PENDING)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  applicationId String
+  isLocked      Boolean         @default(false)
+  type          ProcedureType
+  Document      Document[]
+  Message       Message[]
+  application   Application     @relation(fields: [applicationId], references: [id])
+
+  @@map("Procedure")
 }
 
 enum Role {
@@ -177,13 +180,6 @@ enum MaritalStatus {
   MARRIED
   DIVORCED
   WIDOWED
-}
-
-enum ProcedureType {
-  PR
-  WORK
-  STUDY
-  SCHOLARSHIP
 }
 
 enum DocumentType {
@@ -209,15 +205,15 @@ enum DocumentStatus {
 
 enum ApplicationStatus {
   PENDING
-  IN_PROGRESS
-  SUBMITTED
   IN_REVIEW
   MODIFICATION_REQUESTED
-  VALIDATED
   APPROVED
   REJECTED
   COMPLETED
   CANCELLED
+  IN_PROGRESS
+  SUBMITTED
+  VALIDATED
 }
 
 enum ProcedureStatus {
@@ -226,4 +222,25 @@ enum ProcedureStatus {
   APPROVED
   REJECTED
   ACTION_REQUIRED
+}
+
+enum ProcedureType {
+  REGISTRATION
+  CONTRACT_SIGNING
+  FEE_PAYMENT
+  DOCUMENT_COLLECTION
+  DIPLOMA_EQUIVALENCE
+  LANGUAGE_TEST_REGISTRATION
+  LANGUAGE_TEST_RESULTS
+  PROFILE_CREATION
+  APPLICATION_SUBMISSION
+  MEDICAL_EXAMINATION
+  PASSPORT_SUBMISSION
+}
+
+enum ApplicationType {
+  PR
+  WORK
+  STUDY
+  SCHOLARSHIP
 }

@@ -9,7 +9,7 @@ export default async function DocumentMonitoringPage() {
     // 1. Fetch all documents comprehensively with relations
     const rawDocuments = await prisma.document.findMany({
         include: {
-            procedure: {
+            Procedure: {
                 include: {
                     application: {
                         include: {
@@ -39,7 +39,7 @@ export default async function DocumentMonitoringPage() {
 
     // 2. Map data for the UI
     const documents = rawDocuments.map(doc => {
-        const application = doc.procedure.application;
+        const application = doc.Procedure.application;
         const client = application.client;
 
         return {
@@ -55,9 +55,9 @@ export default async function DocumentMonitoringPage() {
                 id: application.id,
                 destination: application.country
             },
-            procedure: {
-                id: doc.procedure.id,
-                type: doc.procedure.type
+            step: {
+                id: doc.Procedure.id,
+                type: doc.Procedure.type
             }
         };
     });

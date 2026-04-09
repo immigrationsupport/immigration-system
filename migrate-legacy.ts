@@ -9,7 +9,7 @@ async function main() {
       status: {
         in: ['PENDING', 'IN_PROGRESS'] // Old applications stuck in these states but have locked procedures
       },
-      procedures: {
+      steps: {
         some: {
           isLocked: true
         }

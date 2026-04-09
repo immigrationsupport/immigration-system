@@ -197,11 +197,11 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                 </div>
 
                                 <div className="p-6">
-                                    {data.procedures.length === 0 ? (
+                                    {data.steps.length === 0 ? (
                                         <div className="text-center py-12 text-gray-400 italic">No procedures initialized.</div>
                                     ) : (
                                         <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
-                                            {data.procedures.map((proc: any) => (
+                                            {data.steps.map((proc: any) => (
                                                 <div key={proc.id} className="relative pl-10">
                                                     <div className="absolute left-0 top-1 h-6 w-6 rounded-full bg-white border-4 border-blue-100 flex items-center justify-center z-10">
                                                         <div className="h-2 w-2 rounded-full bg-blue-600" />
@@ -210,18 +210,18 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                                     <div className="bg-gray-50/50 rounded-xl p-5 border border-gray-100 hover:border-blue-200 transition-colors">
                                                         <div className="flex justify-between items-start mb-2">
                                                             <h4 className="font-bold text-gray-900 text-sm">Procedure: {proc.type.replace('_', ' ')}</h4>
-                                                            <span className="text-[10px] text-gray-400 font-medium">{new Date(proc.createdAt).toLocaleDateString()}</span>
+                                                            <span className="text-[10px] text-gray-400 font-medium">{new Date(proc.updatedAt).toLocaleDateString()}</span>
                                                         </div>
                                                         <p className="text-xs text-gray-600 mb-4 bg-white p-3 rounded-lg border border-gray-100 shadow-sm leading-relaxed italic">
                                                             "{proc.description || "No description provided."}"
                                                         </p>
 
                                                         {/* Related Documents */}
-                                                        {proc.documents.length > 0 && (
+                                                        {proc.Document.length > 0 && (
                                                             <div className="space-y-2">
                                                                 <p className="text-[10px] uppercase font-black text-gray-400 tracking-wider">Submitted Evidence</p>
                                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                                    {proc.documents.map((doc: any) => (
+                                                                    {proc.Document.map((doc: any) => (
                                                                         <div key={doc.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100 group">
                                                                             <div className="flex items-center gap-3 overflow-hidden">
                                                                                 <div className="h-8 w-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600 shrink-0">

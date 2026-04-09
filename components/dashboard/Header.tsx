@@ -2,7 +2,7 @@
 
 import { Bell, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { signOut } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 interface HeaderProps {
@@ -13,11 +13,19 @@ interface HeaderProps {
 
 export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) {
     const router = useRouter();
+    const { data: session } = useSession();
 
     const handleLogout = async () => {
+        const userRole = session?.user?.role?.toUpperCase();
         await signOut({
             fetchOptions: {
-                onSuccess: () => router.push("/sign-in")
+                onSuccess: () => {
+                    if (userRole === "AGENT" || userRole === "ADMIN") {
+                        router.push("/admin/login");
+                    } else {
+                        router.push("/sign-in");
+                    }
+                }
             }
         });
     };

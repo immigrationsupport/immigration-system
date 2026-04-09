@@ -34,9 +34,9 @@ export default async function AssignedApplicationsPage() {
                     email: true
                 }
             },
-            procedures: {
+            steps: {
                 include: {
-                    documents: true
+                    Document: true
                 }
             }
         },

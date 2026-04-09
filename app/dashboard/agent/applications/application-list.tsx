@@ -1,32 +1,21 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { FileText, Save, Info, RefreshCcw, Loader2, ExternalLink, Download, X } from "lucide-react";
+import { FileText, Info, Loader2, ExternalLink, Download, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { updateApplicationStatusAction } from "./actions";
-
-interface Application {
-    id: string;
-    type: string;
-    country: string;
-    status: string;
-    createdAt: Date;
-    client: {
-        name: string;
-    }
-}
+import Link from "next/link";
 
 interface ApplicationListProps {
     initialApplications: any[];
 }
 
 export default function ApplicationList({ initialApplications }: ApplicationListProps) {
-    const [applications, setApplications] = useState(initialApplications);
+    const [applications] = useState(initialApplications);
     const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null);
 
     return (
-        <div className="grid grid-cols-1 space-y-6">
+        <div className="grid grid-cols-1 space-y-6 animate-in fade-in duration-500">
             {applications.map((app) => (
                 <ApplicationCard
                     key={app.id}
@@ -35,7 +24,7 @@ export default function ApplicationList({ initialApplications }: ApplicationList
                 />
             ))}
             {applications.length === 0 && (
-                <Card className="flex flex-col items-center py-20 bg-gray-50 border-dashed">
+                <Card className="flex flex-col items-center py-20 bg-gray-50 border-dashed rounded-[32px]">
                     <Info className="h-10 w-10 text-gray-300 mb-2" />
                     <p className="text-gray-500 font-medium">No assigned applications found.</p>
                 </Card>
@@ -92,164 +81,106 @@ export default function ApplicationList({ initialApplications }: ApplicationList
 }
 
 function ApplicationCard({ app, onViewDoc }: { app: any, onViewDoc: (doc: any) => void }) {
-    const [status, setStatus] = useState(app.status);
-    const [note, setNote] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [modificationRequested, setModificationRequested] = useState(false);
-    const [modMessage, setModMessage] = useState("");
-
-    const handleSave = async (newStatus?: string) => {
-        setLoading(true);
-        const targetStatus = newStatus || status;
-        const res = await updateApplicationStatusAction(app.id, targetStatus, targetStatus === "MODIFICATION_REQUESTED" ? modMessage : note);
-        setLoading(false);
-        if (res.error) alert(res.error);
-        else {
-            setModificationRequested(false);
-            window.location.reload();
-        }
-    };
+    const completedSteps = app.steps.filter((s:any) => s.status === "APPROVED").length;
+    const totalSteps = app.steps.length || 11;
+    const progress = Math.round((completedSteps / totalSteps) * 100);
 
     return (
-        <Card className="overflow-hidden border-gray-200 hover:border-blue-200 transition-all shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gray-50/50 border-b">
-                <div className="flex gap-4 items-center">
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                        <FileText className="h-6 w-6 text-black-700" />
+        <Card className="overflow-hidden border-none shadow-xl shadow-blue-50/50 rounded-[40px] bg-white group hover:shadow-2xl transition-all duration-500">
+            <CardHeader className="flex flex-row items-center justify-between p-10 bg-white border-b border-gray-50">
+                <div className="flex gap-6 items-center">
+                    <div className="bg-blue-50 p-4 rounded-3xl text-[#1E3A8A] shadow-inner group-hover:bg-[#1E3A8A] group-hover:text-white transition-all duration-500">
+                        <FileText className="h-8 w-8" />
                     </div>
                     <div>
-                        <CardTitle className="text-xl font-bold text-gray-900 tracking-tight">
-                            {app.client.name} — {app.country}
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{app.country}</span>
+                            <span className="h-1 w-1 bg-gray-300 rounded-full" />
+                            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest">{app.type}</span>
+                        </div>
+                        <CardTitle className="text-3xl font-black text-gray-900 tracking-tight">
+                            {app.client.name}
                         </CardTitle>
-                        <CardDescription className="flex flex-wrap items-center gap-2 mt-1">
-                            {app.procedures.map((p: any) => (
-                                <span key={p.id} className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest ring-1 ring-blue-100">{p.type}</span>
-                            ))}
-                        </CardDescription>
                     </div>
                 </div>
                 <div>
-                    <span className={`px-4 py-1.5 rounded-full text-sm font-bold shadow-sm ${app.status === "APPROVED" ? "bg-green-100 text-green-800 border border-green-200" :
-                        app.status === "REJECTED" ? "bg-red-100 text-red-800 border border-red-200" :
-                            app.status === "IN_REVIEW" ? "bg-blue-100 text-blue-800 border border-blue-200" :
-                                app.status === "MODIFICATION_REQUESTED" ? "bg-orange-100 text-orange-800 border border-orange-200" :
-                                    "bg-gray-100 text-gray-800 border border-gray-200"
-                        }`}>
+                    <span className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-tighter shadow-sm border ${
+                        app.status === "APPROVED" ? "bg-emerald-100 text-emerald-800 border-emerald-200" :
+                        app.status === "REJECTED" ? "bg-red-100 text-red-800 border-red-200" :
+                        app.status === "IN_REVIEW" ? "bg-blue-100 text-blue-800 border-blue-200" :
+                        "bg-gray-100 text-gray-800 border-gray-200"
+                    }`}>
                         {app.status.replace("_", " ")}
                     </span>
                 </div>
             </CardHeader>
-            <CardContent className="pt-6 space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Status Management */}
-                    <div className="space-y-4 bg-gray-50/30 p-4 rounded-xl border border-gray-100">
-                        <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Update Status</label>
-                        <div className="flex gap-3">
-                            <select
-                                className="flex h-11 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 shadow-sm outline-none transition-all"
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                            >
-                                <option value="PENDING">Pending Review</option>
-                                <option value="IN_REVIEW">In Review</option>
-                                <option value="APPROVED">Approved</option>
-                                <option value="REJECTED">Rejected</option>
-                                <option value="COMPLETED">Completed</option>
-                                <option value="CANCELLED">Cancelled</option>
-                            </select>
-                            <Button
-                                onClick={() => handleSave()}
-                                className="h-11 px-6 font-bold transition-all shadow-md hover:shadow-lg rounded-lg"
-                                style={{ backgroundColor: "#1e3a8a", color: "white" }}
-                                disabled={loading}
-                            >
-                                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Save
-                            </Button>
-                        </div>
-
-                        {!modificationRequested ? (
-                            <Button
-                                variant="outline"
-                                className="w-full text-orange-700 border-orange-200 mt-2 bg-orange-50 hover:bg-orange-100 h-11 font-bold rounded-lg transition-colors"
-                                onClick={() => setModificationRequested(true)}
-                                disabled={loading}
-                            >
-                                <RefreshCcw className="h-4 w-4 mr-2" /> Request Modification
-                            </Button>
-                        ) : (
-                            <div className="mt-3 space-y-3 p-4 bg-orange-50 border border-orange-200 rounded-xl shadow-inner animate-in slide-in-from-top-2">
-                                <label className="text-xs font-bold text-orange-800 uppercase tracking-wide">Reason for Modification</label>
-                                <textarea
-                                    className="w-full h-24 p-3 text-sm rounded-lg border border-orange-200 focus:ring-2 focus:ring-orange-500 outline-none shadow-sm resize-none"
-                                    placeholder="Explain why client needs to modify documents/info... (Max 255 chars)"
-                                    value={modMessage}
-                                    onChange={(e) => setModMessage(e.target.value)}
-                                    maxLength={255}
-                                ></textarea>
-                                <div className="flex gap-2">
-                                    <Button
-                                        className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg h-10 shadow-sm"
-                                        onClick={() => handleSave("MODIFICATION_REQUESTED")}
-                                        disabled={loading || !modMessage.trim()}
-                                    >
-                                        Send Request
-                                    </Button>
-                                    <Button variant="ghost" onClick={() => setModificationRequested(false)} className="h-10 text-gray-500">Cancel</Button>
+            <CardContent className="p-10 space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    {/* Journey Progress */}
+                    <div className="space-y-4 bg-gray-50/50 p-8 rounded-[32px] border border-gray-100 relative overflow-hidden">
+                        <div className="relative z-10">
+                            <div className="flex justify-between items-end mb-4">
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-2">Journey Overview</p>
+                                    <h4 className="text-4xl font-black text-[#1E3A8A] tracking-tighter">{progress}%</h4>
                                 </div>
+                                <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full">{completedSteps}/{totalSteps} Steps</span>
                             </div>
-                        )}
+                            <div className="w-full h-3 bg-white rounded-full overflow-hidden shadow-inner ring-1 ring-gray-100">
+                                <div 
+                                    className="h-full bg-blue-600 rounded-full transition-all duration-1000 shadow-lg shadow-blue-200" 
+                                    style={{ width: `${progress}%` }}
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Quick Info & Notes */}
-                    <div className="space-y-4">
-                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Client Contact Info</h4>
-                            <div className="space-y-2">
-                                <p className="text-sm"><strong>Name:</strong> {app.client.name}</p>
-                                <p className="text-sm"><strong>Email:</strong> {app.client.email}</p>
-                            </div>
+                    {/* Client Credentials */}
+                    <div className="space-y-4 p-8 rounded-[32px] border border-gray-100 bg-white">
+                        <div className="flex justify-between items-center mb-2">
+                           <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Client Identity</h4>
+                           <Link href={`/dashboard/agent/clients/${app.clientId}`}>
+                             <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black text-blue-600 hover:bg-blue-50 px-4 rounded-xl">View Profile</Button>
+                           </Link>
                         </div>
-
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center px-1">
-                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
-                                    Internal Note (for next status change)
-                                </label>
-                            </div>
-                            <textarea
-                                className="flex w-full rounded-xl border border-gray-200 bg-white p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all min-h-[100px] resize-none"
-                                placeholder="Add an internal note about this application... (Max 255 chars)"
-                                value={note}
-                                onChange={(e) => setNote(e.target.value)}
-                                maxLength={255}
-                            ></textarea>
+                        <div className="space-y-1">
+                            <p className="text-lg font-black text-gray-900 truncate">{app.client.name}</p>
+                            <p className="text-sm font-medium text-gray-500 truncate">{app.client.email}</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Documents Section */}
-                {app.procedures?.some((p: any) => p.documents?.length > 0) && (
-                    <div className="mt-8 pt-6 border-t border-gray-100">
-                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            SUBMITTED DOCUMENTS
+                <div className="pt-4 flex flex-col md:flex-row justify-end gap-4">
+                    <Link href={`/dashboard/agent/applications/${app.id}`}>
+                        <Button className="w-full md:w-fit bg-[#1E3A8A] hover:bg-blue-900 text-white font-black px-12 py-8 rounded-[24px] shadow-2xl shadow-blue-200 transition-all hover:scale-[1.02] active:scale-95 group">
+                            Manage Full Roadmap & Decision
+                            <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                    </Link>
+                </div>
+
+                {/* Documents Preview */}
+                {app.steps?.some((p: any) => p.documents?.length > 0) && (
+                    <div className="mt-8 pt-8 border-t border-gray-50">
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 px-1">
+                            LATEST UPLOADS
                         </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {app.procedures.flatMap((p: any) => p.documents || []).map((doc: any) => (
-                                <div key={doc.id} className="flex items-center justify-between p-3 bg-blue-50/30 rounded-xl border border-blue-100/50 group/doc hover:bg-white hover:shadow-sm transition-all overflow-hidden">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {app.steps.flatMap((p: any) => p.documents || []).slice(0, 3).map((doc: any) => (
+                                <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-white transition-all group/doc">
                                     <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-black-600 shrink-0 border border-blue-100">
-                                            <FileText size={16} />
+                                        <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-blue-600 shrink-0 border border-gray-100 shadow-sm">
+                                            <FileText size={18} />
                                         </div>
                                         <div className="overflow-hidden">
-                                            <p className="text-xs font-bold text-gray-700 truncate">{doc.name}</p>
+                                            <p className="text-xs font-black text-gray-700 truncate uppercase tracking-tight">{doc.name}</p>
                                         </div>
                                     </div>
                                     <button
                                         onClick={() => onViewDoc({ url: doc.fileUrl, name: doc.name })}
-                                        className="p-1.5 bg-white border border-blue-100 text-blue-600 hover:text-blue-800 hover:border-blue-300 transition-all rounded-lg shadow-sm"
-                                        title="View Document"
+                                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
                                     >
-                                        <ExternalLink size={14} />
+                                        <ExternalLink size={16} />
                                     </button>
                                 </div>
                             ))}

@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Ban, UserX, Replace, UserPlus, CheckCircle2, XCircle } from "lucide-react";
+import { Search, Ban, UserX, Replace, UserPlus, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { assignAgentToClientAction, toggleSuspendClientAction, validateClientAction } from "./actions";
+import { assignAgentToClientAction, toggleSuspendClientAction, validateClientAction, deleteClientAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { TruncatedText } from "@/components/ui/truncated-text";
 
@@ -71,6 +71,13 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
     const handleValidate = async (clientId: string) => {
         if (!confirm("Are you sure you want to validate this client? This grants them full access.")) return;
         const res = await validateClientAction(clientId);
+        if (res.error) alert(res.error);
+        else window.location.reload();
+    };
+
+    const handleDelete = async (clientId: string) => {
+        if (!confirm("Are you sure you want to permanently delete this client? This action cannot be undone.")) return;
+        const res = await deleteClientAction(clientId);
         if (res.error) alert(res.error);
         else window.location.reload();
     };
@@ -190,6 +197,13 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                             onClick={() => handleToggleSuspend(client.id, client.isSuspended)}
                                         >
                                             <Ban size={20} />
+                                        </button>
+                                        <button
+                                            className="p-2 text-red-700 hover:text-red-900 hover:bg-red-100 rounded-lg transition-all bg-white"
+                                            title="Delete Client"
+                                            onClick={() => handleDelete(client.id)}
+                                        >
+                                            <Trash2 size={20} />
                                         </button>
                                     </div>
                                 </td>

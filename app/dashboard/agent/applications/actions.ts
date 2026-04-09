@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { ApplicationStatus, ProcedureStatus } from "@prisma/client";
+import { APP_STEP_SEQUENCE, STEP_LABELS } from "@/lib/steps";
 
 export async function updateApplicationStatusAction(
     applicationId: string,
@@ -18,10 +20,6 @@ export async function updateApplicationStatusAction(
         return { error: "Unauthorized access." };
     }
 
-    if (modificationMessage && modificationMessage.length > 255) {
-        return { error: "Message too long. Maximum 255 characters." };
-    }
-
     try {
         const application = await prisma.application.findUnique({
             where: { id: applicationId },
@@ -29,72 +27,255 @@ export async function updateApplicationStatusAction(
         });
 
         if (!application) return { error: "Application not found." };
-        if (application.agentId !== session.user.id && application.client.agentId !== session.user.id) {
-            return { error: "You are not assigned to this application." };
-        }
-
-        // Transaction for status update, log, and notification
+        
         await prisma.$transaction(async (tx) => {
             // 1. Update Application status
             await tx.application.update({
                 where: { id: applicationId },
-                data: { status: newStatus as any }
+                data: { status: newStatus as ApplicationStatus }
             });
 
-            // 2. Unlock procedures IF status is REJECTED or MODIFICATION_REQUESTED
-            if (newStatus === "REJECTED" || newStatus === "MODIFICATION_REQUESTED") {
-                await tx.procedure.updateMany({
-                    where: { applicationId },
-                    data: { 
-                        isLocked: false,
-                        status: newStatus === "REJECTED" ? "REJECTED" : "ACTION_REQUIRED" 
-                    }
-                });
-            }
-
-            // 3. Audit Log
+            // 2. Audit Log
             await tx.auditLog.create({
                 data: {
                     action: "STATUS_UPDATE",
-                    details: `Application ${applicationId} (${application.country}) status updated to ${newStatus} for ${application.client.name} by Agent ${session.user.name}.`,
+                    details: `Application ${applicationId} status updated to ${newStatus} for ${application.client.name}.`,
                     userId: session.user.id,
                     targetId: applicationId
                 }
             });
 
-            // 4. System Message (Notification)
-            // Ensure we have at least one procedure to attach the message to
-            let procedure = await tx.procedure.findFirst({
-                where: { applicationId },
-                orderBy: { createdAt: "desc" }
-            });
+            // 3. System Message & Official Message (if message provided)
+            if (modificationMessage) {
+                const firstStep = await tx.applicationStep.findFirst({
+                    where: { applicationId },
+                    orderBy: { updatedAt: "asc" }
+                });
 
-            // If no procedures exist yet, create a default one to hold the message channel
-            if (!procedure) {
-                procedure = await tx.procedure.create({
+                if (firstStep) {
+                    await tx.message.create({
+                        data: {
+                            content: `AGENT UPDATE: ${modificationMessage}`,
+                            procedureId: firstStep.id,
+                            senderId: session.user.id
+                        }
+                    });
+                }
+
+                // Also create an OFFICIAL MESSAGE for the client dashboard
+                await tx.officialMessage.create({
                     data: {
-                        applicationId,
-                        type: "PR", // Primary / General
-                        description: "General communication about this application.",
-                        status: "PENDING",
-                        isLocked: false
+                        subject: `Application Update: ${newStatus}`,
+                        content: modificationMessage,
+                        senderId: session.user.id,
+                        receiverId: application.clientId
                     }
                 });
             }
-
-            await tx.message.create({
-                data: {
-                    content: `SYSTEM UPDATE: Status changed to ${newStatus.replace("_", " ")}.${modificationMessage ? `\n\nMESSAGE FROM AGENT:\n${modificationMessage}` : ""}`,
-                    procedureId: procedure.id,
-                    senderId: session.user.id
-                }
-            });
         });
 
         revalidatePath("/dashboard/agent/applications");
+        revalidatePath(`/dashboard/agent/applications/${applicationId}`);
         return { success: true };
     } catch (e: any) {
         console.error("Status Update Error:", e);
         return { error: e.message || "Failed to update status." };
+    }
+}
+
+import { sendEmail } from "@/lib/resend";
+
+export async function updateStepAction(
+    stepId: string,
+    data: {
+        status?: ProcedureStatus;
+        isLocked?: boolean;
+        description?: string;
+        organization?: string; // New field for Step 5
+    }
+) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || (session.user as any).role !== "AGENT") {
+        return { error: "Unauthorized access." };
+    }
+
+    try {
+        const step = await prisma.applicationStep.findUnique({
+            where: { id: stepId },
+            include: { 
+                application: {
+                    include: { 
+                        steps: true,
+                        client: true 
+                    }
+                },
+                Document: true
+            }
+        });
+
+        if (!step) return { error: "Step not found." };
+
+        const currentIdx = APP_STEP_SEQUENCE.indexOf(step.type as any);
+
+        // Validation for "APPROVED" status
+        if (data.status === "APPROVED") {
+            // ... (rest of validation)
+            if (currentIdx > 0) {
+                const previousSteps = step.application.steps.filter(s => {
+                    const idx = APP_STEP_SEQUENCE.indexOf(s.type as any);
+                    return idx < currentIdx;
+                });
+                const allPreviousApproved = previousSteps.every(s => s.status === "APPROVED");
+                if (!allPreviousApproved) {
+                    return { error: "Must approve previous steps before completing this one." };
+                }
+            }
+
+            if (step.type === "DOCUMENT_COLLECTION") {
+                const requiredDocs = ["Passport", "Birth Certificate", "National ID", "CV", "Diploma", "Transcripts", "Passport Photo"];
+                const uploadedNames = step.Document.map(d => d.name);
+                const missing = requiredDocs.filter(d => !uploadedNames.includes(d));
+                if (missing.length > 0) {
+                    return { error: `Cannot complete step. Missing documents: ${missing.join(", ")}` };
+                }
+            }
+
+            if (step.type === "PROFILE_CREATION") {
+                const hasConfirmation = step.Document.some(d => d.name.startsWith("Profile_Confirmation_"));
+                if (!hasConfirmation) {
+                    return { error: "Cannot complete step. Profile confirmation screenshot is missing." };
+                }
+            }
+        }
+
+        // Store organization in description if it's Step 5
+        let updateData: any = { ...data };
+        if (step.type === "DIPLOMA_EQUIVALENCE" && data.organization) {
+            updateData.description = `Org: ${data.organization}${data.description ? ` | ${data.description}` : ""}`;
+            delete updateData.organization;
+        }
+
+        const updatedStep = await prisma.applicationStep.update({
+            where: { id: stepId },
+            data: {
+                ...updateData,
+                updatedAt: new Date()
+            }
+        });
+
+        // Create an Official Message if this is a modification request (ACTION_REQUIRED)
+        if (data.status === "ACTION_REQUIRED" && data.description) {
+            const stepLabel = STEP_LABELS[step.type as keyof typeof STEP_LABELS] || step.type;
+            
+            // 1. Create database record
+            await prisma.officialMessage.create({
+                data: {
+                    subject: `Action Required: ${stepLabel}`,
+                    content: data.description,
+                    senderId: session.user.id,
+                    receiverId: step.application.clientId
+                }
+            });
+
+            // 2. Send email notification via Resend
+            if (step.application.client.email) {
+                await sendEmail({
+                    to: step.application.client.email,
+                    subject: "Action Required - ATLE Immigration",
+                    html: `
+                        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                            <div style="background-color: #1E3A8A; padding: 20px; text-align: center;">
+                                <h1 style="color: white; margin: 0; font-size: 20px;">Modification Requested</h1>
+                            </div>
+                            <div style="padding: 30px;">
+                                <p style="font-size: 16px; color: #374151;">Hello <strong>${step.application.client.name}</strong>,</p>
+                                <p style="font-size: 14px; color: #4b5563; line-height: 1.6;">
+                                    An agent has requested a modification on your application step: <br/>
+                                    <strong style="color: #1E3A8A;">${stepLabel}</strong>
+                                </p>
+                                <div style="background-color: #f9fafb; border-left: 4px solid #1E3A8A; padding: 15px; margin: 20px 0;">
+                                    <p style="font-size: 14px; color: #1f2937; margin: 0; font-style: italic;">
+                                        "${data.description}"
+                                    </p>
+                                </div>
+                                <p style="font-size: 14px; color: #4b5563; line-height: 1.6;">
+                                    Please log in to your dashboard to view the full details and upload any required documents.
+                                </p>
+                            </div>
+                        </div>
+                    `
+                });
+            }
+        }
+
+        // Auto-unlock next step ONLY IF status is APPROVED
+        if (data.status === "APPROVED") {
+            if (currentIdx !== -1 && currentIdx < APP_STEP_SEQUENCE.length - 1) {
+                const nextType = APP_STEP_SEQUENCE[currentIdx + 1];
+                const nextStep = await prisma.applicationStep.findFirst({
+                    where: { applicationId: step.applicationId, type: nextType }
+                });
+                
+                if (nextStep && nextStep.isLocked) {
+                    await prisma.applicationStep.update({
+                        where: { id: nextStep.id },
+                        data: {
+                            isLocked: false,
+                            status: "IN_PROGRESS"
+                        }
+                    });
+                }
+            }
+        }
+
+        // Audit Log
+        await prisma.auditLog.create({
+            data: {
+                action: "STEP_UPDATE",
+                details: `Agent ${session.user.name} updated step ${step.type} (Status: ${data.status || step.status}).`,
+                userId: session.user.id,
+                targetId: step.applicationId
+            }
+        });
+
+        revalidatePath(`/dashboard/agent/applications/${step.applicationId}`);
+        return { success: true, step: updatedStep };
+    } catch (e: any) {
+        console.error("Step Update Error:", e);
+        return { error: e.message || "Failed to update step." };
+    }
+}
+
+export async function addStepCommentAction(stepId: string, comment: string) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || (session.user as any).role !== "AGENT") {
+        return { error: "Unauthorized access." };
+    }
+
+    try {
+        const step = await prisma.applicationStep.findUnique({
+            where: { id: stepId }
+        });
+
+        if (!step) return { error: "Step not found." };
+
+        await prisma.message.create({
+            data: {
+                content: comment,
+                procedureId: step.id,
+                senderId: session.user.id
+            }
+        });
+
+        revalidatePath(`/dashboard/agent/applications/${step.applicationId}`);
+        return { success: true };
+    } catch (e: any) {
+        return { error: e.message || "Failed to add comment." };
     }
 }

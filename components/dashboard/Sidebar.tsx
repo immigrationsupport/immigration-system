@@ -2,20 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, LayoutDashboard, Users, UserCog, FileText, Settings as SettingsIcon, Briefcase, FolderSearch, List, MessageSquare, X } from "lucide-react";
+import {
+    LogOut, LayoutDashboard, Users, UserCog, FileText,
+    Settings as SettingsIcon, Briefcase, FolderSearch,
+    List, MessageSquare, X, Menu
+} from "lucide-react";
 import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const iconMap: Record<string, any> = {
-    LayoutDashboard,
-    Users,
-    UserCog,
-    FileText,
-    SettingsIcon,
-    Briefcase,
-    FolderSearch,
-    List,
-    MessageSquare
+    LayoutDashboard, Users, UserCog, FileText,
+    Settings: SettingsIcon, Briefcase, FolderSearch,
+    List, MessageSquare
 };
 
 interface SidebarItem {
@@ -28,91 +27,132 @@ interface SidebarProps {
     items: SidebarItem[];
     userRole: string;
     userName: string;
-    isOpen?: boolean;
-    onClose?: () => void;
 }
 
-export function Sidebar({ items, userRole, userName, isOpen, onClose }: SidebarProps) {
+export function Sidebar({ items, userRole, userName }: SidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
+    const [isOpen, setIsOpen] = useState(false);
 
     const handleLogout = async () => {
+        const role = userRole.toUpperCase();
         await signOut({
             fetchOptions: {
                 onSuccess: () => {
-                    router.push("/sign-in");
+                    if (role === "AGENT" || role === "ADMIN") {
+                        router.push("/admin/login");
+                    } else {
+                        router.push("/sign-in");
+                    }
                 }
             }
         });
     };
 
+    const SidebarContent = (
+        <aside
+            className={`fixed left-0 top-0 z-50 h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out
+                w-[75vw] max-w-[280px] sm:w-64 lg:w-64 xl:w-72
+                ${isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"}
+                md:translate-x-0 md:shadow-none md:z-30
+            `}
+        >
+            {/* Logo */}
+            <div className="flex items-center justify-between h-16 border-b border-gray-200 px-4 xl:px-6 shrink-0">
+                <span className="text-base xl:text-xl font-bold text-[var(--color-primary)] tracking-wide truncate">
+                    ATLE Immigration
+                </span>
+                <button
+                    onClick={() => setIsOpen(false)}
+                    className="md:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100 shrink-0"
+                    aria-label="Close menu"
+                >
+                    <X className="h-5 w-5" />
+                </button>
+            </div>
+
+            {/* User info */}
+            <div className="px-4 xl:px-6 py-4 border-b border-gray-200 shrink-0">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 xl:w-10 xl:h-10 rounded-full bg-[var(--color-secondary)] flex items-center justify-center text-[var(--color-primary)] font-bold shrink-0 text-sm xl:text-base">
+                        {userName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="overflow-hidden min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
+                        <p className="text-xs text-gray-500 capitalize">{userRole}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Nav links */}
+            <nav className="flex-1 overflow-y-auto px-3 xl:px-4 py-4 space-y-1">
+                {items.map((item) => {
+                    const isActive = pathname === item.href || pathname.endsWith(item.href);
+                    const IconComponent = iconMap[item.icon] || LayoutDashboard;
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setIsOpen(false)}
+                            className={`flex items-center px-3 xl:px-4 py-3 text-sm font-medium rounded-xl transition-all ${
+                                isActive
+                                    ? "bg-[var(--color-secondary)] text-[var(--color-primary)] shadow-sm"
+                                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            }`}
+                        >
+                            <IconComponent
+                                className={`mr-3 h-5 w-5 shrink-0 ${
+                                    isActive ? "text-[var(--color-primary)]" : "text-gray-400"
+                                }`}
+                            />
+                            <span className="truncate">{item.label}</span>
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            {/* Logout */}
+            <div className="px-3 xl:px-4 py-4 border-t border-gray-200 shrink-0">
+                <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center px-3 xl:px-4 py-3 text-sm font-medium text-gray-600 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all group"
+                >
+                    <LogOut className="mr-3 h-5 w-5 shrink-0 group-hover:rotate-12 transition-transform" />
+                    Logout
+                </button>
+            </div>
+        </aside>
+    );
+
     return (
         <>
-            {/* Mobile overlay */}
+            {/* ── Mobile top bar ── */}
+            <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 shadow-sm">
+                <button
+                    onClick={() => setIsOpen(true)}
+                    className="p-2 rounded-md text-gray-500 hover:bg-gray-100"
+                    aria-label="Open menu"
+                >
+                    <Menu className="h-5 w-5" />
+                </button>
+                <span className="text-base font-bold text-[var(--color-primary)] tracking-wide">
+                    ATLE Immigration
+                </span>
+                {/* Avatar shortcut */}
+                <div className="w-8 h-8 rounded-full bg-[var(--color-secondary)] flex items-center justify-center text-[var(--color-primary)] font-bold text-sm">
+                    {userName.charAt(0).toUpperCase()}
+                </div>
+            </header>
+
+            {/* Overlay */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm transition-opacity"
-                    onClick={onClose}
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+                    onClick={() => setIsOpen(false)}
                 />
             )}
 
-            <aside
-                className={`fixed left-0 top-0 z-50 h-screen w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
-                    } md:translate-x-0 md:z-30`}
-            >
-                <div className="flex items-center justify-between h-16 border-b border-gray-200 px-6">
-                    <span className="text-xl font-bold text-[var(--color-primary)] tracking-wide">ATLE Immigration</span>
-                    <button
-                        onClick={onClose}
-                        className="md:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100"
-                    >
-                        <X className="h-6 w-6" />
-                    </button>
-                </div>
-
-                <div className="p-4 border-b border-gray-200">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[var(--color-secondary)] flex items-center justify-center text-[var(--color-primary)] font-bold">
-                            {userName.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="overflow-hidden">
-                            <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
-                            <p className="text-xs text-gray-500 capitalize">{userRole}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-                    {items.map((item) => {
-                        const isActive = pathname === item.href || pathname.endsWith(item.href);
-                        const IconComponent = iconMap[item.icon] || LayoutDashboard;
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                onClick={onClose}
-                                className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all ${isActive
-                                    ? "bg-[var(--color-secondary)] text-[var(--color-primary)] shadow-sm"
-                                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                                    }`}
-                            >
-                                <IconComponent className={`mr-3 h-5 w-5 ${isActive ? "text-[var(--color-primary)]" : "text-gray-400"}`} />
-                                {item.label}
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                <div className="p-4 border-t border-gray-200">
-                    <button
-                        onClick={handleLogout}
-                        className="flex w-full items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all group"
-                    >
-                        <LogOut className="mr-3 h-5 w-5 group-hover:rotate-12 transition-transform" />
-                        Logout
-                    </button>
-                </div>
-            </aside>
+            {SidebarContent}
         </>
     );
 }

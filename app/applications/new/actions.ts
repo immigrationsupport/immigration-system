@@ -4,10 +4,13 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { APP_STEP_SEQUENCE } from "@/lib/steps";
+import { ApplicationType } from "@prisma/client";
 
 export async function createFullApplicationAction(data: {
     country: string;
-    procedures: { type: string; description: string }[];
+    type: string;
+    description: string;
 }) {
     const session = await auth.api.getSession({
         headers: await headers()
@@ -17,27 +20,29 @@ export async function createFullApplicationAction(data: {
         return { error: "Unauthorized" };
     }
 
-    if (!data.country || data.procedures.length === 0) {
-        return { error: "Country and at least one procedure are required." };
+    if (!data.country || !data.type) {
+        return { error: "Country and application type are required." };
     }
 
     try {
         const application = await prisma.application.create({
             data: {
                 country: data.country,
+                type: data.type as ApplicationType,
                 clientId: session.user.id,
                 status: "IN_PROGRESS",
-                procedures: {
-                    create: data.procedures.map(p => ({
-                        type: p.type as any,
-                        description: p.description,
-                        status: "IN_PROGRESS",
-                        isLocked: false
-                    }))
+                steps: {
+                    create: APP_STEP_SEQUENCE.map((stepType, index) => {
+                        const isFirstThree = index < 3;
+                        const isStep4 = index === 3;
+                        return {
+                            type: stepType,
+                            status: isFirstThree ? "APPROVED" : (isStep4 ? "IN_PROGRESS" : "PENDING"),
+                            isLocked: isFirstThree ? false : (isStep4 ? false : true),
+                            description: isFirstThree ? "Automatically verified." : null
+                        };
+                    })
                 }
-            },
-            include: {
-                procedures: true
             }
         });
 
@@ -45,7 +50,7 @@ export async function createFullApplicationAction(data: {
         await prisma.auditLog.create({
             data: {
                 action: "APPLICATION_CREATION",
-                details: `Client ${session.user.name} created an application for ${data.country}.`,
+                details: `Client ${session.user.name} created a ${data.type} application for ${data.country}.`,
                 userId: session.user.id
             }
         });

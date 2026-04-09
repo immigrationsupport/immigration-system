@@ -51,7 +51,6 @@ export default async function ClientMessagesPage() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 mt-0.5">
-                                        <span className="text-xs font-bold text-blue-600">From: {msg.sender.name}</span>
                                         <span className="bg-blue-50 text-blue-700 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">{msg.sender.role}</span>
                                     </div>
                                 </div>

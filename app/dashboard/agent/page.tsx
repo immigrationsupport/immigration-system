@@ -31,7 +31,7 @@ export default async function AgentDashboard() {
         prisma.application.count({
             where: {
                 OR: [{ agentId: session.user.id }, { client: { agentId: session.user.id } }],
-                status: "COMPLETED"
+                status: "APPROVED"
             }
         })
     ]);
@@ -42,7 +42,7 @@ export default async function AgentDashboard() {
         },
         include: {
             client: { select: { name: true, email: true } },
-            procedures: { select: { type: true } }
+            steps: { select: { type: true, status: true, isLocked: true }, orderBy: { createdAt: "asc" } }
         },
         orderBy: { updatedAt: "desc" },
         take: 5
@@ -119,7 +119,7 @@ export default async function AgentDashboard() {
                             <thead className="bg-gray-50/50 text-gray-400 uppercase text-[10px] font-black tracking-widest">
                                 <tr>
                                     <th className="px-6 py-4">Applicant</th>
-                                    <th className="px-6 py-4">Visa Type</th>
+                                    <th className="px-6 py-4">Current Step</th>
                                     <th className="px-6 py-4">Last Update</th>
                                     <th className="px-6 py-4">Status</th>
                                     <th className="px-6 py-4 text-right">Action</th>
@@ -129,17 +129,32 @@ export default async function AgentDashboard() {
                                 {recentApplications.map((app) => (
                                     <tr key={app.id} className="hover:bg-blue-50/30 transition-colors group">
                                         <td className="px-6 py-5">
-                                            <div className="font-bold text-gray-900">{app.client.name}</div>
+                                            <div className="font-bold text-gray-900">{(app as any).client.name}</div>
                                             <div className="text-[10px] text-gray-400 font-mono tracking-tighter uppercase">{app.country}</div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex gap-1 flex-wrap">
-                                                {app.procedures.map((p, i) => (
-                                                    <span key={i} className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-black">
-                                                        {p.type}
+                                            {(() => {
+                                                const STEP_LABELS: Record<string, string> = {
+                                                    REGISTRATION: "Registration",
+                                                    CONTRACT_SIGNING: "Contract Signing",
+                                                    FEE_PAYMENT: "Fee Payment",
+                                                    DOCUMENT_COLLECTION: "Document Collection",
+                                                    DIPLOMA_EQUIVALENCE: "Diploma Equivalence",
+                                                    LANGUAGE_TEST_REGISTRATION: "Language Test Reg.",
+                                                    LANGUAGE_TEST_RESULTS: "Language Test Results",
+                                                    PROFILE_CREATION: "Profile Creation",
+                                                    APPLICATION_SUBMISSION: "Application Submission",
+                                                    MEDICAL_EXAMINATION: "Medical Examination",
+                                                    PASSPORT_SUBMISSION: "Passport & Visa"
+                                                };
+                                                const activeStep = (app as any).steps.find((s: any) => s.status === "IN_PROGRESS" || (s.status === "PENDING" && !s.isLocked));
+                                                const stepLabel = activeStep ? STEP_LABELS[activeStep.type] ?? activeStep.type : "Document Collection";
+                                                return (
+                                                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[11px] font-bold">
+                                                        {stepLabel}
                                                     </span>
-                                                ))}
-                                            </div>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="px-6 py-5 text-gray-500 font-medium whitespace-nowrap">
                                             {new Date(app.updatedAt).toLocaleDateString()}

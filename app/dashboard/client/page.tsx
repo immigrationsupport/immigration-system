@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function ClientDashboard() {
     const session = await auth.api.getSession({
@@ -13,159 +14,171 @@ export default async function ClientDashboard() {
     if (!session) return null;
 
     const clientId = session.user.id;
+    
+    // Default values in case the DB query fails
+    let totalApps = 0, pendingApps = 0, approvedApps = 0, rejectedApps = 0;
+    let recentAppsRaw: any[] = [];
+
+    try {
+        // Fetch Stats with individual try/catch or Promise.all
+        const results = await Promise.all([
+            prisma.application.count({ where: { clientId } }),
+            prisma.application.count({ where: { clientId, status: "PENDING" } }),
+            prisma.application.count({ where: { clientId, status: "APPROVED" } }),
+            prisma.application.count({ where: { clientId, status: "REJECTED" } }),
+            prisma.application.findMany({
+                where: { clientId },
+                include: { 
+                    steps: { select: { status: true, type: true, isLocked: true } }
+                },
+                orderBy: { updatedAt: "desc" },
+                take: 5
+            })
+        ]);
+
+        [totalApps, pendingApps, approvedApps, rejectedApps, recentAppsRaw] = results;
+    } catch (error) {
+        console.error("[DASHBOARD_ERROR]: Database query failed. Check if columns exist.", error);
+    }
+
+    const recentApps = (recentAppsRaw || []).map((app: any) => {
+        const steps = app.steps || [];
+        const completedSteps = steps.filter((s: any) => s.status === "APPROVED").length;
+        const totalSteps = steps.length || 1; // Avoid division by zero
+        return {
+            ...app,
+            progress: Math.round((completedSteps / totalSteps) * 100),
+            completedSteps,
+            totalSteps
+        };
+    });
+
+    const profileCompleted = (session.user as any).profileCompleted;
     const isPending = (session.user as any).status === "PENDING";
 
-    // 1. Fetch Stats
-    const [totalApps, pendingApps, approvedApps, rejectedApps, recentApps] = await Promise.all([
-        prisma.application.count({ where: { clientId } }),
-        prisma.application.count({ where: { clientId, status: "PENDING" } }),
-        prisma.application.count({ where: { clientId, status: "APPROVED" } }),
-        prisma.application.count({ where: { clientId, status: "REJECTED" } }),
-        prisma.application.findMany({
-            where: { clientId },
-            include: { procedures: { select: { type: true } } },
-            orderBy: { updatedAt: "desc" },
-            take: 5
-        })
-    ]);
+    // Fetch Action Required count from steps
+    const actionRequiredCount = await prisma.application.count({
+        where: { 
+            clientId,
+            steps: { some: { status: "ACTION_REQUIRED" } }
+        }
+    });
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto py-8 px-4">
-            <div className="flex flex-col gap-1">
-                <h1 className="text-3xl font-black text-[#1E3A8A] tracking-tight uppercase">Dashboard Overview</h1>
-                <p className="text-gray-500 font-medium">Track your immigration status and document progress.</p>
+            {/* Header and UI sections remain the same... */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex flex-col gap-1">
+                    <h1 className="text-3xl font-black text-[#1E3A8A] tracking-tight uppercase">Dashboard Overview</h1>
+                    <p className="text-gray-500 font-medium tracking-tight">Track your immigration status.</p>
+                </div>
             </div>
 
+            {/* Validation Message for Pending Clients */}
             {isPending && (
-                <div className="bg-gray-50 border border-amber-200 text-amber-800 px-6 py-4 rounded-xl flex items-center gap-3 shadow-sm">
-                    <Clock className="h-6 w-6 text-amber-500" />
-                    <div>
-                        <h3 className="font-bold text-lg">Your account is awaiting admin validation.</h3>
-                        <p className="text-sm">You have limited access until your account is approved. You cannot create applications or upload documents.</p>
-                    </div>
-                </div>
+                <Card className="border-none bg-amber-50 shadow-sm rounded-3xl overflow-hidden border border-amber-100 animate-in fade-in slide-in-from-top-4 duration-700">
+                    <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-5">
+                            <div className="bg-amber-100 p-4 rounded-2xl text-amber-700 shadow-sm">
+                                <Clock size={32} className="animate-pulse" />
+                            </div>
+                            <div className="space-y-1">
+                                <h3 className="text-xl font-bold text-amber-900 uppercase tracking-tight">Account Awaiting Validation</h3>
+                                <p className="text-amber-800/80 font-medium text-sm leading-relaxed max-w-2xl">
+                                    Your account is currently under review by our administration. To accelerate the validation process or for any urgent inquiries, please contact our agency directly.
+                                </p>
+                            </div>
+                        </div>
+                        <Link href="/contact">
+                            <Button className="bg-amber-600 hover:bg-amber-700 text-white font-black px-8 py-6 rounded-2xl shadow-lg shadow-amber-200 transition-all hover:scale-105">
+                                Contact Agency Now
+                            </Button>
+                        </Link>
+                    </CardContent>
+                </Card>
             )}
 
+            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Total Applications */}
-                <div
-
-                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
-                    style={{ borderRadius: "16px" }}
-                >
-                    <div className="p-4 rounded-2xl bg-blue-50 text-[#1E3A8A] group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
-                        <FileText size={26} color="black" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Total Cases</p>
-                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{totalApps}</h3>
-                    </div>
-                </div>
-
-                {/* Pending */}
-                <div
-
-                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
-                    style={{ borderRadius: "16px" }}
-                >
-                    <div className="p-4 rounded-2xl bg-amber-50 text-[#1E3A8A] group-hover:bg-amber-500 group-hover:text-white transition-all duration-300">
-                        <Clock size={26} color="black" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Pending</p>
-                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{pendingApps}</h3>
-                    </div>
-                </div>
-                {/* Approved */}
-                <div
-
-                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
-                    style={{ borderRadius: "16px" }}
-                >
-                    <div className="p-4 rounded-2xl bg-green-50 text-[#1E3A8A] group-hover:bg-green-500 group-hover:text-white transition-all duration-300">
-                        <CheckCircle size={26} color="black" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Success</p>
-                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{approvedApps}</h3>
-                    </div>
-                </div>
-                {/* Rejected */}
-                <div
-
-                    className="bg-white p-6 shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg hover:-translate-y-1 group"
-                    style={{ borderRadius: "16px" }}
-                >
-                    <div className="p-4 rounded-2xl bg-red-50 text-[#1E3A8A] group-hover:bg-red-500 group-hover:text-white transition-all duration-300">
-                        <XCircle size={26} color="black" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Action Req.</p>
-                        <h3 className="text-3xl font-black text-gray-900 mt-0.5">{rejectedApps}</h3>
-                    </div>
-                </div>
+                <StatCard icon={<FileText size={26} />} label="Total Cases" value={totalApps} color="blue" />
+                <StatCard icon={<Clock size={26} />} label="Pending" value={pendingApps} color="amber" />
+                <StatCard icon={<CheckCircle size={26} />} label="Success" value={approvedApps} color="green" />
+                <StatCard 
+                    icon={<XCircle size={26} className={actionRequiredCount > 0 ? "animate-pulse" : ""} />} 
+                    label="Action Req." 
+                    value={actionRequiredCount} 
+                    color="red" 
+                    link="/dashboard/client/messages"
+                    isUrgent={actionRequiredCount > 0}
+                />
             </div>
 
-            <Card className="border-none shadow-xl shadow-gray-200/50 rounded-3xl overflow-hidden mt-8">
-                <CardHeader className="bg-white border-b border-gray-50 py-6 px-8">
-                    <div className="flex justify-between items-center">
-                        <CardTitle className="text-lg font-black text-[#1E3A8A] uppercase tracking-tight">Active Applications</CardTitle>
-                    </div>
-                </CardHeader>
+            {/* Applications Table */}
+            <Card className="border-none shadow-xl rounded-3xl overflow-hidden mt-8">
                 <CardContent className="p-0">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-gray-50/50 text-gray-400 uppercase text-[10px] font-black tracking-widest">
                                 <tr>
                                     <th className="px-8 py-4">Country</th>
-                                    <th className="px-8 py-4">Type</th>
-                                    <th className="px-8 py-4">Last Update</th>
-                                    <th className="px-8 py-4">Status</th>
+                                    <th className="px-8 py-4">Current Step</th>
+                                    <th className="px-8 py-4">Progress</th>
                                     <th className="px-8 py-4 text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 bg-white">
                                 {recentApps.length > 0 ? (
                                     recentApps.map((app) => (
-                                        <tr key={app.id} className="hover:bg-blue-50/30 transition-colors group">
-                                            <td className="px-8 py-5">
-                                                <div className="font-bold text-gray-900 text-base">{app.country}</div>
-                                            </td>
-                                            <td className="px-8 py-5">
-                                                <div className="flex gap-1 flex-wrap">
-                                                    {app.procedures.map((p, i) => (
-                                                        <span key={i} className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">
-                                                            {p.type}
+                                        <tr key={app.id} className="hover:bg-blue-50/30 transition-colors">
+                                            <td className="px-8 py-5 font-bold">{app.country}</td>
+                                            <td className="px-8 py-5 text-xs font-bold">
+                                                {(() => {
+                                                    const STEP_LABELS: Record<string, string> = {
+                                                        REGISTRATION: "Registration",
+                                                        CONTRACT_SIGNING: "Contract Signing",
+                                                        FEE_PAYMENT: "Fee Payment",
+                                                        DOCUMENT_COLLECTION: "Document Collection",
+                                                        DIPLOMA_EQUIVALENCE: "Diploma Equivalence",
+                                                        LANGUAGE_TEST_REGISTRATION: "Language Test Reg.",
+                                                        LANGUAGE_TEST_RESULTS: "Language Test Results",
+                                                        PROFILE_CREATION: "Profile Creation",
+                                                        APPLICATION_SUBMISSION: "Application Submission",
+                                                        MEDICAL_EXAMINATION: "Medical Examination",
+                                                        PASSPORT_SUBMISSION: "Passport & Visa"
+                                                    };
+                                                    const steps = app.steps || [];
+                                                    const activeStep = steps.find((s: any) => s.status === "ACTION_REQUIRED" || s.status === "IN_PROGRESS" || (s.status === "PENDING" && !s.isLocked));
+                                                    const stepLabel = activeStep ? STEP_LABELS[(activeStep as any).type] ?? (activeStep as any).type : "Document Collection";
+                                                    
+                                                    return (
+                                                        <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${
+                                                            (activeStep as any)?.status === "ACTION_REQUIRED" 
+                                                            ? "bg-red-50 text-red-700" 
+                                                            : "bg-blue-50 text-blue-700"
+                                                        }`}>
+                                                            {stepLabel}
                                                         </span>
-                                                    ))}
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-5 text-gray-500 font-medium whitespace-nowrap">
-                                                {new Date(app.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    );
+                                                })()}
                                             </td>
                                             <td className="px-8 py-5">
-                                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tight ${app.status === "APPROVED" ? "bg-emerald-100 text-emerald-700" :
-                                                    app.status === "REJECTED" ? "bg-red-100 text-red-700" :
-                                                        app.status === "IN_REVIEW" ? "bg-amber-100 text-amber-700" :
-                                                            "bg-blue-100 text-blue-700"
-                                                    }`}>
-                                                    {app.status.replace("_", " ")}
-                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                                        <div className="h-full bg-blue-600" style={{ width: `${app.progress}%` }} />
+                                                    </div>
+                                                    <span className="text-[10px]">{app.completedSteps}/{app.totalSteps}</span>
+                                                </div>
                                             </td>
                                             <td className="px-8 py-5 text-right">
                                                 <Link href={`/dashboard/client/applications/${app.id}`}>
-                                                    <button className="inline-flex items-center gap-2 bg-white border border-gray-200 text-[#1E3A8A] px-4 py-2 rounded-xl text-xs font-black shadow-sm hover:bg-[#1E3A8A] hover:text-white hover:border-[#1E3A8A] transition-all">
-                                                        View application <ArrowRight className="h-3 w-3" />
-                                                    </button>
+                                                    <Button variant="outline" size="sm">View Application</Button>
                                                 </Link>
                                             </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={5} className="px-8 py-20 text-center text-gray-400 font-bold bg-gray-50/50">
-                                            No applications found. Start by choosing a pathway.
-                                        </td>
+                                        <td colSpan={4} className="px-8 py-20 text-center text-gray-400">No applications found.</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -177,3 +190,31 @@ export default async function ClientDashboard() {
     );
 }
 
+// Reusable StatCard for cleaner code
+function StatCard({ icon, label, value, color, link, isUrgent }: any) {
+    const colors: any = {
+        blue: "bg-blue-50 text-blue-600",
+        amber: "bg-amber-50 text-amber-600",
+        green: "bg-green-50 text-green-600",
+        red: "bg-red-50 text-red-600",
+    };
+
+    const content = (
+        <div className={`bg-white p-6 shadow-sm border ${isUrgent ? 'border-red-200 ring-2 ring-red-50 animate-in fade-in' : 'border-gray-100'} flex items-center gap-5 rounded-2xl transition-all hover:shadow-md cursor-pointer group`}>
+            <div className={`p-4 rounded-2xl transition-all ${colors[color]} ${isUrgent ? 'animate-pulse' : ''} group-hover:scale-110`}>{icon}</div>
+            <div className="flex-1">
+                <p className="text-[10px] font-black uppercase tracking-widest">{label}</p>
+                <div className="flex items-center justify-between">
+                    <h3 className="text-3xl font-black text-gray-900">{value}</h3>
+                    {link && <ArrowRight size={16} className="text-gray-300 group-hover:text-gray-900 group-hover:translate-x-1 transition-all" />}
+                </div>
+            </div>
+        </div>
+    );
+
+    if (link) {
+        return <Link href={link}>{content}</Link>;
+    }
+
+    return content;
+}

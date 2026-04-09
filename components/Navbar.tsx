@@ -27,7 +27,7 @@ export default function Navbar() {
             router.push("/#services");
         } else if (query.includes("about") || query.includes("agency") || query.includes("firm")) {
             router.push("/#about");
-        } else if (query.includes("destination") || query.includes("countr") || query.includes("canada") || query.includes("france") || query.includes("germany")) {
+        } else if (query.includes("destination") || query.includes("countr") || query.includes("canada")) {
             router.push("/#destinations");
         } else if (query.includes("contact") || query.includes("consultation") || query.includes("email") || query.includes("phone")) {
             router.push("/#contact");

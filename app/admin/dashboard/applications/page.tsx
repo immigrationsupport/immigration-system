@@ -22,7 +22,7 @@ export default async function AllApplicationsPage() {
                     name: true
                 }
             },
-            procedures: {
+            steps: {
                 select: {
                     type: true
                 },
@@ -38,7 +38,7 @@ export default async function AllApplicationsPage() {
     const applications = rawApplications.map(app => ({
         ...app,
         destination: app.country,
-        type: app.procedures[0]?.type || "GENERAL"
+        type: (app as any).steps[0]?.type || "GENERAL"
     }));
 
     // Fetch agents for the assignment dropdown

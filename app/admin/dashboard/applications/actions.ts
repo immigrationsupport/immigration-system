@@ -24,23 +24,23 @@ export async function deleteApplicationAction(applicationId: string) {
 
         await prisma.$transaction(async (tx) => {
             // Delete related documents first
-            const procedures = await tx.procedure.findMany({
+            const steps = await tx.applicationStep.findMany({
                 where: { applicationId },
                 select: { id: true }
             });
-            const procedureIds = procedures.map(p => p.id);
+            const stepIds = steps.map((p: any) => p.id);
 
             await tx.document.deleteMany({
-                where: { procedureId: { in: procedureIds } }
+                where: { procedureId: { in: stepIds } }
             });
 
             // Delete messages
             await tx.message.deleteMany({
-                where: { procedureId: { in: procedureIds } }
+                where: { procedureId: { in: stepIds } }
             });
 
-            // Delete procedures
-            await tx.procedure.deleteMany({
+            // Delete steps
+            await tx.applicationStep.deleteMany({
                 where: { applicationId }
             });
 

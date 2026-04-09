@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, FileText, GraduationCap, Home as HomeIcon, Briefcase, Building2, MessageSquare, CheckCircle, Phone } from "lucide-react";
+import QuickContactForm from "@/components/home/QuickContactForm";
 
 const services = [
   { icon: <Briefcase className="w-6 h-6 text-[#1E3A8A]" strokeWidth={1.8}/>, title: "Work Visa", desc: "End-to-end assistance for H-1B, L-1, O-1 and other work permit categories enabling professionals to join global workforces legally." },
@@ -14,11 +15,9 @@ const services = [
 
 const destinations = [
   { country: "🇨🇦 Canada", img: "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?w=600&q=80" },
-  { country: "🇫🇷 France", img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80" },
-  { country: "🇩🇪 Germany", img: "https://images.unsplash.com/photo-1555952517-2e8e729e0b44?w=600&q=80" },
 ];
 
-const checks = ["Certified Consultants","Real-Time Status Updates","Confidential & Secure","Fast Processing Times","50+ Countries Covered","98.4% Approval Rate"];
+const checks = ["Certified Consultants","Real-Time Status Updates","Confidential & Secure","Fast Processing Times","Canada Specialist Agents","98.4% Approval Rate"];
 
 const tickerItems = ["Visa Assistance","Travel Planning","Global Immigration","Work Permits","Residency Services","Citizenship"];
 
@@ -106,7 +105,7 @@ export default function Home() {
               { num: "5+", label: "Years of Experience" },
               { num: "1,250+", label: "Applications Processed" },
               { num: "88.4%", label: "Success Rate" },
-              { num: "5+", label: "Countries Covered" },
+              { num: "100%", label: "Canada Dedicated" },
             ].map(({ num, label }, i) => (
               <div key={label} className={`text-center py-4 ${i > 0 ? "border-l border-slate-100" : ""}`}>
                 <div className="text-[38px] font-extrabold text-[#1E3A8A] leading-none" style={{ fontFamily: "Georgia, serif" }}>{num}</div>
@@ -143,8 +142,8 @@ export default function Home() {
                   <h3 className="text-[18px] font-extrabold text-white mb-3">Custom Case Review</h3>
                   <p className="text-[14px] text-white/75 leading-[1.75] mb-5">Have a complex immigration challenge? Our Senior Partners build a tailored legal strategy just for you.</p>
                 </div>
-                <Link href="/contact" className="inline-flex items-center gap-1.5 text-[13px] font-bold text-white">
-                  Contact Us <ArrowRight className="w-3.5 h-3.5" />
+                <Link href="#contact" className="inline-flex items-center gap-1.5 text-[13px] font-bold text-white uppercase tracking-widest hover:gap-3 transition-all">
+                  Book a Consultation <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
@@ -219,19 +218,38 @@ export default function Home() {
         </section>
 
         {/* ── CTA ── */}
-        <div id="contact" className="relative py-20 px-8 overflow-hidden">
+        <div id="contact" className="relative py-24 px-8 overflow-hidden">
           <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1400&q=80" alt="cta bg"  className=" absolute inset-0 w-full h-full object-cover"/>
-          <div className="absolute inset-0 bg-[#0a1946]/82"/>
-          <div className="relative z-10 max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-10">
-            <div>
-              <p className="text-[40px] font-extrabold text-white mb-4 leading-[1.2]" style={{ fontFamily: "Georgia, serif" }}>
-                Book a Free Consultation<br />with Us Today
+          <div className="absolute inset-0 bg-[#0a1946]/85 backdrop-blur-[2px]"/>
+          
+          <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div className="animate-in fade-in slide-in-from-left-8 duration-1000">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-full text-blue-200 text-xs font-black uppercase tracking-widest mb-6">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                Available Now
+              </div>
+              <h2 className="text-[48px] lg:text-[56px] font-black text-white mb-6 leading-[1.05] tracking-tighter" style={{ fontFamily: "Georgia, serif" }}>
+                Book a Free<br />
+                <span className="text-blue-400">Consultation</span>
+              </h2>
+              <p className="text-lg text-white/70 max-w-lg leading-relaxed mb-8">
+                Our certified consultants are available for a detailed evaluation of your immigration status and goals. Send us a quick message to get started.
               </p>
-              <p className="text-[16px] text-white/70 max-w-lg leading-[1.7]">Our certified consultants are available for a detailed evaluation of your immigration status and goals. Response within 24 hours.</p>
-            </div>
-            <div className="flex gap-4 flex-shrink-0">
-              <Link href="/contact" className="px-8 py-4 bg-white text-[#1E3A8A] text-[14px] font-extrabold rounded-lg hover:bg-[#EEF2FF] hover:-translate-y-px transition-all">Book Consultation</Link>
-              <Link href="/contact" className="px-8 py-4 border-2 border-white/50 text-white text-[14px] font-bold rounded-lg hover:border-white hover:bg-white/10 transition-all">Contact Us</Link>
+              
+              <div className="flex flex-col gap-5">
+                <div className="flex items-center gap-4 text-white/80">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-blue-400">
+                    <CheckCircle size={20} />
+                  </div>
+                  <span className="font-bold">Official response within 24 hours</span>
+                </div>
+                <div className="flex items-center gap-4 text-white/80">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-blue-400">
+                    <CheckCircle size={20} />
+                  </div>
+                  <span className="font-bold">100% Secure & Confidential</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

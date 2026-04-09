@@ -17,7 +17,7 @@ import { Send, Loader2, MailCheck } from "lucide-react";
 import { sendOfficialMessageAction } from "./actions";
 import { toast } from "sonner";
 
-export default function SendMessageModal({ clientId, clientName, defaultSubject = "", buttonText = "Send Official Message" }: { clientId: string, clientName: string, defaultSubject?: string, buttonText?: string }) {
+export default function SendMessageModal({ clientId, clientName, defaultSubject = "", buttonText = "Send Official Message" }: { clientId: string, clientName: string, defaultSubject?: string, buttonText?: React.ReactNode }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [subject, setSubject] = useState(defaultSubject);
@@ -43,8 +43,8 @@ export default function SendMessageModal({ clientId, clientName, defaultSubject 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-[#1E3A8A] hover:bg-[#152a6a] text-white font-black rounded-xl gap-2 shadow-lg shadow-blue-100 px-6">
-                    <Send className="h-4 w-4" /> {buttonText}
+                <Button variant="ghost" className="h-10 px-3 hover:bg-red-50 text-red-500 rounded-xl transition-all">
+                    {buttonText}
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] border-none shadow-2xl rounded-2xl">

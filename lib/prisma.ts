@@ -1,40 +1,30 @@
-import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
-// Explicit initialization for Prisma 7 with pg adapter
+const connectionString = `${process.env.DATABASE_URL}`;
+
 const globalForPrisma = global as unknown as {
-    prisma_final_v7: PrismaClient | undefined;
+    prisma: PrismaClient | undefined;
+    pool: Pool | undefined;
 };
 
-const createPrisma = () => {
-    console.log("[PRISMA] Initializing with @prisma/adapter-pg...");
+// Singleton Pool to prevent connection exhaustion
+const pool = globalForPrisma.pool || new Pool({ 
+    connectionString,
+    connectionTimeoutMillis: 30000,
+    max: 10, 
+});
 
-    const dbUrl = (process.env.DATABASE_URL || "").replace(/['"]+/g, '');
-    if (!dbUrl) {
-        console.error("[PRISMA] CRITICAL ERROR: DATABASE_URL is missing!");
-    }
+if (process.env.NODE_ENV !== "production") globalForPrisma.pool = pool;
 
-    const pool = new Pool({
-        connectionString: dbUrl,
-        connectionTimeoutMillis: 15000, // 15 seconds to handle Neon cold starts
-    });
+const adapter = new PrismaPg(pool);
 
-    pool.on('error', (err) => {
-        console.error('[PRISMA-POOL] Unexpected error on idle client', err);
-    });
+export const prisma = globalForPrisma.prisma || new PrismaClient({ 
+    adapter, 
+    log: ["error", "warn"] 
+});
 
-    const adapter = new PrismaPg(pool);
-
-    return new PrismaClient({
-        adapter,
-        log: ["error", "warn"]
-    });
-};
-
-export const prisma = globalForPrisma.prisma_final_v7 || createPrisma();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma_final_v7 = prisma;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export default prisma;

@@ -193,7 +193,6 @@ export default function CompleteProfilePage() {
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 py-12">
             <Card className="w-full max-w-2xl shadow-xl border-gray-100 overflow-hidden">
-                <div className="h-2 w-full bg-[#1E3A8A]" />
                 <CardHeader className="pt-8 pb-4 text-center">
                     <div className="mx-auto bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mb-4">
                         <User className="h-8 w-8 text-[#1E3A8A]" />
@@ -213,17 +212,17 @@ export default function CompleteProfilePage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Date of Birth */}
                             <div className="space-y-1.5">
-                                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-blue-500" /> Date of Birth
-                                </label>
-                                <Input
-                                    name="dateOfBirth"
-                                    type="date"
-                                    className="h-11 border-gray-200 focus:ring-[#1E3A8A]"
-                                    required
-                                />
-                            </div>
-
+           <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <Calendar className="h-4 w-4 text-blue-500" /> Date of Birth
+    </label>
+    <Input
+        name="dateOfBirth"
+        type="date"
+        className="h-11 border-gray-200 focus:ring-[#1E3A8A]"
+        max={new Date().toISOString().split("T")[0]}
+        required
+    />
+</div>
                             {/* Nationality — Searchable Combobox */}
                             <div className="space-y-1.5">
                                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -265,20 +264,7 @@ export default function CompleteProfilePage() {
                                 />
                             </div>
                         </div>
-
-                        {/* Phone Number */}
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                <Phone className="h-4 w-4 text-blue-500" /> Phone Number
-                            </label>
-                            <Input
-                                name="phoneNumber"
-                                type="tel"
-                                placeholder="+1 234 567 8900"
-                                className="h-11 border-gray-200 focus:ring-[#1E3A8A]"
-                                required
-                            />
-                        </div>
+                       
 
                         {/* Address */}
                         <div className="space-y-1.5">

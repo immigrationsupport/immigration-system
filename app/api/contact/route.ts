@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         if (!gmailUser || !gmailPass) {
             console.error("[Contact API] Gmail credentials not configured.");
             return NextResponse.json(
-                { error: "Email service not configured. Please contact us directly at emilieag573@gmail.com" },
+                { error: "Failed to send message. Please email us directly at emilieag573@gmail.com" },
                 { status: 503 }
             );
         }
