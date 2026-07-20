@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { signUp } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { role } from "better-auth/plugins";
-import { property } from "better-auth";
 
 export default function AdminRegisterPage() {
     const router = useRouter();

@@ -1,7 +1,7 @@
 // Forced rebuild to resolve import path cache
 import React from "react";
 import prisma from "@/lib/prisma";
-import ApplicationTable from "@/app/admin/dashboard/applications/application-table";
+import ApplicationTable from "./application-table";
 
 export const dynamic = "force-dynamic";
 

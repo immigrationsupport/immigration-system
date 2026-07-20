@@ -23,7 +23,7 @@ import {
     Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getApplicationDetails, unlockApplication, validateApplication } from "@/app/admin/dashboard/applications/details-actions";
+import { getApplicationDetails, unlockApplication, validateApplication } from "./details-actions";
 import { toast } from "sonner";
 
 interface DetailsModalProps {
@@ -210,7 +210,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                                     <div className="bg-gray-50/50 rounded-xl p-5 border border-gray-100 hover:border-blue-200 transition-colors">
                                                         <div className="flex justify-between items-start mb-2">
                                                             <h4 className="font-bold text-gray-900 text-sm">Procedure: {proc.type.replace('_', ' ')}</h4>
-                                                            <span className="text-[10px] text-gray-400 font-medium">{new Date(proc.updatedAt).toLocaleDateString()}</span>
+                                                            <span className="text-[10px] text-gray-400 font-medium">{new Date(proc.updatedAt).toLocaleDateString("en-US")}</span>
                                                         </div>
                                                         <p className="text-xs text-gray-600 mb-4 bg-white p-3 rounded-lg border border-gray-100 shadow-sm leading-relaxed italic">
                                                             "{proc.description || "No description provided."}"

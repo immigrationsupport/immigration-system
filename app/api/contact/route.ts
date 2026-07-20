@@ -3,6 +3,43 @@ import nodemailer from "nodemailer";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * @swagger
+ * /api/contact:
+ *   post:
+ *     summary: Send contact email
+ *     description: Submits the contact form and sends an email to the administrator.
+ *     tags:
+ *       - Contact
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullName
+ *               - email
+ *               - message
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Email sent successfully
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Internal server error
+ *       503:
+ *         description: Service unavailable (SMTP credentials not configured)
+ */
 export async function POST(req: NextRequest) {
     try {
         const { fullName, email, phone, message } = await req.json();
@@ -34,7 +71,7 @@ export async function POST(req: NextRequest) {
                 pass: gmailPass, // Must be a Gmail App Password, not your account password
             },
         });
-
+        console.log("Transporter configured:", { gmailUser });
         // Send the email
         await transporter.sendMail({
             from: `"ATLE Immigration" <${gmailUser}>`,

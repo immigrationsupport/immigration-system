@@ -110,7 +110,7 @@ export default function AdminSettingsPage() {
                         <div className="space-y-4">
                             <div className="flex justify-between text-xs font-bold">
                                 <span className="opacity-60">Last Update</span>
-                                <span>{new Date().toLocaleDateString()}</span>
+                                <span>{new Date().toLocaleDateString("en-US")}</span>
                             </div>
                             <div className="flex justify-between text-xs font-bold">
                                 <span className="opacity-60">Status</span>

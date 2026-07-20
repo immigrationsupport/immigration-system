@@ -1,15 +1,20 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { LogIn, Search, Menu, X } from "lucide-react";
+import { Link, usePathname, useRouter } from "@/i18n/routing";
+import { LogIn, Search, Menu, X, Globe, ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function Navbar() {
+    const t = useTranslations("navigation.navbar");
+    const tCommon = useTranslations("common");
+    const locale = useLocale();
     const pathname = usePathname();
     const router = useRouter();
+    
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [isLangOpen, setIsLangOpen] = useState(false);
 
     // Helper to determine if a link is active
     const isActive = (path: string) => pathname === path;
@@ -37,6 +42,11 @@ export default function Navbar() {
         }
     };
 
+    const changeLanguage = (nextLocale: "en" | "fr") => {
+        setIsLangOpen(false);
+        router.replace(pathname, { locale: nextLocale });
+    };
+
     return (
         <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -48,7 +58,7 @@ export default function Navbar() {
                             <div className="w-8 h-8 bg-[#1E3A8A] mr-3 rounded-sm flex items-center justify-center">
                                 <span className="text-white text-lg font-serif">A</span>
                             </div>
-                            ATLE Immigration
+                            {tCommon("appName")}
                         </Link>
                     </div>
 
@@ -58,50 +68,81 @@ export default function Navbar() {
                             href="/" 
                             className={`font-bold text-[16px] lg:text-[18px] transition-colors ${isActive('/') ? 'text-[#1E3A8A]' : 'text-[#374151] hover:text-[#1E3A8A]'}`}
                         >
-                            Home
+                            {t("home")}
                         </Link>
                         <Link 
                             href="/services" 
                             className={`font-bold text-[16px] lg:text-[18px] transition-colors ${isActive('/services') ? 'text-[#1E3A8A]' : 'text-[#374151] hover:text-[#1E3A8A]'}`}
                         >
-                            Services
+                            {t("services")}
                         </Link>
                         <Link 
                             href="/about" 
                             className={`font-bold text-[16px] lg:text-[18px] transition-colors ${isActive('/about') ? 'text-[#1E3A8A]' : 'text-[#374151] hover:text-[#1E3A8A]'}`}
                         >
-                            About Us
+                            {t("about")}
                         </Link>
                         <Link 
                             href="/contact" 
                             className={`font-bold text-[16px] lg:text-[18px] transition-colors ${isActive('/contact') ? 'text-[#1E3A8A]' : 'text-[#374151] hover:text-[#1E3A8A]'}`}
                         >
-                            Contact
+                            {t("contact")}
                         </Link>
                     </div>
 
-                    {/* Right Section: Search & Actions */}
+                    {/* Right Section: Search, Language Switcher & Actions */}
                     <div className="hidden lg:flex items-center space-x-4">
                         {/* Desktop Search Bar */}
-                        <form onSubmit={handleSearch} className="relative w-56 lg:w-64">
+                        <form onSubmit={handleSearch} className="relative w-48 lg:w-56">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <Search className="h-4 w-4 text-gray-400" />
                             </div>
                             <input
                                 type="text"
-                                placeholder="Search here..."
+                                placeholder={`${tCommon("search")}...`}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-md leading-5 bg-gray-50 placeholder-[#6B7280] focus:outline-none focus:placeholder-[#4B5563] focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] text-[16px] font-medium transition-colors"
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-gray-50 placeholder-[#6B7280] focus:outline-none focus:placeholder-[#4B5563] focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] text-[15px] font-medium transition-colors"
                             />
                         </form>
 
+                        {/* Language Selector Dropdown */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setIsLangOpen(!isLangOpen)}
+                                className="flex items-center space-x-1 px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none transition-colors font-bold text-[15px] cursor-pointer"
+                            >
+                                <Globe className="w-4 h-4 text-gray-500" />
+                                <span className="uppercase">{locale}</span>
+                                <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
+                            </button>
+                            {isLangOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setIsLangOpen(false)} />
+                                    <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50">
+                                        <button
+                                            onClick={() => changeLanguage('en')}
+                                            className={`w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer ${locale === 'en' ? 'bg-[#1E3A8A] text-white font-semibold' : 'text-gray-700 hover:bg-gray-100'}`}
+                                        >
+                                            English
+                                        </button>
+                                        <button
+                                            onClick={() => changeLanguage('fr')}
+                                            className={`w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer ${locale === 'fr' ? 'bg-[#1E3A8A] text-white font-semibold' : 'text-gray-700 hover:bg-gray-100'}`}
+                                        >
+                                            Français
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
                         <Link
                             href="/sign-in"
-                            className="inline-flex items-center justify-center px-6 py-2.5 border-2 border-[#1E3A8A] text-[#1E3A8A] hover:bg-blue-50 bg-white rounded-md text-[16px] font-extrabold transition-colors"
+                            className="inline-flex items-center justify-center px-5 py-2 border-2 border-[#1E3A8A] text-[#1E3A8A] hover:bg-blue-50 bg-white rounded-md text-[15px] font-extrabold transition-colors"
                         >
-                            <LogIn className="w-5 h-5 mr-2" />
-                             Login
+                            <LogIn className="w-4 h-4 mr-2" />
+                            {t("login")}
                         </Link>
                     </div>
 
@@ -135,7 +176,7 @@ export default function Navbar() {
                             </div>
                             <input
                                 type="text"
-                                placeholder="Search for applications, services..."
+                                placeholder={`${tCommon("search")}...`}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] text-base transition-colors"
@@ -148,29 +189,51 @@ export default function Navbar() {
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={`block px-3 py-3 rounded-md text-base font-medium ${isActive('/') ? 'bg-blue-50 text-[#1E3A8A]' : 'text-gray-900 hover:bg-gray-50 hover:text-[#1E3A8A]'}`}
                             >
-                                Home
+                                {t("home")}
                             </Link>
                             <Link 
                                 href="/services" 
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={`block px-3 py-3 rounded-md text-base font-medium ${isActive('/services') ? 'bg-blue-50 text-[#1E3A8A]' : 'text-gray-900 hover:bg-gray-50 hover:text-[#1E3A8A]'}`}
                             >
-                                Services
+                                {t("services")}
                             </Link>
                             <Link 
                                 href="/about" 
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={`block px-3 py-3 rounded-md text-base font-medium ${isActive('/about') ? 'bg-blue-50 text-[#1E3A8A]' : 'text-gray-900 hover:bg-gray-50 hover:text-[#1E3A8A]'}`}
                             >
-                                About Us
+                                {t("about")}
                             </Link>
                             <Link 
                                 href="/contact" 
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={`block px-3 py-3 rounded-md text-base font-medium ${isActive('/contact') ? 'bg-blue-50 text-[#1E3A8A]' : 'text-gray-900 hover:bg-gray-50 hover:text-[#1E3A8A]'}`}
                             >
-                                Contact
+                                {t("contact")}
                             </Link>
+                        </div>
+
+                        {/* Mobile Language Switcher */}
+                        <div className="flex justify-between items-center px-3 py-2 border border-gray-200 rounded-md bg-gray-50">
+                            <span className="text-gray-600 text-sm font-semibold flex items-center">
+                                <Globe className="w-4 h-4 mr-2 text-gray-500" />
+                                {t("language")}
+                            </span>
+                            <div className="flex space-x-1">
+                                <button
+                                    onClick={() => { changeLanguage('en'); setIsMobileMenuOpen(false); }}
+                                    className={`px-3 py-1.5 text-xs rounded font-bold transition-all cursor-pointer ${locale === 'en' ? 'bg-[#1E3A8A] text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                                >
+                                    EN
+                                </button>
+                                <button
+                                    onClick={() => { changeLanguage('fr'); setIsMobileMenuOpen(false); }}
+                                    className={`px-3 py-1.5 text-xs rounded font-bold transition-all cursor-pointer ${locale === 'fr' ? 'bg-[#1E3A8A] text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                                >
+                                    FR
+                                </button>
+                            </div>
                         </div>
 
                         <div className="pt-4 border-t border-gray-200">
@@ -180,7 +243,7 @@ export default function Navbar() {
                                 className="w-full flex items-center justify-center px-4 py-3 border border-[#1E3A8A] text-[#1E3A8A] hover:bg-blue-50 bg-white rounded-md text-base font-semibold transition-colors"
                             >
                                 <LogIn className="w-5 h-5 mr-2" />
-                                Login
+                                {t("login")}
                             </Link>
                         </div>
                     </div>

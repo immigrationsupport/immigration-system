@@ -1,6 +1,33 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+/**
+ * @swagger
+ * /api/migrate-legacy:
+ *   get:
+ *     summary: Migrate legacy applications
+ *     description: Finds pending applications with locked procedures and updates their status to SUBMITTED.
+ *     tags:
+ *       - System
+ *     responses:
+ *       200:
+ *         description: Migration successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 updatedCount:
+ *                   type: number
+ *                 applications:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       500:
+ *         description: Migration failed
+ */
 export async function GET() {
     try {
         console.log("Fetching legacy applications...");

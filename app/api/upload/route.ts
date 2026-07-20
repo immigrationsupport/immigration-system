@@ -4,6 +4,43 @@ import path from "path";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
+/**
+ * @swagger
+ * /api/upload:
+ *   post:
+ *     summary: Upload a file
+ *     description: Uploads a file (PDF, JPG, PNG) up to 10MB to the server. Requires authentication.
+ *     tags:
+ *       - Upload
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: File uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 url:
+ *                   type: string
+ *       400:
+ *         description: Bad request (no file, too large, invalid type)
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(req: NextRequest) {
     try {
         // Auth check

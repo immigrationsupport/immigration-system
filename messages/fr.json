@@ -1,0 +1,611 @@
+{
+  "common": {
+    "home": "Accueil",
+    "about": "À propos",
+    "services": "Services",
+    "contact": "Nous contacter",
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "logout": "Déconnexion",
+    "submit": "Soumettre",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "search": "Rechercher",
+    "view": "Voir",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "download": "Télécharger",
+    "upload": "Téléverser",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Avertissement",
+    "info": "Information",
+    "noResults": "Aucun résultat trouvé",
+    "actions": "Actions",
+    "status": "Statut",
+    "date": "Date",
+    "time": "Heure",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "name": "Nom",
+    "fullName": "Nom complet",
+    "yes": "Oui",
+    "no": "Non",
+    "appName": "ATLE Immigration",
+    "redirectingToDashboard": "Redirection vers votre tableau de bord..."
+  },
+  "navigation": {
+    "navbar": {
+      "home": "Accueil",
+      "about": "À Propos",
+      "services": "Services",
+      "contact": "Contact",
+      "dashboard": "Tableau de Bord",
+      "profile": "Profil",
+      "logout": "Déconnexion",
+      "language": "Langue",
+      "english": "Anglais",
+      "french": "Français",
+      "login": "Connexion"
+    },
+    "dashboard": {
+      "logout": "Déconnexion",
+      "client": {
+        "atleClient": "ATLE Client",
+        "overview": "Tableau de Bord",
+        "applications": "Demandes",
+        "messages": "Messages Officiels",
+        "profile": "Profil"
+      },
+      "agent": {
+        "atleAgent": "ATLE Agent",
+        "overview": "Aperçu",
+        "applications": "Toutes les Demandes",
+        "profile": "Profil",
+        "clients": "Clients"
+      },
+      "admin": {
+        "atleAdmin": "ATLE Admin",
+        "overview": "Tableau de Bord",
+        "clients": "Clients",
+        "agents": "Agents",
+        "applications": "Demandes",
+        "documentsMonitoring": "Suivi des Documents",
+        "auditLogs": "Journaux d'Audit"
+      }
+    },
+    "footer": {
+      "description": "Cabinet de conseil professionnel en immigration offrant un traitement des visas et des résidences sécurisé, transparent et précis à l'échelle mondiale.",
+      "offices": "Nos Bureaux",
+      "privacy": "Politique de Confidentialité",
+      "terms": "Conditions d'Utilisation",
+      "copyright": "ATLE Immigration Consultancy.",
+      "address": "DOUALA, CAMEROUN\nBonamoussadi, carrefour maison blanche"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Votre partenaire d'immigration de confiance",
+      "subtitle": "Orientation experte et traitement sécurisé des documents pour les particuliers et les entreprises navigant dans le processus d'immigration mondiale.",
+      "ctaButton": "Commencer",
+      "ctaSecondary": "Se connecter"
+    },
+    "services": {
+      "title": "Services d'immigration essentiels",
+      "subtitle": "Des solutions dédiées adaptées à votre parcours d'immigration unique.",
+      "visaApplication": {
+        "title": "Demande de visa",
+        "description": "Soutien complet pour les catégories de visa touristique, travail, étudiant et spécialisé dans le monde."
+      },
+      "permanentResidency": {
+        "title": "Résidence permanente",
+        "description": "Planification stratégique et gestion complète des demandes pour les voies vers les statuts de résidence permanente."
+      },
+      "documentProcessing": {
+        "title": "Traitement des documents",
+        "description": "Examen précis, coordination de la traduction et soumission sécurisée de tous les documents juridiques requis."
+      },
+      "learnMore": "En savoir plus"
+    },
+    "whyChooseUs": {
+      "title": "Pourquoi choisir ATLE Immigration ?",
+      "subtitle": "Nous combinons des années d'expertise juridique avec un engagement envers le succès des clients, garantissant que votre cas est traité avec le plus haut niveau de professionnalisme et de diligence.",
+      "provenTrackRecord": {
+        "title": "Antécédents éprouvés",
+        "description": "Des milliers de demandes réussies et de clients satisfaits dans le monde."
+      },
+      "secureConfidential": {
+        "title": "Sécurisé et confidentiel",
+        "description": "Vos documents et données sensibles sont traités avec une sécurité de qualité entreprise."
+      },
+      "efficientProcessing": {
+        "title": "Traitement efficace",
+        "description": "Nous minimisons les retards grâce à une préparation méticuleuse et à des méthodes de communication directe autorisée."
+      }
+    },
+    "cta": {
+      "title": "Prêt à discuter de votre cas ?",
+      "subtitle": "Nos consultants certifiés sont disponibles pour une évaluation détaillée de votre statut d'immigration.",
+      "button": "Planifier une consultation"
+    }
+  },
+  "services": {
+    "pageTitle": "Nos services d'immigration",
+    "pageSubtitle": "Soutien complet et soutenu juridiquement à chaque étape de votre parcours de mobilité mondiale.",
+    "workVisa": {
+      "title": "Traitement des visas de travail",
+      "description": "Assistance complète pour l'obtention de visas de travail spécialisés (H-1B, L-1, O-1, etc.) permettant aux professionnels de rejoindre légalement les marchés du travail mondiaux.",
+      "startApplication": "Commencer la demande"
+    },
+    "studentVisa": {
+      "title": "Assistance pour visa d'étudiant",
+      "description": "Traitement complet de la documentation pour l'inscription aux études internationales, garantissant le respect complet des protocoles d'immigration académique.",
+      "startApplication": "Commencer la demande"
+    },
+    "permanentResidency": {
+      "title": "Résidence permanente",
+      "description": "Planification stratégique à long terme, préparation de dossiers et demandes d'ajustement de statut pour sécuriser le statut de résident permanent.",
+      "startApplication": "Commencer la demande"
+    },
+    "citizenship": {
+      "title": "Demande de citoyenneté",
+      "description": "Préparation guidée des processus de naturalisation, examen de la documentation et coordination des examens.",
+      "startApplication": "Commencer la demande"
+    },
+    "businessImmigration": {
+      "title": "Immigration d'affaires",
+      "description": "Conseil au niveau corporatif pour l'établissement de nouvelles entreprises commerciales, visas d'investisseur (EB-5, E-2) et réinstallations d'cadres multinationaux.",
+      "startApplication": "Commencer la demande"
+    },
+    "customCaseReview": {
+      "title": "Examen de cas personnalisé",
+      "description": "Avez-vous un défi d'immigration complexe ? Consultez directement nos associés principaux.",
+      "contactUs": "Nous contacter"
+    }
+  },
+  "about": {
+    "pageTitle": "À propos de notre agence",
+    "pageSubtitle": "Un cabinet de premier plan dédié à la navigation dans les complexités du droit de l'immigration mondiale.",
+    "missionTitle": "Notre mission et expérience",
+    "missionText1": "Fondée dans le but de fournir des conseils en immigration transparents, éthiques et efficaces, ATLE Immigration a développé une pratique d'élite axée sur le traitement précis des visas légaux, des statuts de résidence et des structures d'immigration d'entreprise.",
+    "missionText2": "Notre cabinet opère à l'intersection du droit international et des réglementations locales, garantissant que les dossiers de nos clients répondent aux critères gouvernementaux stricts. Nous nous enorgueillissons de la confidentialité, de la réduction des risques et de l'élimination des fardeau administratifs courants aux pipelines d'immigration complexes.",
+    "consultantsTitle": "Consultants professionnels",
+    "consultantsText": "Notre réseau comprend des autorités d'immigration certifiées, des stratèges juridiques et d'anciens agents de consulat. En employant des personnes ayant une connaissance institutionnelle approfondie, nous fournissons à nos clients une prévoyance précise concernant les délais d'application, les exigences de documentation et les obstacles juridiques potentiels. Chaque cas est assigné à un consultant senior spécialisé garantissant une représentation personnalisée et dévouée.",
+    "metricsTitle": "Métriques de performance de l'agence",
+    "yearsOfExperience": "Années d'expérience",
+    "applicationsProcessed": "Demandes traitées",
+    "successRate": "Taux de réussite"
+  },
+  "contact": {
+    "pageTitle": "Nous contacter",
+    "pageSubtitle": "Connectez-vous avec nos agents certifiés pour planifier une consultation ou vous renseigner sur les statuts de traitement.",
+    "form": {
+      "fullName": "Nom légal complet",
+      "email": "Adresse e-mail",
+      "phone": "Numéro de téléphone",
+      "message": "Détails de l'enquête",
+      "messagePlaceholder": "Fournissez les détails concernant vos besoins... (Max 1000 caractères)",
+      "required": "Champ obligatoire",
+      "send": "Envoyer le message",
+      "sending": "Envoi en cours...",
+      "successTitle": "Enquête reçue",
+      "successMessage": "Votre message a été envoyé avec succès. Un représentant autorisé vous contactera dans les 24 à 48 heures ouvrables.",
+      "submitAnother": "Soumettre une autre enquête",
+      "error": "Impossible d'envoyer le message. Veuillez réessayer."
+    },
+    "officeInfo": {
+      "title": "Notre bureau",
+      "address": "Adresse",
+      "addressText": "ATLE Immigration\nDOUALA, CAMEROUN\nBonamoussadi, carrefour maison blanche",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "operatingHours": "Heures d'ouverture"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Connexion",
+      "subtitle": "Bon retour. Veuillez entrer vos identifiants.",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "button": "Se connecter",
+      "forgotPassword": "Mot de passe oublié ?",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "signUp": "S'inscrire ici",
+      "suspendedError": "Votre compte a été suspendu. Veuillez contacter l'agence.",
+      "allFieldsRequired": "Tous les champs sont obligatoires.",
+      "invalidCredentials": "E-mail ou mot de passe invalide.",
+      "googleLoginFailed": "La connexion Google a échoué. Veuillez réessayer."
+    },
+    "signUp": {
+      "title": "S'inscrire",
+      "subtitle": "Créez votre compte pour commencer.",
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Entrez votre nom complet",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "Entrez votre e-mail",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Entrez votre mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+      "button": "Créer un compte",
+      "googleSignUp": "S'inscrire avec Google",
+      "alreadyHaveAccount": "Vous avez déjà un compte ?",
+      "login": "Se connecter ici",
+      "allFieldsRequired": "Tous les champs sont obligatoires.",
+      "invalidEmail": "Veuillez entrer une adresse e-mail valide.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères.",
+      "error": "Échec de la création du compte.",
+      "unexpectedError": "Une erreur inattendue s'est produite. Veuillez réessayer."
+    },
+    "adminLogin": {
+      "title": "Connexion administrateur",
+      "subtitle": "Accès au portail du personnel",
+      "email": "E-mail du personnel",
+      "emailPlaceholder": "staff@example.com",
+      "password": "Mot de passe",
+      "button": "Connexion",
+      "invalidCredentials": "E-mail ou mot de passe invalide",
+      "loading": "Connexion en cours...",
+      "authorizedAccessOnly": "Accès réservé au personnel autorisé."
+    }
+  },
+  "dashboard": {
+    "clientDashboard": {
+      "title": "Aperçu du tableau de bord",
+      "subtitle": "Suivez votre statut d'immigration et la progression de vos documents.",
+      "stats": {
+        "totalCases": "Cas totaux",
+        "allSubmissions": "Tous les envois",
+        "inProcess": "En cours",
+        "awaitingReview": "En attente d'examen",
+        "success": "Succès",
+        "officiallyApproved": "Officiellement approuvé",
+        "actionRequired": "Action requise",
+        "revisionNeeded": "Révision nécessaire"
+      },
+      "activeApplications": "Demandes actives",
+      "pathway": "Voie / Pays",
+      "type": "Type",
+      "lastUpdate": "Dernière mise à jour",
+      "status": "Statut",
+      "action": "Action",
+      "pendingApprovalTitle": "Compte en attente de validation",
+      "pendingApprovalDesc": "Votre compte est actuellement en cours d'examen par notre administration. Pour accélérer le processus de validation ou pour toute demande urgente, veuillez contacter notre agence directement.",
+      "contactAgencyNow": "Contacter l'agence maintenant",
+      "viewApplication": "Voir la demande",
+      "noApplications": "Aucune demande trouvée.",
+      "tableHeaders": {
+        "country": "Pays",
+        "currentStep": "Étape actuelle",
+        "progress": "Progression",
+        "action": "Action"
+      },
+      "statCards": {
+        "totalCases": "Cas totaux",
+        "pending": "En attente",
+        "success": "Succès",
+        "actionReq": "Action req."
+      },
+      "stepLabels": {
+        "REGISTRATION": "Inscription",
+        "CONTRACT_SIGNING": "Signature du contrat",
+        "FEE_PAYMENT": "Paiement des frais",
+        "DOCUMENT_COLLECTION": "Collecte des documents",
+        "DIPLOMA_EQUIVALENCE": "Équivalence de diplôme",
+        "LANGUAGE_TEST_REGISTRATION": "Inscription au test de langue",
+        "LANGUAGE_TEST_RESULTS": "Résultats du test de langue",
+        "PROFILE_CREATION": "Création de profil",
+        "APPLICATION_SUBMISSION": "Soumission de la demande",
+        "MEDICAL_EXAMINATION": "Examen médical",
+        "PASSPORT_SUBMISSION": "Passeport et visa"
+      }
+    },
+    "agentDashboard": {
+      "title": "Aperçu de l'agent",
+      "subtitle": "Bienvenue dans votre espace de travail.",
+      "stats": {
+        "assignedCases": "Cas assignés",
+        "inReview": "En examen",
+        "completed": "Terminé"
+      },
+      "recentActivity": "Activité récente",
+      "viewAllWork": "Voir tout le travail",
+      "applicant": "Demandeur",
+      "pathways": "Voies",
+      "lastUpdate": "Dernière mise à jour",
+      "status": "Statut",
+      "action": "Action",
+      "myProfile": "Mon profil",
+      "viewClientDetails": "Voir les détails du client",
+      "noActivity": "Aucune activité récente trouvée."
+    },
+    "adminDashboard": {
+      "title": "Tableau de bord admin",
+      "pipeline": "Pipeline des demandes",
+      "liveActivity": "Flux d'activité en direct",
+      "noActivityPulse": "Aucune activité détectée.",
+      "stats": {
+        "totalClients": "Clients totaux",
+        "totalAgents": "Agents totaux",
+        "liveApplications": "Demandes en direct"
+      },
+      "statuses": {
+        "pendingReview": "En attente d'examen",
+        "inReview": "En cours d'examen",
+        "approved": "Approuvé",
+        "rejected": "Rejeté"
+      }
+    }
+  },
+  "applications": {
+    "myApplications": "Mes demandes",
+    "subtitle": "Suivez vos demandes et procédures dans différents pays.",
+    "newApplication": "Nouvelle demande",
+    "noApplications": "Aucune demande trouvée",
+    "noApplicationsDesc": "Commencez votre parcours en créant votre première demande pour un pays de destination.",
+    "destinationCountry": "Pays de destination",
+    "activeProcedures": "Procédures actives",
+    "addPathway": "Ajouter une voie",
+    "viewDetails": "Voir les détails",
+    "applicationDetails": "Détails de la demande",
+    "globalStatus": "Statut mondial",
+    "procedures": "Procédures",
+    "procedure": "Procédure",
+    "locked": "Verrouillé",
+    "editable": "Modifiable",
+    "manage": "Gérer",
+    "documentSubmission": "Soumission de documents",
+    "confirmSubmitDocument": "Confirmer et soumettre le document",
+    "awaitingAdminValidationTooltip": "En attente de validation par l'administrateur",
+    "awaitingValidation": "En attente de validation",
+    "getStarted": "Commencer",
+    "manageApplication": "Gérer la demande",
+    "newJourney": "Nouveau parcours",
+    "addAnotherDestination": "Ajouter une autre destination",
+    "types": {
+      "PR": "Résidence permanente",
+      "WORK": "Permis de travail",
+      "STUDY": "Visa d'études",
+      "SCHOLARSHIP": "Bourse d'études",
+      "GENERAL": "Demande générale"
+    },
+    "statuses": {
+      "PENDING": "En attente",
+      "IN_REVIEW": "En cours d'examen",
+      "MODIFICATION_REQUESTED": "Modification demandée",
+      "APPROVED": "Approuvé",
+      "REJECTED": "Rejeté",
+      "COMPLETED": "Terminé",
+      "CANCELLED": "Annulé",
+      "IN_PROGRESS": "En cours",
+      "SUBMITTED": "Soumis",
+      "VALIDATED": "Validé"
+    },
+    "stepper": {
+      "processReliability": "Fiabilité du processus",
+      "applicationStatus": "Statut de la demande",
+      "milestonesValidated": "{completed} sur {total} étapes validées",
+      "headers": {
+        "stepNumber": "N° d'étape",
+        "stepName": "Nom de l'étape",
+        "status": "Statut",
+        "lastUpdated": "Dernière mise à jour",
+        "action": "Action"
+      },
+      "statusLabels": {
+        "completed": "Terminé",
+        "inProgress": "En cours",
+        "pending": "En attente"
+      },
+      "locked": "Verrouillé",
+      "legacyApplication": "Demande historique",
+      "actionDescriptions": {
+        "feePayment": "Téléverser le reçu de paiement",
+        "medicalExam": "Téléverser le rapport médical",
+        "languageTestRegistration": "Téléverser l'inscription au test",
+        "languageTestResults": "Téléverser les résultats du test",
+        "contractSigning": "Téléverser le contrat signé",
+        "default": "Téléverser le document requis"
+      },
+      "close": "Fermer",
+      "uploadProof": "Téléverser une preuve",
+      "handledByAgentOnly": "Géré uniquement par l'agent",
+      "haveYouCompletedTest": "Avez-vous déjà passé un test ?",
+      "yes": "Oui",
+      "no": "Non",
+      "requestAgentAssistance": "Demander l'aide de l'agent",
+      "skippedTestCompleted": "Ignoré (test déjà réalisé)",
+      "waitingForRegistration": "En attente d'inscription",
+      "closeDocuments": "Fermer les documents",
+      "manageDocuments": "Gérer les documents",
+      "uploading": "Téléversement...",
+      "uploadSuccess": "Téléversement réussi",
+      "uploadFile": "Téléverser le fichier",
+      "loading": "Chargement...",
+      "profileCreationLabel": "Création de profil (Entrée express / Arrima)",
+      "requiredDocumentsRoadmap": "Feuille de route des documents requis",
+      "provideAllMandatoryFiles": "Fournissez tous les fichiers obligatoires pour passer à l'examen par l'agent.",
+      "finalizeSubmission": "Finaliser la soumission",
+      "documentCategory": "Catégorie de document",
+      "currentStatus": "Statut actuel",
+      "uploaded": "Téléversé",
+      "required": "Requis",
+      "processing": "Traitement...",
+      "replace": "Remplacer",
+      "upload": "Téléverser",
+      "view": "Voir",
+      "administrativeManagement": "Gestion administrative",
+      "adminManagedDesc": "Cette étape (Entrée express / Arrima / Campus France) est gérée strictement par l'agent administratif. Vous serez notifié automatiquement sur ce tableau de bord une fois votre profil créé avec succès.",
+      "statusMonitoringInProgress": "Statut : Suivi en cours",
+      "diplomaEquivalenceSupport": "Support d'équivalence de diplôme",
+      "diplomaManagedDesc": "Étape gérée. Vous pouvez fournir des documents justificatifs si votre agent le demande.",
+      "closePortal": "Fermer le portail",
+      "optionalSubmissionPortal": "Portail de soumission optionnel",
+      "supportingProofSubmitted": "Preuve justificative soumise",
+      "viewUpload": "Voir le fichier",
+      "uploadSupportingProof": "Téléverser une preuve justificative",
+      "preparingPortal": "Préparation du portail...",
+      "diplomaNote": "Remarque : cette étape correspond à un processus administratif externe. La validation finale et la progression du statut sont gérées strictement par l'équipe de supervision administrative.",
+      "systemNotification": "Notification système",
+      "confirmUnderstood": "Confirmer et compris",
+      "agentSupport": "Assistance de l'agent",
+      "connectWithCaseOfficer": "Contactez votre agent en charge du dossier",
+      "assistanceDetails": "Détails de la demande",
+      "stateRequirements": "Indiquez vos besoins ici...",
+      "discard": "Annuler",
+      "transmitting": "Envoi en cours...",
+      "sendRequest": "Envoyer la demande",
+      "missingDocumentsError": "Veuillez téléverser les documents requis suivants avant de soumettre : {docs}",
+      "completeStepFirstError": "Vous devez d'abord terminer l'étape {step} : {label}.",
+      "docNames": {
+        "passport": "Passeport",
+        "birthCertificate": "Acte de naissance",
+        "idCard": "Carte d'identité nationale",
+        "cv": "CV",
+        "diploma": "Diplôme",
+        "transcripts": "Relevés de notes",
+        "passportPhoto": "Photo d'identité"
+      }
+    },
+    "detail": {
+      "accessRestricted": "Accès restreint",
+      "accessRestrictedDesc": "Cette demande est introuvable ou vous n'avez pas la permission de la consulter.",
+      "returnToDashboard": "Retour au tableau de bord",
+      "backToOverview": "Retour à l'aperçu",
+      "applicationTracking": "Suivi de la demande",
+      "journeySuffix": "Parcours",
+      "currentPathway": "Voie actuelle",
+      "accountAwaitingApproval": "Compte en attente d'approbation",
+      "accountAwaitingApprovalDesc": "Vos informations sont en cours d'examen. Les fonctions de téléversement et de soumission sont temporairement désactivées."
+    }
+  },
+  "profile": {
+    "myProfile": "Mon profil",
+    "subtitle": "Gérez votre identité et vos coordonnées.",
+    "personalDetails": "Détails personnels",
+    "nationality": "Nationalité",
+    "dateOfBirth": "Date de naissance",
+    "maritalStatus": "Statut matrimonial",
+    "children": "Enfants",
+    "residentialAddress": "Adresse résidentielle",
+    "notSpecified": "Non spécifié",
+    "assignedSpecialist": "Votre spécialiste assigné",
+    "noPhoneAdded": "Aucun téléphone ajouté",
+    "personalInformation": "Informations personnelles",
+    "emailAddress": "Adresse e-mail",
+    "phoneNumber": "Numéro de téléphone",
+    "location": "Localisation / Bureau",
+    "globalHQ": "QG mondial (à distance)",
+    "professionalDetails": "Détails professionnels",
+    "joinedOn": "Rejoint le",
+    "professionalID": "ID professionnel",
+    "profileNote": "Note de profil",
+    "authorizedAgent": "Agent autorisé",
+    "activeStatus": "Statut actif",
+    "clientWorkspace": "Espace Client",
+    "continueToWorkspace": "Continuer vers l'espace",
+    "accountUnderReview": "Compte en cours d'examen",
+    "accountUnderReviewDesc": "Votre inscription est actuellement en attente de validation par l'administrateur. L'accès est limité.",
+    "identityProfile": "Profil d'identité",
+    "verifiedAccount": "Compte vérifié",
+    "editProfile": "Modifier le profil",
+    "fullName": "Nom complet",
+    "dependentsChildren": "Personnes à charge (Enfants)",
+    "currentAddress": "Adresse actuelle",
+    "saveProfileData": "Enregistrer les données",
+    "notProvided": "Non fourni",
+    "childrenSuffix": "enfant(s)",
+    "noAddressProvided": "Aucune adresse fournie pour le moment.",
+    "assignedSupport": "Assistance attribuée",
+    "unassignedSpecialist": "Spécialiste non assigné",
+    "waitingForAssignment": "En attente d'attribution...",
+    "contactSpecialist": "Contacter le spécialiste",
+    "fillAllFieldsError": "Veuillez remplir tous les champs (Nom complet, E-mail et Téléphone).",
+    "updateSuccessful": "Mise à jour réussie !",
+    "maritalOptions": {
+      "SINGLE": "Célibataire",
+      "MARRIED": "Marié(e)",
+      "DIVORCED": "Divorcé(e)",
+      "WIDOWED": "Veuf/Veuve"
+    }
+  },
+  "messages": {
+    "officialNotifications": "Notifications officielles",
+    "subtitle": "Communications officielles concernant votre statut d'immigration et vos demandes.",
+    "messages": "Messages",
+    "from": "De",
+    "subject": "Sujet",
+    "content": "Contenu",
+    "inboxClear": "Votre boîte de réception est vide",
+    "noMessagesDesc": "Toute annonce officielle ou demande de document de votre agent apparaîtra ici.",
+    "professionalNotice": "Avis professionnel",
+    "noticText": "Ces messages sont considérés comme des communications juridiques officielles. Veuillez répondre rapidement à toute demande d'information pour éviter les retards dans le traitement de votre demande.",
+    "communicationChannel": "Canal de communication",
+    "sendMessage": "Envoyer un message",
+    "typeMessage": "Tapez votre message...",
+    "messagesSent": "Messages envoyés"
+  },
+  "clients": {
+    "assignedClients": "Clients assignés",
+    "subtitle": "Gérez les personnes actuellement assignées à votre care.",
+    "activeClients": "Clients actifs",
+    "clientRoster": "Liste des clients",
+    "clientDetail": "Détail du client",
+    "applicationID": "ID de la demande",
+    "documents": "Documents",
+    "noClientsAssigned": "Aucun client assigné pour le moment",
+    "files": "fichiers",
+    "viewProfile": "Voir le profil",
+    "assignedClient": "Client assigné"
+  },
+  "agents": {
+    "agentWorkspace": "Espace de travail de l'agent",
+    "manageUpdate": "Gérer et mettre à jour les demandes assignées",
+    "noAssignedApplications": "Aucune demande assignée trouvée.",
+    "submitDocuments": "Soumettre des documents",
+    "updateStatus": "Mettre à jour le statut",
+    "pendingReview": "En attente d'examen",
+    "inReview": "En examen",
+    "approved": "Approuvé",
+    "rejected": "Rejeté",
+    "completed": "Complété",
+    "cancelled": "Annulé",
+    "requestModification": "Demander une modification",
+    "reasonForModification": "Raison de la modification",
+    "sendRequest": "Envoyer la demande",
+    "internalNote": "Note interne (pour le prochain changement de statut)",
+    "clientContactInfo": "Informations de contact du client",
+    "submittedDocuments": "Documents soumis",
+    "download": "Télécharger",
+    "viewDocument": "Voir le document",
+    "requestMod": "Demander une modification",
+    "waitingForDocuments": "En attente de documents du client.",
+    "actionHistory": "Historique des actions et audit"
+  },
+  "applicationManagement": {
+    "title": "Gestion des demandes",
+    "subtitle": "Superviser et gérer tous les processus d'immigration des clients.",
+    "totalApplications": "Total des demandes",
+    "countryDestination": "Pays de destination",
+    "applicantAttempts": "Tentatives du demandeur",
+    "applicationID": "ID de la demande",
+    "lastModified": "Dernière modification",
+    "deepDetails": "Récupération des détails complets...",
+    "applicationDetails": "Détails de la demande",
+    "clientInformation": "Informations du client",
+    "agentInformation": "Informations de l'agent",
+    "procedures": "Procédures",
+    "documents": "Documents",
+    "comments": "Commentaires"
+  }
+}

@@ -1,40 +1,10 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { Toaster } from "sonner";
-import { extractRouterConfig } from "uploadthing/server";
-import { NextSSRPlugin  } from "@uploadthing/react/next-ssr-plugin";
-import { ourFileRouter } from "./api/uploadthing/core";
+import { ReactNode } from "react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "ATLE Immigration",
-  description: "Professional immigration consultancy...",
+type Props = {
+  children: ReactNode;
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-         <NextSSRPlugin
-          routerConfig={extractRouterConfig(ourFileRouter)}
-        />
-        {children}
-        <Toaster position="top-right" richColors />
-      </body>
-    </html>
-  );
+// This root layout is a pass-through because the localized layout under app/[locale]/layout.tsx handles the actual html/body tags
+export default function RootLayout({ children }: Props) {
+  return children;
 }

@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
                 password,
             }, {
                 onSuccess: () => {
-                    router.push("/dashboard");
+                    router.push("/admin/dashboard");
                 },
                 onError: (ctx) => {
                     setError(ctx.error.message || "Invalid credentials");
@@ -53,10 +53,10 @@ export default function AdminLoginPage() {
                         className="text-3xl font-bold mb-2"
                         style={{ color: "#1E3A8A" }}
                     >
-                        Login
+                        Admin Login
                     </h1>
                     <p className="text-gray-500 text-sm">
-                        Please sign in to access your dashboard.
+                        Sign in to access the administration panel
                     </p>
                 </div>
 
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="staff@example.com"
+                            placeholder="admin@example.com"
                             required
                             className="w-full"
                         />
@@ -119,13 +119,13 @@ export default function AdminLoginPage() {
                         className="w-full text-white font-medium py-2.5 rounded hover:opacity-90 transition-opacity"
                         style={{ backgroundColor: "#1E3A8A", borderRadius: "8px" }}
                     >
-                        {loading ? "Signing in..." : "Login"}
+                        {loading ? "Signing in..." : "Sign In"}
                     </Button>
                 </form>
 
                 <div className="mt-6 text-center">
                     <p className="text-xs font-medium text-gray-400">
-                        Authorized staff access only.
+                        Authorized access only
                     </p>
                 </div>
             </div>

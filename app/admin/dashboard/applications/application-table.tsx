@@ -18,8 +18,8 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { updateApplicationAction, deleteApplicationAction } from "@/app/admin/dashboard/applications/actions";
-import ApplicationDetailsModal from "@/app/admin/dashboard/applications/application-details-modal";
+import { updateApplicationAction, deleteApplicationAction } from "./actions";
+import ApplicationDetailsModal from "./application-details-modal";
 import { TruncatedText } from "@/components/ui/truncated-text";
 
 interface Application {
