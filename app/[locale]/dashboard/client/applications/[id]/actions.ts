@@ -90,7 +90,7 @@ export async function submitProcedureAction(stepId: string) {
         await prisma.auditLog.create({
             data: {
                 action: "STEP_SUBMISSION",
-                details: `Client completed step ${step.type} for ${step.application.country} application. Status: ${isInitialStep ? 'APPROVED' : 'IN_PROGRESS'}`,
+                details: `Client completed step ${step.type} for ${step.application.country} application. Status: ${isClientFinalizableStep ? 'APPROVED' : 'IN_PROGRESS'}`,
                 userId: session.user.id,
                 targetId: step.applicationId
             }
