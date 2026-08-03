@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { Users, Briefcase, FileText } from "lucide-react";
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export default async function AdminStats() {
+    const session = await auth.api.getSession({ headers: await headers() });
+    const agencyId = (session?.user as any)?.agencyId;
+
+    if (!agencyId) {
+        return null;
+    }
+
     const [totalClients, totalAgents, totalApplications] = await Promise.all([
-        prisma.user.count({ where: { role: "CLIENT" } }),
-        prisma.user.count({ where: { role: "AGENT" } }),
-        prisma.application.count(),
+        prisma.user.count({ where: { role: "CLIENT", agencyId } }),
+        prisma.user.count({ where: { role: "AGENT", agencyId } }),
+        prisma.application.count({ where: { agencyId } }),
     ]);
 
     return (

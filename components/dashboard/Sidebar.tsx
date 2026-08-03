@@ -27,11 +27,12 @@ interface SidebarProps {
     items: SidebarItem[];
     userRole: string;
     userName: string;
+    agencyName?: string | null;
     isOpen?: boolean;
     onClose?: () => void;
 }
 
-export function Sidebar({ items, userRole, userName, isOpen: externalIsOpen, onClose }: SidebarProps) {
+export function Sidebar({ items, userRole, userName, agencyName, isOpen: externalIsOpen, onClose }: SidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -71,9 +72,12 @@ export function Sidebar({ items, userRole, userName, isOpen: externalIsOpen, onC
         >
             {/* Logo */}
             <div className="flex items-center justify-between h-16 border-b border-gray-200 px-4 xl:px-6 shrink-0">
-                <span className="text-base xl:text-xl font-bold text-[var(--color-primary)] tracking-wide truncate">
-                    ATLE Immigration
-                </span>
+                <Link
+                    href="/dashboard"
+                    className="text-base xl:text-xl font-bold text-[var(--color-primary)] tracking-wide truncate hover:opacity-80 transition-opacity"
+                >
+                    {agencyName || "ATLE Immigration"}
+                </Link>
                 <button
                     onClick={() => toggleSidebar(false)}
                     className="md:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100 shrink-0"
@@ -147,9 +151,9 @@ export function Sidebar({ items, userRole, userName, isOpen: externalIsOpen, onC
                 >
                     <Menu className="h-5 w-5" />
                 </button>
-                <span className="text-base font-bold text-[var(--color-primary)] tracking-wide">
-                    ATLE Immigration
-                </span>
+                <Link href="/dashboard" className="text-base font-bold text-[var(--color-primary)] tracking-wide truncate max-w-[50vw]">
+                    {agencyName || "ATLE Immigration"}
+                </Link>
                 {/* Avatar shortcut */}
                 <div className="w-8 h-8 rounded-full bg-[var(--color-secondary)] flex items-center justify-center text-[var(--color-primary)] font-bold text-sm">
                     {userName.charAt(0).toUpperCase()}

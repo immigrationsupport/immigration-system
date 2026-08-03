@@ -3,15 +3,30 @@ import { Role } from "@prisma/client";
 import { Search, Edit2, Ban, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import CreateAgentModal from "./create-agent-modal";
 import AgentActionButtons from "./agent-actions";
 import { TruncatedText } from "@/components/ui/truncated-text";
 
+export const dynamic = "force-dynamic";
+
 export default async function ManageAgentsPage() {
-    // Fetch real agent data securely from DB
+    const session = await auth.api.getSession({ headers: await headers() });
+    const agencyId = (session?.user as any)?.agencyId;
+
+    if (!agencyId) {
+        return (
+            <div className="max-w-7xl mx-auto p-8 text-center text-gray-500">
+                Your account is not linked to an agency.
+            </div>
+        );
+    }
+
+    // Fetch real agent data securely from DB, scoped to this agency
     const agents =
         await prisma.user.findMany({
-            where: { role: Role.AGENT },
+            where: { role: Role.AGENT, agencyId },
             include: {
                 assignedClients: { select: { id: true } }
             },

@@ -3,18 +3,33 @@ import { Activity, Clock } from "lucide-react";
 import prisma from "@/lib/prisma";
 import AdminStats from "@/components/dashboard/AdminStats";
 import { ActivityItem } from "@/components/dashboard/ActivityItem";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardOverview() {
-    // Fetch status groups and recent activity
+    const session = await auth.api.getSession({ headers: await headers() });
+    const agencyId = (session?.user as any)?.agencyId;
+
+    if (!agencyId) {
+        return (
+            <div className="max-w-7xl mx-auto p-8 text-center text-gray-500">
+                Your account is not linked to an agency.
+            </div>
+        );
+    }
+
+    // Fetch status groups and recent activity, scoped to this agency
     const statusGroups = await prisma.application.groupBy({
         by: ["status"],
+        where: { agencyId },
         _count: { _all: true },
     });
 
     // 2. Fetch recent activities (Resilient Fetch to bypass stale cache issues)
     const logs = await prisma.auditLog.findMany({
+        where: { agencyId },
         take: 10,
         orderBy: {
             createdAt: "desc",

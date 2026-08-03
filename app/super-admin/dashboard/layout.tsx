@@ -4,6 +4,7 @@ import { Header } from "@/components/dashboard/Header";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getMyAgencyName } from "@/lib/agency-actions";
 
 export default async function SuperAdminDashboardLayout({
     children,
@@ -18,6 +19,8 @@ export default async function SuperAdminDashboardLayout({
         redirect("/super-admin/login");
     }
 
+    const agencyName = await getMyAgencyName();
+
     const superAdminSidebarItems = [
         { icon: "LayoutDashboard", label: "Agencies", href: "/super-admin/dashboard" },
     ];
@@ -28,6 +31,7 @@ export default async function SuperAdminDashboardLayout({
                 items={superAdminSidebarItems}
                 userRole="Super Admin"
                 userName={session?.user?.name || "Super Admin"}
+                agencyName={agencyName}
             />
 
             <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative">

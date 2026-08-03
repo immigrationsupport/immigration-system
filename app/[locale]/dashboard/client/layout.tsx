@@ -4,6 +4,8 @@ import { Link, usePathname } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
 import { useSession, signOut } from "@/lib/auth-client";
 import { LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getMyAgencyName } from "@/lib/agency-actions";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const { data: session } = useSession();
@@ -11,6 +13,15 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const t = useTranslations("navigation.dashboard.client");
     const tCommon = useTranslations("navigation.dashboard");
     const locale = useLocale();
+    const [agencyName, setAgencyName] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (session?.user) {
+            getMyAgencyName().then(setAgencyName);
+        }
+    }, [session?.user]);
+
+    const displayName = agencyName || "ATLE Immigration";
 
     const navItems = [
         { label: t("overview"), href: "/dashboard/client" },
@@ -27,12 +38,15 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <div className="flex-shrink-0 flex items-center">
-                                <span className="text-xl font-bold text-[#1E3A8A] flex items-center tracking-wide">
-                                    <div className="w-8 h-8 bg-[#1E3A8A] mr-3 rounded-sm flex items-center justify-center">
-                                        <span className="text-white text-lg font-serif">A</span>
+                                <Link
+                                    href="/dashboard/client"
+                                    className="text-xl font-bold text-[#1E3A8A] flex items-center tracking-wide hover:opacity-80 transition-opacity"
+                                >
+                                    <div className="w-8 h-8 bg-[#1E3A8A] mr-3 rounded-sm flex items-center justify-center shrink-0">
+                                        <span className="text-white text-lg font-serif">{displayName.charAt(0).toUpperCase()}</span>
                                     </div>
-                                    {t("atleClient")}
-                                </span>
+                                    <span className="truncate max-w-[40vw] sm:max-w-none">{displayName}</span>
+                                </Link>
                             </div>
                             <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
                                 {navItems.map((item) => {

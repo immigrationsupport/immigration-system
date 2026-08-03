@@ -4,11 +4,19 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { Users, FileText, MessageSquare, User, LayoutDashboard } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getMyAgencyName } from "@/lib/agency-actions";
 
 export default function AgentLayout({ children }: { children: React.ReactNode }) {
     const { data: session } = useSession();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [agencyName, setAgencyName] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (session?.user) {
+            getMyAgencyName().then(setAgencyName);
+        }
+    }, [session?.user]);
 
     const agentItems = [
         { icon: "LayoutDashboard", label: "Overview", href: "/dashboard/agent" },
@@ -23,6 +31,7 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
                 items={agentItems}
                 userRole="Agent"
                 userName={session?.user?.name || "Agent User"}
+                agencyName={agencyName}
                 isOpen={sidebarOpen}
                 onClose={() => setSidebarOpen(false)}
             />

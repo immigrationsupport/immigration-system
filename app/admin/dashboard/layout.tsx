@@ -5,6 +5,7 @@ import AdminStats from "@/components/dashboard/AdminStats";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getMyAgencyName } from "@/lib/agency-actions";
 
 export default async function AdminDashboardLayout({
     children,
@@ -18,6 +19,8 @@ export default async function AdminDashboardLayout({
     if (!session || (session.user as any).role !== "ADMIN") {
         redirect("/admin/login");
     }
+
+    const agencyName = await getMyAgencyName();
 
     const adminSidebarItems = [
         { icon: "LayoutDashboard", label: "Overview", href: "/admin/dashboard" },
@@ -37,6 +40,7 @@ export default async function AdminDashboardLayout({
                 items={adminSidebarItems}
                 userRole="Admin"
                 userName={session?.user?.name || "System Admin"}
+                agencyName={agencyName}
             />
 
             {/* Main Content wrapper */}
@@ -50,4 +54,3 @@ export default async function AdminDashboardLayout({
         </div>
     );
 }
-

@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { ApplicationStatus, ProcedureStatus } from "@prisma/client";
 import { APP_STEP_SEQUENCE, STEP_LABELS } from "@/lib/steps";
-
+import { getMyAgencyName } from "@/lib/agency-actions";
 export async function updateApplicationStatusAction(
     applicationId: string,
     newStatus: string,
@@ -183,9 +183,10 @@ export async function updateStepAction(
 
             // 2. Send email notification via Resend
             if (step.application.client.email) {
+                const agencyName = await getMyAgencyName();
                 await sendEmail({
                     to: step.application.client.email,
-                    subject: "Action Required - ATLE Immigration",
+                    subject: `Action Required - ${agencyName || "ATLE Immigration"}`,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
                             <div style="background-color: #1E3A8A; padding: 20px; text-align: center;">
