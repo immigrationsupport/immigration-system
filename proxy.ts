@@ -20,11 +20,25 @@ export default async function middleware(request: NextRequest) {
     // and would redirect e.g. /admin/login -> /en/admin/login, a route that
     // doesn't exist, which is why every /admin route was unreachable.
     const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
+    // /super-admin is also outside the [locale] tree, same reasoning as /admin above.
+    const isSuperAdminRoute = pathname === "/super-admin" || pathname.startsWith("/super-admin/");
+    const isOutsideLocaleTree = isAdminRoute || isSuperAdminRoute;
 
     // Strip leading locale prefix to get the "bare" pathname for auth checks
     // e.g. /en/dashboard/client -> /dashboard/client
     const localePattern = /^\/(en|fr)(\/|$)/;
     const barePathname = pathname.replace(localePattern, "/");
+
+    const url = request.nextUrl.clone();
+
+    // Redirect root URL and public landing pages directly to Login page
+    const landingRoutes = ["/", "/about", "/services", "/contact"];
+    if (landingRoutes.includes(barePathname)) {
+        const localeMatch = pathname.match(/^\/(en|fr)/);
+        const localePrefix = localeMatch ? localeMatch[0] : "";
+        url.pathname = `${localePrefix}/sign-in`;
+        return NextResponse.redirect(url);
+    }
 
     // ── AUTH GUARD ──────────────────────────────────────────────────
     let session = null;
@@ -36,24 +50,23 @@ export default async function middleware(request: NextRequest) {
         console.error("[Middleware] getSession error:", e);
     }
 
-    const url = request.nextUrl.clone();
-    const publicAdminRoutes = ["/admin/login", "/admin/register"];
+    const publicAdminRoutes = ["/admin/login", "/admin/register", "/super-admin/login"];
 
     if (!session) {
-        const protectedPaths = ["/admin", "/dashboard", "/complete-profile", "/applications"];
+        const protectedPaths = ["/admin", "/super-admin", "/dashboard", "/complete-profile", "/applications"];
         const needsAuth = protectedPaths.some(p => barePathname.startsWith(p));
 
         if (needsAuth) {
             if (publicAdminRoutes.includes(barePathname)) {
-                // /admin isn't part of the [locale] tree — don't let next-intl
-                // redirect it to a locale-prefixed URL that doesn't exist.
+                // /admin and /super-admin aren't part of the [locale] tree — don't
+                // let next-intl redirect them to a locale-prefixed URL that doesn't exist.
                 return NextResponse.next();
             }
             url.pathname = `/sign-in`;
             return NextResponse.redirect(url);
         }
-        // Not protected — let next-intl handle locale routing (skip for /admin)
-        return isAdminRoute ? NextResponse.next() : intlMiddleware(request);
+        // Not protected — let next-intl handle locale routing (skip for /admin, /super-admin)
+        return isOutsideLocaleTree ? NextResponse.next() : intlMiddleware(request);
     }
 
     const { role, profileCompleted, isSuspended, status } = session.user as any;
@@ -62,6 +75,12 @@ export default async function middleware(request: NextRequest) {
     if (isSuspended && barePathname !== "/sign-in") {
         url.pathname = `/sign-in`;
         url.searchParams.set("suspended", "true");
+        return NextResponse.redirect(url);
+    }
+
+    const { mustChangePassword } = session.user as any;
+    if (mustChangePassword && barePathname !== "/change-password") {
+        url.pathname = `/change-password`;
         return NextResponse.redirect(url);
     }
 
@@ -90,6 +109,13 @@ export default async function middleware(request: NextRequest) {
         }
     }
 
+    if (barePathname.startsWith("/super-admin") && !publicAdminRoutes.includes(barePathname)) {
+        if (userRole !== "SUPER_ADMIN") {
+            url.pathname = `/dashboard`;
+            return NextResponse.redirect(url);
+        }
+    }
+
     if (barePathname.startsWith("/dashboard/agent")) {
         if (userRole !== "AGENT" && userRole !== "ADMIN") {
             url.pathname = `/dashboard`;
@@ -102,9 +128,14 @@ export default async function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
+    if (barePathname === "/change-password" && !mustChangePassword) {
+        url.pathname = `/dashboard`;
+        return NextResponse.redirect(url);
+    }
+
     // All auth checks passed — let next-intl finalize locale routing
-    // (skip for /admin, which isn't part of the [locale] tree)
-    return isAdminRoute ? NextResponse.next() : intlMiddleware(request);
+    // (skip for /admin and /super-admin, which aren't part of the [locale] tree)
+    return isOutsideLocaleTree ? NextResponse.next() : intlMiddleware(request);
 }
 
 export const config = {

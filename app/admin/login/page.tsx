@@ -24,6 +24,7 @@ export default function AdminLoginPage() {
             await signIn.email({
                 email,
                 password,
+                rememberMe: true,
             }, {
                 onSuccess: () => {
                     router.push("/admin/dashboard");

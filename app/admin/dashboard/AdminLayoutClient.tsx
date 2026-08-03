@@ -45,6 +45,7 @@ export default function AdminDashboardLayout({
         { icon: "Briefcase", label: "Manage Agents", href: "/admin/dashboard/agents" },
         { icon: "Users", label: "Manage Clients", href: "/admin/dashboard/clients" },
         { icon: "FileText", label: "All Applications", href: "/admin/dashboard/applications" },
+        { icon: "Briefcase", label: "Agent Workspace", href: "/dashboard/agent" },
         { icon: "FolderSearch", label: "Documents Monitoring", href: "/admin/dashboard/documents" },
         { icon: "List", label: "System Logs", href: "/admin/dashboard/logs" },
         { icon: "Settings", label: "System Settings", href: "/admin/dashboard/settings" }

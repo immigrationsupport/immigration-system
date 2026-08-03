@@ -11,7 +11,7 @@ export default async function AssignedApplicationsPage() {
         headers: await headers()
     });
 
-    if (!session || (session.user as any).role !== "AGENT") {
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <p className="text-gray-500 font-medium">Please sign in as an agent to view your applications.</p>
@@ -19,9 +19,12 @@ export default async function AssignedApplicationsPage() {
         );
     }
 
-    // 1. Fetch applications for this agent
+    const isAdmin = (session.user as any).role === "ADMIN";
+    const agencyId = (session.user as any).agencyId;
+
+    // 1. Fetch applications — admins see every application in their agency, agents see only theirs
     const applications = await prisma.application.findMany({
-        where: {
+        where: isAdmin ? { agencyId } : {
             OR: [
                 { agentId: session.user.id },
                 { client: { agentId: session.user.id } }

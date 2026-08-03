@@ -1,12 +1,18 @@
 import React from "react";
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import LogsTable from "./logs-table";
 
 export const dynamic = "force-dynamic";
 
 export default async function SystemLogsPage() {
-    // 1. Fetch all general system logs
+    const session = await auth.api.getSession({ headers: await headers() });
+    const agencyId = (session?.user as any)?.agencyId;
+
+    // 1. Fetch system logs for this agency only
     const logs = await prisma.auditLog.findMany({
+        where: { agencyId },
         include: {
         author: true, // This populates the 'author' field in your interface
   },

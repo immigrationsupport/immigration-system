@@ -16,6 +16,11 @@ export async function createAgentAction(formData: FormData) {
         return { error: "Unauthorized access." };
     }
 
+    const adminAgencyId = (session.user as any).agencyId;
+    if (!adminAgencyId) {
+        return { error: "Your account is not linked to an agency." };
+    }
+
     const name = (formData.get("name") as string)?.trim();
     const email = (formData.get("email") as string)?.trim()?.toLowerCase();
     const password = formData.get("password") as string;
@@ -46,13 +51,15 @@ export async function createAgentAction(formData: FormData) {
         // 3. Hash the password using Better Auth's expected algorithm (scrypt)
         const hashedPassword = await hashPassword(password);
 
-        // 4. Create the user record and associated credential account
+        // 4. Create the user record and associated credential account,
+        // scoped to the admin's own agency.
         const newUser = await prisma.user.create({
             data: {
                 name,
                 email: email.toLowerCase(),
                 password: hashedPassword, // Saved to User table
                 role: "AGENT" as any,
+                agencyId: adminAgencyId,
                 emailVerified: true,
                 accounts: {
                     create: {
@@ -70,6 +77,7 @@ export async function createAgentAction(formData: FormData) {
                 action: "CREATE_AGENT",
                 details: `Agent ${name} (${email}) created by Admin.`,
                 userId: session.user.id,
+                agencyId: adminAgencyId,
                 targetId: newUser.id,
             }
         });
@@ -91,9 +99,14 @@ export async function toggleSuspendAgentAction(agentId: string, currentlySuspend
         return { error: "Unauthorized access." };
     }
 
+    const adminAgencyId = (session.user as any).agencyId;
+
     try {
         const agent = await prisma.user.findUnique({ where: { id: agentId } });
         if (!agent) return { error: "Agent not found." };
+        if (agent.agencyId !== adminAgencyId) {
+            return { error: "This agent does not belong to your agency." };
+        }
 
         await prisma.user.update({
             where: { id: agentId },
@@ -105,6 +118,7 @@ export async function toggleSuspendAgentAction(agentId: string, currentlySuspend
                 action: currentlySuspended ? "UNSUSPEND_AGENT" : "SUSPEND_AGENT",
                 details: `Agent ${agent.name} (${agent.email}) ${currentlySuspended ? "unsuspended" : "suspended"} by Admin.`,
                 userId: session.user.id,
+                agencyId: adminAgencyId,
                 targetId: agentId
             }
         });
@@ -125,9 +139,15 @@ export async function deleteAgentAction(agentId: string) {
         return { error: "Unauthorized access." };
     }
 
+    const adminAgencyId = (session.user as any).agencyId;
+
     try {
         const agent = await prisma.user.findUnique({ where: { id: agentId } });
-        
+        if (!agent) return { error: "Agent not found." };
+        if (agent.agencyId !== adminAgencyId) {
+            return { error: "This agent does not belong to your agency." };
+        }
+
         await prisma.user.delete({
             where: { id: agentId }
         });
@@ -137,6 +157,7 @@ export async function deleteAgentAction(agentId: string) {
                 action: "DELETE_AGENT",
                 details: `Agent ${agent?.name} (${agent?.email}) deleted by Admin.`,
                 userId: session.user.id,
+                agencyId: adminAgencyId,
                 targetId: agentId
             }
         });
@@ -158,6 +179,8 @@ export async function updateAgentAction(agentId: string, name: string, email: st
         return { error: "Unauthorized access." };
     }
 
+    const adminAgencyId = (session.user as any).agencyId;
+
     const nameTrimmed = name?.trim();
     const emailTrimmed = email?.trim()?.toLowerCase();
 
@@ -175,6 +198,12 @@ export async function updateAgentAction(agentId: string, name: string, email: st
     }
 
     try {
+        const existingAgent = await prisma.user.findUnique({ where: { id: agentId } });
+        if (!existingAgent) return { error: "Agent not found." };
+        if (existingAgent.agencyId !== adminAgencyId) {
+            return { error: "This agent does not belong to your agency." };
+        }
+
         const updateData: any = { 
             name, 
             email: email.toLowerCase() 
@@ -206,6 +235,7 @@ export async function updateAgentAction(agentId: string, name: string, email: st
                 action: "UPDATE_AGENT",
                 details: `Agent ${name} (${email}) details updated by Admin.${password ? " Password was also reset." : ""}`,
                 userId: session.user.id,
+                agencyId: adminAgencyId,
                 targetId: agentId
             }
         });
@@ -217,4 +247,3 @@ export async function updateAgentAction(agentId: string, name: string, email: st
         return { error: "Failed to update agent details." };
     }
 }
-

@@ -20,7 +20,9 @@ export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) 
         await signOut({
             fetchOptions: {
                 onSuccess: () => {
-                    if (userRole === "AGENT" || userRole === "ADMIN") {
+                    if (userRole === "SUPER_ADMIN") {
+                        router.push("/super-admin/login");
+                    } else if (userRole === "AGENT" || userRole === "ADMIN") {
                         router.push("/admin/login");
                     } else {
                         router.push("/sign-in");

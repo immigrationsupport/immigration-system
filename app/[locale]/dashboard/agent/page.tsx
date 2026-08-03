@@ -13,35 +13,37 @@ export default async function AgentDashboard() {
         headers: await headers()
     });
 
-    if (!session || (session.user as any).role !== "AGENT") {
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
         return null;
     }
+
+    const isAdmin = (session.user as any).role === "ADMIN";
+    const agencyId = (session.user as any).agencyId;
+    const scopeFilter = isAdmin ? { agencyId } : {
+        OR: [{ agentId: session.user.id }, { client: { agentId: session.user.id } }]
+    };
 
     // Fetch stats and applications
     const [assignedApps, inReviewApps, completedApps] = await Promise.all([
         prisma.application.count({
-            where: {
-                OR: [{ agentId: session.user.id }, { client: { agentId: session.user.id } }]
-            }
+            where: scopeFilter
         }),
         prisma.application.count({
             where: {
-                OR: [{ agentId: session.user.id }, { client: { agentId: session.user.id } }],
+                ...scopeFilter,
                 status: "IN_REVIEW"
             }
         }),
         prisma.application.count({
             where: {
-                OR: [{ agentId: session.user.id }, { client: { agentId: session.user.id } }],
+                ...scopeFilter,
                 status: "APPROVED"
             }
         })
     ]);
 
     const recentApplications = await prisma.application.findMany({
-        where: {
-            OR: [{ agentId: session.user.id }, { client: { agentId: session.user.id } }]
-        },
+        where: scopeFilter,
         include: {
             client: { select: { name: true, email: true } },
             steps: { select: { type: true, status: true, isLocked: true }, orderBy: { createdAt: "asc" } }
@@ -54,8 +56,8 @@ export default async function AgentDashboard() {
         <div className="space-y-8 max-w-7xl mx-auto px-4 py-8">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 tracking-tight" style={{ color: "#1E3A8A" }}>Agent Overview</h1>
-                    <p className="text-gray-500 font-medium">Welcome back to your workspace.</p>
+                    <h1 className="text-3xl font-black text-gray-900 tracking-tight" style={{ color: "#1E3A8A" }}>{isAdmin ? "Applications Overview" : "Agent Overview"}</h1>
+                    <p className="text-gray-500 font-medium">{isAdmin ? "All applications across your agency." : "Welcome back to your workspace."}</p>
                 </div>
                 <Link href="/dashboard/agent/profile">
                     <Button variant="outline" className="rounded-xl border-gray-200 hover:bg-blue-50 hover:text-blue-700 font-bold gap-2">

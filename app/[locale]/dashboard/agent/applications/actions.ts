@@ -16,7 +16,7 @@ export async function updateApplicationStatusAction(
         headers: await headers()
     });
 
-    if (!session || (session.user as any).role !== "AGENT") {
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
         return { error: "Unauthorized access." };
     }
 
@@ -53,9 +53,10 @@ export async function updateApplicationStatusAction(
                 });
 
                 if (firstStep) {
+                    const actorRoleLabel = (session.user as any).role === "ADMIN" ? "ADMIN" : "AGENT";
                     await tx.message.create({
                         data: {
-                            content: `AGENT UPDATE: ${modificationMessage}`,
+                            content: `${actorRoleLabel} UPDATE: ${modificationMessage}`,
                             procedureId: firstStep.id,
                             senderId: session.user.id
                         }
@@ -98,7 +99,7 @@ export async function updateStepAction(
         headers: await headers()
     });
 
-    if (!session || (session.user as any).role !== "AGENT") {
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
         return { error: "Unauthorized access." };
     }
 
@@ -231,11 +232,13 @@ export async function updateStepAction(
             }
         }
 
-        // Audit Log
+        // Audit Log — always record the actor's role (Agent vs Admin) so the
+        // change is traceable even though both roles can act on a step.
+        const actorRole = (session.user as any).role === "ADMIN" ? "Admin" : "Agent";
         await prisma.auditLog.create({
             data: {
                 action: "STEP_UPDATE",
-                details: `Agent ${session.user.name} updated step ${step.type} (Status: ${data.status || step.status}).`,
+                details: `${actorRole} ${session.user.name} updated step ${step.type} (Status: ${data.status || step.status}).`,
                 userId: session.user.id,
                 targetId: step.applicationId
             }
@@ -254,7 +257,7 @@ export async function addStepCommentAction(stepId: string, comment: string) {
         headers: await headers()
     });
 
-    if (!session || (session.user as any).role !== "AGENT") {
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
         return { error: "Unauthorized access." };
     }
 

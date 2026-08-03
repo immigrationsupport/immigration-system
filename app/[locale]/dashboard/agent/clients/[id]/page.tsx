@@ -16,14 +16,16 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
         headers: await headers()
     });
 
-    if (!session || (session.user as any).role !== "AGENT") {
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
         return null;
     }
 
     const { id } = await params;
+ const isAdmin = (session.user as any).role === "ADMIN";
+const agencyId = (session.user as any).agencyId;
 
-    const client = await prisma.user.findUnique({
-        where: { id, agentId: session.user.id },
+const client = await prisma.user.findUnique({
+    where: isAdmin ? { id, agencyId } : { id, agentId: session.user.id },
         include: {
             applications: {
                 include: {

@@ -108,9 +108,16 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                             </p>
                         </div>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-gray-100">
-                        <X size={20} className="text-gray-500" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <a href={`/dashboard/agent/applications/${data.id}`} target="_blank" rel="noopener noreferrer">
+                            <Button variant="outline" className="rounded-xl border-blue-200 text-blue-700 hover:bg-blue-50 font-bold text-xs uppercase tracking-widest">
+                                Manage Steps
+                            </Button>
+                        </a>
+                        <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-gray-100">
+                            <X size={20} className="text-gray-500" />
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="p-8 space-y-8">

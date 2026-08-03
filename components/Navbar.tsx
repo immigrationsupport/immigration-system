@@ -4,6 +4,7 @@ import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { LogIn, Search, Menu, X, Globe, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import ContactAgencyModal from "@/components/ContactAgencyModal";
 
 export default function Navbar() {
     const t = useTranslations("navigation.navbar");
@@ -15,6 +16,7 @@ export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [isLangOpen, setIsLangOpen] = useState(false);
+    const [isContactOpen, setIsContactOpen] = useState(false);
 
     // Helper to determine if a link is active
     const isActive = (path: string) => pathname === path;
@@ -82,12 +84,13 @@ export default function Navbar() {
                         >
                             {t("about")}
                         </Link>
-                        <Link 
-                            href="/contact" 
-                            className={`font-bold text-[16px] lg:text-[18px] transition-colors ${isActive('/contact') ? 'text-[#1E3A8A]' : 'text-[#374151] hover:text-[#1E3A8A]'}`}
+                        <button
+                            type="button"
+                            onClick={() => setIsContactOpen(true)}
+                            className="font-bold text-[16px] lg:text-[18px] transition-colors text-[#374151] hover:text-[#1E3A8A] cursor-pointer"
                         >
                             {t("contact")}
-                        </Link>
+                        </button>
                     </div>
 
                     {/* Right Section: Search, Language Switcher & Actions */}
@@ -205,13 +208,13 @@ export default function Navbar() {
                             >
                                 {t("about")}
                             </Link>
-                            <Link 
-                                href="/contact" 
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className={`block px-3 py-3 rounded-md text-base font-medium ${isActive('/contact') ? 'bg-blue-50 text-[#1E3A8A]' : 'text-gray-900 hover:bg-gray-50 hover:text-[#1E3A8A]'}`}
+                            <button
+                                type="button"
+                                onClick={() => { setIsContactOpen(true); setIsMobileMenuOpen(false); }}
+                                className="block w-full text-left px-3 py-3 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50 hover:text-[#1E3A8A] cursor-pointer"
                             >
                                 {t("contact")}
-                            </Link>
+                            </button>
                         </div>
 
                         {/* Mobile Language Switcher */}
@@ -249,6 +252,8 @@ export default function Navbar() {
                     </div>
                 </div>
             )}
+
+            <ContactAgencyModal open={isContactOpen} onOpenChange={setIsContactOpen} />
         </nav>
     );
 }

@@ -34,7 +34,10 @@ export default function DashboardPage() {
 
             const role = (user.role || "client").toLowerCase();
 
-            if (role === "admin") {
+            if (role === "super_admin") {
+                // /super-admin lives outside the [locale] route tree too.
+                nativeRouter.push("/super-admin/dashboard");
+            } else if (role === "admin") {
                 // /admin lives outside the [locale] route tree, so it must
                 // NOT go through the locale-prefixing router.
                 nativeRouter.push("/admin/dashboard");

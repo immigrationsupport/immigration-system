@@ -1,0 +1,136 @@
+"use server";
+
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import prisma from "@/lib/prisma";
+import { hashPassword } from "better-auth/crypto";
+import { revalidatePath } from "next/cache";
+
+async function requireSuperAdmin() {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session || (session.user as any).role !== "SUPER_ADMIN") {
+        return null;
+    }
+    return session;
+}
+
+export async function getAgencies() {
+    const session = await requireSuperAdmin();
+    if (!session) throw new Error("Unauthorized");
+
+    const agencies = await prisma.agency.findMany({
+        orderBy: { createdAt: "desc" },
+        include: {
+            _count: {
+                select: { users: true, applications: true }
+            }
+        }
+    });
+
+    return agencies;
+}
+
+export async function createAgencyAction(formData: FormData) {
+    const session = await requireSuperAdmin();
+    if (!session) return { error: "Unauthorized access." };
+
+    const agencyName = (formData.get("agencyName") as string)?.trim();
+    const adminName = (formData.get("adminName") as string)?.trim();
+    const adminEmail = (formData.get("adminEmail") as string)?.trim()?.toLowerCase();
+    const adminPassword = formData.get("adminPassword") as string;
+
+    if (!agencyName || !adminName || !adminEmail || !adminPassword) {
+        return { error: "All fields are required." };
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(adminEmail)) {
+        return { error: "Invalid email format." };
+    }
+
+    try {
+        const existingUser = await prisma.user.findUnique({ where: { email: adminEmail } });
+        if (existingUser) {
+            return { error: "A user with this email already exists." };
+        }
+
+        const hashedPassword = await hashPassword(adminPassword);
+
+        const result = await prisma.$transaction(async (tx) => {
+            const agency = await tx.agency.create({
+                data: {
+                    name: agencyName,
+                    status: "ACTIVE",
+                    isInternal: false,
+                }
+            });
+
+            const admin = await tx.user.create({
+                data: {
+                    name: adminName,
+                    email: adminEmail,
+                    password: hashedPassword,
+                    role: "ADMIN" as any,
+                    agencyId: agency.id,
+                    emailVerified: true,
+                    accounts: {
+                        create: {
+                            providerId: "credential",
+                            accountId: adminEmail,
+                            password: hashedPassword,
+                        }
+                    }
+                }
+            });
+
+            await tx.auditLog.create({
+                data: {
+                    action: "CREATE_AGENCY",
+                    details: `Agency "${agencyName}" created with admin ${adminName} (${adminEmail}) by Super Admin.`,
+                    userId: session.user.id,
+                    agencyId: agency.id,
+                    targetId: agency.id,
+                }
+            });
+
+            return { agency, admin };
+        });
+
+        revalidatePath("/super-admin/dashboard");
+        return { success: true, agencyId: result.agency.id };
+    } catch (e: any) {
+        console.error("Agency creation error:", e);
+        return { error: e.message || "Failed to create agency." };
+    }
+}
+
+export async function toggleSuspendAgencyAction(agencyId: string, currentlySuspended: boolean) {
+    const session = await requireSuperAdmin();
+    if (!session) return { error: "Unauthorized access." };
+
+    try {
+        const agency = await prisma.agency.findUnique({ where: { id: agencyId } });
+        if (!agency) return { error: "Agency not found." };
+        if (agency.isInternal) return { error: "The internal agency cannot be suspended." };
+
+        await prisma.agency.update({
+            where: { id: agencyId },
+            data: { status: currentlySuspended ? "ACTIVE" : "SUSPENDED" }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: currentlySuspended ? "UNSUSPEND_AGENCY" : "SUSPEND_AGENCY",
+                details: `Agency "${agency.name}" ${currentlySuspended ? "reactivated" : "suspended"} by Super Admin.`,
+                userId: session.user.id,
+                agencyId: agencyId,
+                targetId: agencyId,
+            }
+        });
+
+        revalidatePath("/super-admin/dashboard");
+        return { success: true };
+    } catch (e: any) {
+        return { error: "Failed to update agency status." };
+    }
+}

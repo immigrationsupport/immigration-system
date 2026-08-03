@@ -14,13 +14,15 @@ export async function getClientsAndAgents() {
         throw new Error("Unauthorized");
     }
 
+    const agencyId = (session.user as any).agencyId;
+
     const [clients, agents] = await Promise.all([
         prisma.user.findMany({
-            where: { role: "CLIENT" as any },
+            where: { role: "CLIENT" as any, agencyId },
             include: { agent: true }
         }),
         prisma.user.findMany({
-            where: { role: "AGENT" as any }
+            where: { role: "AGENT" as any, agencyId }
         })
     ]);
 
@@ -36,6 +38,8 @@ export async function assignAgentToClientAction(clientId: string, agentId: strin
         return { error: "Unauthorized access." };
     }
 
+    const adminAgencyId = (session.user as any).agencyId;
+
     try {
         const client = await prisma.user.findUnique({
             where: { id: clientId },
@@ -43,12 +47,16 @@ export async function assignAgentToClientAction(clientId: string, agentId: strin
         });
 
         if (!client) return { error: "Client not found." };
+        if (client.agencyId !== adminAgencyId) return { error: "This client does not belong to your agency." };
         if (client.isSuspended) return { error: "Cannot assign an agent to a suspended client." };
 
         // Transaction to update client and all their applications
         await prisma.$transaction(async (tx) => {
             // Re-fetch agent with name
             const agent = await tx.user.findUnique({ where: { id: agentId } });
+            if (!agent || agent.agencyId !== adminAgencyId) {
+                throw new Error("This agent does not belong to your agency.");
+            }
             const agentName = agent?.name || agentId;
 
             // Update client
@@ -69,6 +77,7 @@ export async function assignAgentToClientAction(clientId: string, agentId: strin
                     action: "ASSIGN_AGENT",
                     details: `Agent ${agentName} assigned to Client ${client.name} (${client.email}).`,
                     userId: session.user.id,
+                    agencyId: adminAgencyId,
                     targetId: clientId
                 }
             });
@@ -78,7 +87,7 @@ export async function assignAgentToClientAction(clientId: string, agentId: strin
         return { success: true };
     } catch (e: any) {
         console.error("Assignment Error:", e);
-        return { error: "An error occurred while assigning the agent." };
+        return { error: e?.message || "An error occurred while assigning the agent." };
     }
 }
 
@@ -91,9 +100,12 @@ export async function toggleSuspendClientAction(clientId: string, currentlySuspe
         return { error: "Unauthorized access." };
     }
 
+    const adminAgencyId = (session.user as any).agencyId;
+
     try {
         const client = await prisma.user.findUnique({ where: { id: clientId } });
         if (!client) return { error: "Client not found." };
+        if (client.agencyId !== adminAgencyId) return { error: "This client does not belong to your agency." };
 
         await prisma.user.update({
             where: { id: clientId },
@@ -105,6 +117,7 @@ export async function toggleSuspendClientAction(clientId: string, currentlySuspe
                 action: currentlySuspended ? "UNSUSPEND_CLIENT" : "SUSPEND_CLIENT",
                 details: `Client ${client.name} (${client.email}) ${currentlySuspended ? "unsuspended" : "suspended"} by Admin.`,
                 userId: session.user.id,
+                agencyId: adminAgencyId,
                 targetId: clientId
             }
         });
@@ -125,9 +138,12 @@ export async function validateClientAction(clientId: string) {
         return { error: "Unauthorized access." };
     }
 
+    const adminAgencyId = (session.user as any).agencyId;
+
     try {
         const client = await prisma.user.findUnique({ where: { id: clientId } });
         if (!client) return { error: "Client not found." };
+        if (client.agencyId !== adminAgencyId) return { error: "This client does not belong to your agency." };
         if (client.status !== "PENDING") return { error: "Client is already validated." };
 
         await prisma.user.update({
@@ -157,6 +173,7 @@ export async function validateClientAction(clientId: string) {
                 action: "VALIDATE_CLIENT",
                 details: `Client ${client.name} (${client.email}) was validated by Admin, fast-tracking initial steps.`,
                 userId: session.user.id,
+                agencyId: adminAgencyId,
                 targetId: clientId
             }
         });
@@ -177,9 +194,12 @@ export async function deleteClientAction(clientId: string) {
         return { error: "Unauthorized access." };
     }
 
+    const adminAgencyId = (session.user as any).agencyId;
+
     try {
         const client = await prisma.user.findUnique({ where: { id: clientId } });
         if (!client) return { error: "Client not found." };
+        if (client.agencyId !== adminAgencyId) return { error: "This client does not belong to your agency." };
 
         await prisma.$transaction(async (tx) => {
             // 1. Get all application data for this client
@@ -232,6 +252,7 @@ export async function deleteClientAction(clientId: string) {
                     action: "DELETE_CLIENT",
                     details: `Client ${client.name} (${client.email}) was permanently deleted by Admin.`,
                     userId: session.user.id,
+                    agencyId: adminAgencyId,
                     targetId: clientId
                 }
             });

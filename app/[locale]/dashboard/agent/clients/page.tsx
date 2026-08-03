@@ -5,18 +5,25 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
+import NewClientButton from "./new-client-button";
 
 export default async function AssignedClientsPage() {
     const session = await auth.api.getSession({
         headers: await headers()
     });
 
-    if (!session || (session.user as any).role !== "AGENT") {
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
         return null; // Handled by middleware mostly
     }
 
+    const isAdmin = (session.user as any).role === "ADMIN";
+    const agencyId = (session.user as any).agencyId;
+    if (isAdmin && !agencyId) {
+        return null;
+    }
+
     const clients = await prisma.user.findMany({
-        where: { agentId: session.user.id },
+        where: isAdmin ? { role: "CLIENT", agencyId } : { agentId: session.user.id },
         include: {
             applications: {
                 orderBy: { updatedAt: "desc" },
@@ -33,12 +40,15 @@ export default async function AssignedClientsPage() {
         <div className="space-y-6 max-w-7xl mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900" style={{ color: "#1E3A8A" }}>Assigned Clients</h1>
-                    <p className="text-gray-500 mt-1">Manage individuals currently assigned to your care.</p>
+                    <h1 className="text-3xl font-extrabold tracking-tight text-gray-900" style={{ color: "#1E3A8A" }}>{isAdmin ? "All Clients" : "Assigned Clients"}</h1>
+                    <p className="text-gray-500 mt-1">{isAdmin ? "Manage every client across your agency." : "Manage individuals currently assigned to your care."}</p>
                 </div>
-                <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100 flex items-center gap-2">
-                    <Users className="h-4 w-4 text-[#1E3A8A]" />
-                    <span className="text-sm font-bold text-[#1E3A8A]">{clients.length} Active Clients</span>
+                <div className="flex items-center gap-3">
+                    <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100 flex items-center gap-2">
+                        <Users className="h-4 w-4 text-[#1E3A8A]" />
+                        <span className="text-sm font-bold text-[#1E3A8A]">{clients.length} Active Clients</span>
+                    </div>
+                    <NewClientButton isAgent={!isAdmin} />
                 </div>
             </div>
 

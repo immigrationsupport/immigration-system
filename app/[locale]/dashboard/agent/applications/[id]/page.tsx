@@ -11,7 +11,7 @@ export default async function AgentApplicationManagementPage({ params }: { param
         headers: await headers()
     });
 
-    if (!session || (session.user as any).role !== "AGENT") {
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
         return null;
     }
 

@@ -1,13 +1,19 @@
 // Forced rebuild to resolve import path cache
 import React from "react";
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import ApplicationTable from "./application-table";
 
 export const dynamic = "force-dynamic";
 
 export default async function AllApplicationsPage() {
-    // Fetch all applications with client and agent info
+    const session = await auth.api.getSession({ headers: await headers() });
+    const agencyId = (session?.user as any)?.agencyId;
+
+    // Fetch all applications with client and agent info, scoped to this agency
     const rawApplications = await prisma.application.findMany({
+        where: { agencyId },
         include: {
             client: {
                 select: {
@@ -41,10 +47,11 @@ export default async function AllApplicationsPage() {
         type: (app as any).steps[0]?.type || "GENERAL"
     }));
 
-    // Fetch agents for the assignment dropdown
+    // Fetch agents for the assignment dropdown, scoped to this agency
     const agents = await prisma.user.findMany({
         where: {
-            role: "AGENT"
+            role: "AGENT",
+            agencyId
         },
         select: {
             id: true,

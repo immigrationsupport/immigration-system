@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { getTranslations } from "next-intl/server";
+import ContactAgencyButton from "@/components/ContactAgencyButton";
 
 export default async function ClientDashboard() {
     const t = await getTranslations("dashboard.clientDashboard");
@@ -91,11 +92,10 @@ export default async function ClientDashboard() {
                                 </p>
                             </div>
                         </div>
-                        <Link href="/contact">
-                            <Button className="bg-amber-600 hover:bg-amber-700 text-white font-black px-8 py-6 rounded-2xl shadow-lg shadow-amber-200 transition-all hover:scale-105">
-                                {t("contactAgencyNow")}
-                            </Button>
-                        </Link>
+                        <ContactAgencyButton
+                            label={t("contactAgencyNow")}
+                            className="bg-amber-600 hover:bg-amber-700 text-white font-black px-8 py-6 rounded-2xl shadow-lg shadow-amber-200 transition-all hover:scale-105"
+                        />
                     </CardContent>
                 </Card>
             )}

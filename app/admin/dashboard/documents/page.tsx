@@ -1,13 +1,24 @@
 // Forced rebuild to resolve import path cache
 import React from "react";
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import DocumentTable from "@/app/admin/dashboard/documents/document-table";
 
 export const dynamic = "force-dynamic";
 
 export default async function DocumentMonitoringPage() {
-    // 1. Fetch all documents comprehensively with relations
+    const session = await auth.api.getSession({ headers: await headers() });
+    const agencyId = (session?.user as any)?.agencyId;
+
+    // 1. Fetch all documents for this agency (Document has no direct agencyId
+    // column — scoped through Procedure -> Application -> agencyId instead)
     const rawDocuments = await prisma.document.findMany({
+        where: {
+            Procedure: {
+                application: { agencyId }
+            }
+        },
         include: {
             Procedure: {
                 include: {

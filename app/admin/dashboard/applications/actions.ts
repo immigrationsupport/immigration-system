@@ -14,6 +14,8 @@ export async function deleteApplicationAction(applicationId: string) {
         return { error: "Unauthorized access." };
     }
 
+    const adminAgencyId = (session.user as any).agencyId;
+
     try {
         const application = await prisma.application.findUnique({
             where: { id: applicationId },
@@ -21,6 +23,7 @@ export async function deleteApplicationAction(applicationId: string) {
         });
 
         if (!application) return { error: "Application not found." };
+        if (application.agencyId !== adminAgencyId) return { error: "This application does not belong to your agency." };
 
         await prisma.$transaction(async (tx) => {
             // Delete related documents first
@@ -54,7 +57,8 @@ export async function deleteApplicationAction(applicationId: string) {
                 data: {
                     action: "DELETE_APPLICATION",
                     details: `Application for ${application.client.name} (${application.country}) permanently deleted by Admin.`,
-                    userId: session.user.id
+                    userId: session.user.id,
+                    agencyId: adminAgencyId
                 }
             });
         });
@@ -83,6 +87,8 @@ export async function updateApplicationAction(
         return { error: "Unauthorized access." };
     }
 
+    const adminAgencyId = (session.user as any).agencyId;
+
     try {
         const oldApp = await prisma.application.findUnique({
             where: { id: applicationId },
@@ -90,6 +96,14 @@ export async function updateApplicationAction(
         });
 
         if (!oldApp) return { error: "Application not found." };
+        if (oldApp.agencyId !== adminAgencyId) return { error: "This application does not belong to your agency." };
+
+        if (data.agentId) {
+            const agent = await prisma.user.findUnique({ where: { id: data.agentId } });
+            if (!agent || agent.agencyId !== adminAgencyId) {
+                return { error: "This agent does not belong to your agency." };
+            }
+        }
 
         await prisma.application.update({
             where: { id: applicationId },
@@ -105,7 +119,8 @@ export async function updateApplicationAction(
             data: {
                 action: "UPDATE_APPLICATION",
                 details: `Application for ${oldApp.client.name} updated by Admin. Changes: ${JSON.stringify(data)}`,
-                userId: session.user.id
+                userId: session.user.id,
+                agencyId: adminAgencyId
             }
         });
 
@@ -116,4 +131,3 @@ export async function updateApplicationAction(
         return { error: e.message || "Failed to update application." };
     }
 }
-

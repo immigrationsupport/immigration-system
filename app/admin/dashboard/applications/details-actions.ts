@@ -7,6 +7,12 @@ import { revalidatePath } from "next/cache";
 
 export async function getApplicationDetails(applicationId: string) {
     try {
+        const session = await auth.api.getSession({ headers: await headers() });
+        if (!session || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+            return { error: "Unauthorized access." };
+        }
+        const agencyId = (session.user as any).agencyId;
+
         const app = await prisma.application.findUnique({
             where: { id: applicationId },
             include: {
@@ -46,6 +52,7 @@ export async function getApplicationDetails(applicationId: string) {
         }) as any;
 
         if (!app) return { error: "Application not found." };
+        if (app.agencyId !== agencyId) return { error: "This application does not belong to your agency." };
 
         const mappedApp = {
             ...app,
@@ -61,6 +68,16 @@ export async function getApplicationDetails(applicationId: string) {
 
 export async function unlockApplication(applicationId: string) {
     try {
+        const session = await auth.api.getSession({ headers: await headers() });
+        if (!session || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+            return { error: "Unauthorized access." };
+        }
+        const agencyId = (session.user as any).agencyId;
+
+        const existing = await prisma.application.findUnique({ where: { id: applicationId } });
+        if (!existing) return { error: "Application not found." };
+        if (existing.agencyId !== agencyId) return { error: "This application does not belong to your agency." };
+
         await prisma.application.update({
             where: { id: applicationId },
             data: { status: "IN_PROGRESS" }
@@ -69,6 +86,16 @@ export async function unlockApplication(applicationId: string) {
         await prisma.applicationStep.updateMany({
             where: { applicationId },
             data: { isLocked: false }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "APPLICATION_UNLOCKED",
+                details: `Application ${applicationId} unlocked by Admin.`,
+                userId: session.user.id,
+                agencyId,
+                targetId: applicationId
+            }
         });
 
         revalidatePath("/admin/dashboard/applications");
@@ -81,6 +108,15 @@ export async function unlockApplication(applicationId: string) {
 export async function validateApplication(applicationId: string) {
     try {
         const session = await auth.api.getSession({ headers: await headers() });
+        if (!session || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+            return { error: "Unauthorized access." };
+        }
+        const agencyId = (session.user as any).agencyId;
+
+        const existing = await prisma.application.findUnique({ where: { id: applicationId } });
+        if (!existing) return { error: "Application not found." };
+        if (existing.agencyId !== agencyId) return { error: "This application does not belong to your agency." };
+
         const app = await prisma.application.update({
             where: { id: applicationId },
             data: { status: "VALIDATED" },
@@ -105,7 +141,9 @@ export async function validateApplication(applicationId: string) {
                 data: {
                     action: "APPLICATION_VALIDATED",
                     details: `Application ${applicationId} validated. Notification sent to ${app.client.email}.`,
-                    userId: session.user.id
+                    userId: session.user.id,
+                    agencyId,
+                    targetId: applicationId
                 }
             });
         }

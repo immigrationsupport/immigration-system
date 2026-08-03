@@ -51,8 +51,8 @@ export async function contactAction(formData: FormData) {
     `;
 
     return await sendEmail({
-        to: "emilieag573@gmail.com",
-        subject: `New Inquiry from ${fullName}`,
+                to: process.env.AGENCY_CONTACT_EMAIL || "emilieag573@gmail.com",
+             subject: `New Inquiry from ${fullName}`,
         html,
     });
 }

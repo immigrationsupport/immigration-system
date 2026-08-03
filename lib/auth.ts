@@ -10,6 +10,17 @@ export const auth = betterAuth({
     }),
     baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
     secret: process.env.BETTER_AUTH_SECRET,
+    session: {
+        expiresIn: 60 * 60 * 24 * 90, // 90 days in seconds (7,776,000s)
+        updateAge: 60 * 60 * 24 * 1, // 1 day
+    },
+    advanced: {
+        // Ensure the session cookie always carries a Max-Age so it persists
+        // across browser restarts (not treated as a session-only cookie).
+        defaultCookieAttributes: {
+            maxAge: 60 * 60 * 24 * 90, // 90 days
+        },
+    },
     /*
     plugins: [
         multiSession({
@@ -18,13 +29,7 @@ export const auth = betterAuth({
     ],
     */
 
-    debug: true,
-    socialProviders: {
-        google: {
-            clientId: process.env.GOOGLE_CLIENT_ID || "PLACEHOLDER",
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "PLACEHOLDER",
-        },
-    },
+     debug: true,
     emailAndPassword: {
         enabled: true,
         autoSignIn: true,
@@ -37,9 +42,18 @@ export const auth = betterAuth({
     },
     user: {
         additionalFields: {
-            role: {
+           role: {
                 type: "string",
                 defaultValue: "CLIENT",
+            },
+           agencyId: {
+                type: "string",
+                required: false
+            },
+            mustChangePassword: {
+                type: "boolean",
+                defaultValue: false,
+                required: false
             },
             status: {
                 type: "string",

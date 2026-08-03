@@ -19,7 +19,7 @@ export default function NotFound() {
           if (typeof window !== 'undefined' && window.history.length > 2) {
               router.back();
           } else {
-              router.push('/');
+              router.push('/sign-in');
           }
           return 0;
         }
@@ -34,7 +34,7 @@ export default function NotFound() {
     if (typeof window !== 'undefined' && window.history.length > 2) {
         router.back();
     } else {
-        router.push('/');
+        router.push('/sign-in');
     }
   };
 
@@ -63,10 +63,10 @@ export default function NotFound() {
           </button>
           
           <Link 
-            href="/"
+            href="/sign-in"
             className="w-full flex items-center justify-center gap-2 py-3.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300 text-[14px] font-bold rounded-xl transition-all"
           >
-            <Home className="w-4 h-4" /> Return to Home
+            <Home className="w-4 h-4" /> Return to Login Page
           </Link>
         </div>
       </div>
