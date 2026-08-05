@@ -57,7 +57,7 @@ model User {
   phoneNumber      String?
   profileCompleted Boolean           @default(false)
   role             Role              @default(CLIENT)
-  status           UserStatus        @default(PENDING)
+  status           UserStatus        @default(ACTIVE)
   assignedApps     Application[]     @relation("AgentApplications")
   applications     Application[]     @relation("ClientApplications")
   authoredLogs     AuditLog[]        @relation("AuthorLogs")

@@ -24,8 +24,7 @@ export default async function ManageClientsPage() {
     ]);
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
-            <h1 className="text-2xl font-semibold mb-6" style={{ color: "#1E3A8A" }}>Manage Clients</h1>
+        <div className="max-w-7xl mx-auto space-y-6">
             <ClientList initialClients={clients} agents={agents} />
         </div>
     );

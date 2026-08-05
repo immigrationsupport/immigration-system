@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import SendMessageModal from "./send-message-modal";
+import CompleteProfileButton from "./complete-profile-button";
 import { getLocale } from "next-intl/server";
 
 export default async function ClientDetailPage({ params }: { params: { id: string } }) {
@@ -21,11 +22,14 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
     }
 
     const { id } = await params;
- const isAdmin = (session.user as any).role === "ADMIN";
-const agencyId = (session.user as any).agencyId;
+    const isAdmin = (session.user as any).role === "ADMIN";
+    const agencyId = (session.user as any).agencyId;
+    if (isAdmin && !agencyId) {
+        return null;
+    }
 
-const client = await prisma.user.findUnique({
-    where: isAdmin ? { id, agencyId } : { id, agentId: session.user.id },
+    const client = await prisma.user.findUnique({
+        where: isAdmin ? { id, agencyId } : { id, agentId: session.user.id },
         include: {
             applications: {
                 include: {
@@ -83,10 +87,21 @@ const client = await prisma.user.findUnique({
                 {/* Profile Card */}
                 <div className="lg:col-span-1 space-y-6">
                     <Card className="border-none shadow-xl shadow-gray-200/50 rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-white border-b border-gray-50 py-6">
+                        <CardHeader className="bg-white border-b border-gray-50 py-6 flex flex-row items-center justify-between gap-3">
                             <CardTitle className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
                                 <User className="h-4 w-4 text-blue-500" /> Personal Profile
                             </CardTitle>
+                            <CompleteProfileButton
+                                clientId={client.id}
+                                defaults={{
+                                    dateOfBirth: client.dateOfBirth ? new Date(client.dateOfBirth).toISOString() : null,
+                                    nationality: client.nationality,
+                                    maritalStatus: client.maritalStatus,
+                                    numberOfChildren: client.numberOfChildren,
+                                    address: client.address,
+                                    phoneNumber: client.phoneNumber,
+                                }}
+                            />
                         </CardHeader>
                         <CardContent className="p-6 space-y-4">
                             <div className="space-y-1">

@@ -26,8 +26,6 @@ export default async function ClientProfilePage() {
 
     if (!user) return null;
 
-    const isPending = user.status === "PENDING";
-
     return (
         <div className="space-y-12 max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b-4 border-[#1E3A8A]">
@@ -42,18 +40,6 @@ export default async function ClientProfilePage() {
                     </Button>
                 </Link>
             </div>
-
-            {isPending && (
-                <div className="bg-amber-50 border-4 border-amber-200 text-amber-900 px-8 py-6 rounded-[40px] flex items-center gap-6 shadow-2xl shadow-amber-100/50 animate-pulse">
-                    <div className="bg-amber-100 p-4 rounded-3xl">
-                        <Users className="h-10 w-10 text-amber-600" />
-                    </div>
-                    <div>
-                        <h3 className="font-black text-2xl uppercase tracking-tighter">{t("accountUnderReview")}</h3>
-                        <p className="font-bold opacity-75">{t("accountUnderReviewDesc")}</p>
-                    </div>
-                </div>
-            )}
 
             <div className="grid grid-cols-1 gap-12">
                 <ProfileForm user={{

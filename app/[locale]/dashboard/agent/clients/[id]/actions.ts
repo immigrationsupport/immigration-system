@@ -53,3 +53,61 @@ export async function sendOfficialMessageAction(clientId: string, subject: strin
         return { error: "Failed to send official message." };
     }
 }
+
+export async function completeClientProfileAction(clientId: string, formData: FormData) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
+        return { error: "Unauthorized access." };
+    }
+
+    const agencyId = (session.user as any).agencyId;
+
+    const dateOfBirth = formData.get("dateOfBirth") as string;
+    const nationality = formData.get("nationality") as string;
+    const maritalStatus = formData.get("maritalStatus") as string;
+    const numberOfChildren = parseInt(formData.get("numberOfChildren") as string || "0");
+    const address = formData.get("address") as string;
+    const phoneNumber = formData.get("phoneNumber") as string;
+
+    if (!dateOfBirth || !nationality || !maritalStatus || !address) {
+        return { error: "All fields are required." };
+    }
+
+    try {
+        const client = await prisma.user.findUnique({ where: { id: clientId } });
+        if (!client) return { error: "Client not found." };
+        if (client.agencyId !== agencyId) return { error: "This client does not belong to your agency." };
+
+        await prisma.user.update({
+            where: { id: clientId },
+            data: {
+                dateOfBirth: new Date(dateOfBirth),
+                nationality,
+                maritalStatus: maritalStatus as any,
+                numberOfChildren,
+                address,
+                phoneNumber: phoneNumber || null,
+                profileCompleted: true
+            }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "PROFILE_UPDATE",
+                details: `Profile for client ${client.name} completed by ${session.user.name}.`,
+                userId: session.user.id,
+                agencyId,
+                targetId: clientId
+            }
+        });
+
+        revalidatePath(`/dashboard/agent/clients/${clientId}`);
+        return { success: true };
+    } catch (e: any) {
+        console.error("Profile completion error:", e);
+        return { error: e.message || "An error occurred while updating the profile." };
+    }
+}

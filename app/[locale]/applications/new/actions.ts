@@ -20,6 +20,11 @@ export async function createFullApplicationAction(data: {
         return { error: "Unauthorized" };
     }
 
+    const agencyId = (session.user as any).agencyId;
+    if (!agencyId) {
+        return { error: "Your account is not linked to an agency." };
+    }
+
     if (!data.country || !data.type) {
         return { error: "Country and application type are required." };
     }
@@ -30,6 +35,7 @@ export async function createFullApplicationAction(data: {
                 country: data.country,
                 type: data.type as ApplicationType,
                 clientId: session.user.id,
+                agencyId,
                 status: "IN_PROGRESS",
                 steps: {
                     create: APP_STEP_SEQUENCE.map((stepType, index) => {
@@ -51,7 +57,8 @@ export async function createFullApplicationAction(data: {
             data: {
                 action: "APPLICATION_CREATION",
                 details: `Client ${session.user.name} created a ${data.type} application for ${data.country}.`,
-                userId: session.user.id
+                userId: session.user.id,
+                agencyId
             }
         });
 

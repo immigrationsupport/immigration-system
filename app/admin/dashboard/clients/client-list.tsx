@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import { Search, Ban, UserX, Replace, UserPlus, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { assignAgentToClientAction, toggleSuspendClientAction, validateClientAction, deleteClientAction } from "./actions";
+import { assignAgentToClientAction, toggleSuspendClientAction, deleteClientAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { TruncatedText } from "@/components/ui/truncated-text";
+import CreateClientModal from "./create-client-modal";
 
 interface Client {
     id: string;
@@ -68,13 +69,6 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
     }
 };
 
-    const handleValidate = async (clientId: string) => {
-        if (!confirm("Are you sure you want to validate this client? This grants them full access.")) return;
-        const res = await validateClientAction(clientId);
-        if (res.error) alert(res.error);
-        else window.location.reload();
-    };
-
     const handleDelete = async (clientId: string) => {
         if (!confirm("Are you sure you want to permanently delete this client? This action cannot be undone.")) return;
         const res = await deleteClientAction(clientId);
@@ -83,7 +77,14 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
     };
 
     return (
-        <div className="bg-[#F9FAFB] p-6 lg:p-8 shadow-sm border border-gray-200" style={{ borderRadius: "8px" }}>
+        <div className="space-y-6">
+            {/* Header row with title and Create Client button */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h1 className="text-2xl font-semibold" style={{ color: "#1E3A8A" }}>Manage Clients</h1>
+                <CreateClientModal agents={agents} />
+            </div>
+
+            <div className="bg-[#F9FAFB] p-6 lg:p-8 shadow-sm border border-gray-200" style={{ borderRadius: "8px" }}>
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <div className="relative flex-1 md:w-1/2">
                     <Search className="absolute left-4 top-3.5 h-5 w-5 text-[#374151]" />
@@ -156,32 +157,16 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                 <td className="px-6 py-5">
                                     <div className="flex flex-col gap-2">
                                         <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[14px] font-bold uppercase tracking-tight w-max ${
-                                            client.status === "PENDING"
-                                            ? "bg-amber-100 text-amber-800 border-amber-200"
+                                            client.isSuspended
+                                            ? "bg-red-100 text-red-800 border-red-200"
                                             : "bg-emerald-100 text-emerald-800 border-emerald-200"
                                         }`}>
-                                            {client.status === "PENDING" ? "Pending" : "Validated"}
-                                        </span>
-                                        <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[14px] font-bold uppercase tracking-tight w-max ${
-                                            client.isSuspended 
-                                            ? "bg-red-100 text-red-800 border-red-200" 
-                                            : "hidden"
-                                        }`}>
-                                            
+                                            {client.isSuspended ? "Suspended" : "Active"}
                                         </span>
                                     </div>
                                 </td>
                                 <td className="px-6 py-5 text-right">
                                     <div className="flex items-center justify-end gap-2 transition-all duration-300">
-                                        {client.status === "PENDING" && (
-                                            <button
-                                                className="p-2 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg shadow-sm transition-all bg-white"
-                                                title="Validate Client"
-                                                onClick={() => handleValidate(client.id)}
-                                            >
-                                                <CheckCircle2 size={20} />
-                                            </button>
-                                        )}
                                         <button
                                             className="p-2 text-[#374151] hover:text-[#1E3A8A] hover:bg-white rounded-lg transition-all disabled:opacity-50"
                                             title={client.isSuspended ? "Cannot assign agent to suspended client" : "Assign/Reassign Agent"}
@@ -217,8 +202,9 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                             </tr>
                         )}
                     </tbody>
-                </table>
+                    </table>
             </div>
+        </div>
         </div>
     );
 }

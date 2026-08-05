@@ -23,8 +23,9 @@ import {
     Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getApplicationDetails, unlockApplication, validateApplication } from "./details-actions";
+import { getApplicationDetails, unlockApplication } from "./details-actions";
 import { toast } from "sonner";
+import StepManagement from "@/app/[locale]/dashboard/agent/applications/[id]/step-management";
 
 interface DetailsModalProps {
     applicationId: string;
@@ -35,7 +36,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null);
-    const [actionLoading, setActionLoading] = useState<"unlock" | "validate" | null>(null);
+    const [actionLoading, setActionLoading] = useState<"unlock" | null>(null);
 
     const fetchDetails = async () => {
         setLoading(true);
@@ -56,18 +57,6 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
             fetchDetails();
         } else {
             toast.error(res.error || "Failed to unlock.");
-        }
-        setActionLoading(null);
-    };
-
-    const handleValidate = async () => {
-        setActionLoading("validate");
-        const res = await validateApplication(applicationId);
-        if (res.success) {
-            toast.success("Application validated successfully.");
-            fetchDetails();
-        } else {
-            toast.error(res.error || "Failed to validate.");
         }
         setActionLoading(null);
     };
@@ -109,11 +98,6 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <a href={`/dashboard/agent/applications/${data.id}`} target="_blank" rel="noopener noreferrer">
-                            <Button variant="outline" className="rounded-xl border-blue-200 text-blue-700 hover:bg-blue-50 font-bold text-xs uppercase tracking-widest">
-                                Manage Steps
-                            </Button>
-                        </a>
                         <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-gray-100">
                             <X size={20} className="text-gray-500" />
                         </Button>
@@ -192,71 +176,13 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
 
                         {/* Right Column: Timeline & Procedures */}
                         <div className="lg:col-span-2 space-y-6">
-                            <div className="bg-white border border-gray-100 rounded-2xl shadow-sm">
-                                <div className="p-5 border-b border-gray-50 flex justify-between items-center">
-                                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                                        <Hash size={18} className="text-blue-600" />
-                                        Application Timeline & Procedures
-                                    </h3>
-                                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${data.status === 'APPROVED' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
-                                        {data.status}
-                                    </span>
-                                </div>
-
-                                <div className="p-6">
-                                    {data.steps.length === 0 ? (
-                                        <div className="text-center py-12 text-gray-400 italic">No procedures initialized.</div>
-                                    ) : (
-                                        <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
-                                            {data.steps.map((proc: any) => (
-                                                <div key={proc.id} className="relative pl-10">
-                                                    <div className="absolute left-0 top-1 h-6 w-6 rounded-full bg-white border-4 border-blue-100 flex items-center justify-center z-10">
-                                                        <div className="h-2 w-2 rounded-full bg-blue-600" />
-                                                    </div>
-
-                                                    <div className="bg-gray-50/50 rounded-xl p-5 border border-gray-100 hover:border-blue-200 transition-colors">
-                                                        <div className="flex justify-between items-start mb-2">
-                                                            <h4 className="font-bold text-gray-900 text-sm">Procedure: {proc.type.replace('_', ' ')}</h4>
-                                                            <span className="text-[10px] text-gray-400 font-medium">{new Date(proc.updatedAt).toLocaleDateString("en-US")}</span>
-                                                        </div>
-                                                        <p className="text-xs text-gray-600 mb-4 bg-white p-3 rounded-lg border border-gray-100 shadow-sm leading-relaxed italic">
-                                                            "{proc.description || "No description provided."}"
-                                                        </p>
-
-                                                        {/* Related Documents */}
-                                                        {proc.Document.length > 0 && (
-                                                            <div className="space-y-2">
-                                                                <p className="text-[10px] uppercase font-black text-gray-400 tracking-wider">Submitted Evidence</p>
-                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                                    {proc.Document.map((doc: any) => (
-                                                                        <div key={doc.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100 group">
-                                                                            <div className="flex items-center gap-3 overflow-hidden">
-                                                                                <div className="h-8 w-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600 shrink-0">
-                                                                                    <Download size={16} />
-                                                                                </div>
-                                                                                <div className="overflow-hidden">
-                                                                                    <p className="text-xs font-bold text-gray-700 truncate">{doc.name}</p>
-                                                                                    <p className="text-[9px] text-gray-400 uppercase">{doc.type}</p>
-                                                                                </div>
-                                                                            </div>
-                                                                            <button
-                                                                                onClick={() => setViewingDoc({ url: doc.fileUrl, name: doc.name })}
-                                                                                className="p-1.5 hover:bg-blue-50 text-gray-400 hover:text-blue-700 transition-colors rounded-lg"
-                                                                                title="View in Browser"
-                                                                            >
-                                                                                <ExternalLink size={14} />
-                                                                            </button>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                            <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 overflow-x-auto">
+                                <StepManagement 
+                                    applicationId={data.id}
+                                    currentStatus={data.status}
+                                    steps={data.steps}
+                                    country={data.country}
+                                />
                             </div>
                         </div>
                     </div>
@@ -322,16 +248,6 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                 className="rounded-xl font-bold px-8 h-11 border-blue-200 text-blue-700 hover:bg-blue-50"
                             >
                                 {actionLoading === "unlock" ? "Unlocking..." : "Unlock Application"}
-                            </Button>
-                        )}
-                        {data.status !== "VALIDATED" && (
-                            <Button 
-                                variant="primary" 
-                                onClick={handleValidate} 
-                                disabled={actionLoading !== null}
-                                className="rounded-xl font-bold px-8 h-11 bg-green-600 hover:bg-green-700 text-white"
-                            >
-                                {actionLoading === "validate" ? "Validating..." : "Validate Application"}
                             </Button>
                         )}
                     </div>

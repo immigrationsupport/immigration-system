@@ -2,8 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, Globe, Briefcase, GraduationCap, Users, Clock } from "lucide-react";
-import ApplicationStepper from "./application-stepper";
+import { ArrowLeft, Globe, Briefcase, GraduationCap, Users } from "lucide-react";import ApplicationStepper from "./application-stepper";
 import { APP_STEP_SEQUENCE } from "@/lib/steps";
 import { getTranslations } from "next-intl/server";
 
@@ -76,7 +75,6 @@ export default async function ApplicationDetailsPage({ params }: { params: Promi
         );
     }
 
-    const isPending = (session.user as any).status === "PENDING";
     const completedSteps = application.steps.filter(s => s.status === "APPROVED").length;
     const progress = Math.round((completedSteps / application.steps.length) * 100);
     const appType = application.type || "GENERAL";
@@ -124,24 +122,11 @@ export default async function ApplicationDetailsPage({ params }: { params: Promi
                 </div>
             </div>
 
-            {isPending && (
-                <div className="bg-amber-50 border border-amber-200 p-8 rounded-[32px] flex items-center gap-6 shadow-xl shadow-amber-100 animate-pulse">
-                    <div className="bg-amber-500 p-3 rounded-2xl text-white shadow-lg">
-                        <Clock className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <h4 className="font-black text-amber-900 uppercase tracking-tight text-lg leading-none mb-1">{t("accountAwaitingApproval")}</h4>
-                        <p className="text-amber-800/80 font-medium">{t("accountAwaitingApprovalDesc")}</p>
-                    </div>
-                </div>
-            )}
-
             {/* Table Section */}
             <div className="bg-white p-6 rounded border border-gray-200 shadow-sm mt-8">
                 <ApplicationStepper 
                     steps={application.steps} 
                     applicationId={application.id} 
-                    isPending={isPending}
                     country={application.country}
                 />
             </div>

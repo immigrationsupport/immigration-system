@@ -144,7 +144,6 @@ export default function ApplicationTable({
                         <option value="IN_PROGRESS">In Progress</option>
                         <option value="SUBMITTED">Submitted</option>
                         <option value="IN_REVIEW">In Review</option>
-                        <option value="VALIDATED">Validated</option>
                         <option value="APPROVED">Approved</option>
                         <option value="REJECTED">Rejected</option>
                     </select>
@@ -221,7 +220,6 @@ export default function ApplicationTable({
                                             <option value="IN_PROGRESS">IN PROGRESS</option>
                                             <option value="SUBMITTED">SUBMITTED</option>
                                             <option value="IN_REVIEW">IN REVIEW</option>
-                                            <option value="VALIDATED">VALIDATED</option>
                                             <option value="APPROVED">APPROVED</option>
                                             <option value="REJECTED">REJECTED</option>
                                         </select>

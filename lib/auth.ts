@@ -57,7 +57,7 @@ export const auth = betterAuth({
             },
             status: {
                 type: "string",
-                defaultValue: "PENDING",
+                defaultValue: "ACTIVE",
             },
             isSuspended: {
                 type: "boolean",

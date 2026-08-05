@@ -4,6 +4,84 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { hashPassword } from "better-auth/crypto";
+
+export async function createClientAction(data: {
+    name: string;
+    email: string;
+    password: string;
+    agentId?: string | null;
+}) {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session || (session.user as any).role !== "ADMIN") {
+        return { error: "Unauthorized access." };
+    }
+
+    const agencyId = (session.user as any).agencyId;
+    if (!agencyId) return { error: "Your account is not linked to an agency." };
+
+    const name = data.name?.trim();
+    const email = data.email?.trim()?.toLowerCase();
+    const password = data.password;
+    const agentId = data.agentId || null;
+
+    if (!name || !email || !password) return { error: "Name, email and password are required." };
+    if (name.length > 50) return { error: "Name must be 50 characters or less." };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Invalid email format." };
+    if (password.length < 8) return { error: "Password must be at least 8 characters." };
+
+    // Validate agent belongs to agency if provided
+    if (agentId) {
+        const agent = await prisma.user.findUnique({ where: { id: agentId } });
+        if (!agent || agent.agencyId !== agencyId || (agent.role as string) !== "AGENT") {
+            return { error: "Selected agent does not belong to your agency." };
+        }
+    }
+
+    try {
+        const existing = await prisma.user.findUnique({ where: { email } });
+        if (existing) return { error: "A user with this email already exists." };
+
+        const hashedPassword = await hashPassword(password);
+
+        const newClient = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+               role: "CLIENT" as any,
+                status: "ACTIVE" as any,
+                agencyId,
+                agentId,
+                mustChangePassword: true,
+                emailVerified: true,
+                accounts: {
+                    create: {
+                        providerId: "credential",
+                        accountId: email,
+                        password: hashedPassword,
+                    }
+                }
+            }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "CREATE_CLIENT",
+                details: `Client ${name} (${email}) created by Admin ${session.user.name}.${agentId ? ` Assigned to agent ID ${agentId}.` : ""}`,
+                userId: session.user.id,
+                agencyId,
+                targetId: newClient.id,
+            }
+        });
+
+        revalidatePath("/admin/dashboard/clients");
+        return { success: true };
+    } catch (e: any) {
+        console.error("Create client error:", e);
+        return { error: "An error occurred while creating the client." };
+    }
+}
 
 export async function getClientsAndAgents() {
     const session = await auth.api.getSession({
@@ -129,61 +207,6 @@ export async function toggleSuspendClientAction(clientId: string, currentlySuspe
     }
 }
 
-export async function validateClientAction(clientId: string) {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    });
-
-    if (!session || (session.user as any).role !== "ADMIN") {
-        return { error: "Unauthorized access." };
-    }
-
-    const adminAgencyId = (session.user as any).agencyId;
-
-    try {
-        const client = await prisma.user.findUnique({ where: { id: clientId } });
-        if (!client) return { error: "Client not found." };
-        if (client.agencyId !== adminAgencyId) return { error: "This client does not belong to your agency." };
-        if (client.status !== "PENDING") return { error: "Client is already validated." };
-
-        await prisma.user.update({
-            where: { id: clientId },
-            data: { status: "ACTIVE" }
-        });
-
-        // 5. ADMIN VALIDATION RULE
-        // Automatically mark Step 1, 2, 3 -> Completed, Unlock Step 4 -> In Progress
-        const applications = await prisma.application.findMany({
-            where: { clientId: clientId }
-        });
-
-        for (const app of applications) {
-            await prisma.applicationStep.updateMany({
-               where: { applicationId: app.id, type: { in: ["REGISTRATION", "CONTRACT_SIGNING", "FEE_PAYMENT"] } },
-               data: { status: "APPROVED", isLocked: false }
-            });
-            await prisma.applicationStep.updateMany({
-               where: { applicationId: app.id, type: "DOCUMENT_COLLECTION" },
-               data: { status: "IN_PROGRESS", isLocked: false }
-            });
-        }
-
-        await prisma.auditLog.create({
-            data: {
-                action: "VALIDATE_CLIENT",
-                details: `Client ${client.name} (${client.email}) was validated by Admin, fast-tracking initial steps.`,
-                userId: session.user.id,
-                agencyId: adminAgencyId,
-                targetId: clientId
-            }
-        });
-
-        revalidatePath("/admin/dashboard/clients");
-        return { success: true };
-    } catch (e: any) {
-        return { error: "Failed to validate client." };
-    }
-}
 
 export async function deleteClientAction(clientId: string) {
     const session = await auth.api.getSession({

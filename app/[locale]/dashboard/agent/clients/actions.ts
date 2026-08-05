@@ -63,6 +63,7 @@ export async function createClientAction(formData: FormData) {
                 email,
                 password: hashedPassword,
                 role: "CLIENT" as any,
+                status: "ACTIVE" as any,
                 agencyId,
                 agentId: isAgent ? session.user.id : null,
                 emailVerified: true,

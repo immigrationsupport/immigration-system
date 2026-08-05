@@ -57,7 +57,6 @@ export default async function ClientDashboard() {
     });
 
     const profileCompleted = (session.user as any).profileCompleted;
-    const isPending = (session.user as any).status === "PENDING";
 
     // Fetch Action Required count from steps
     const actionRequiredCount = await prisma.application.count({
@@ -69,38 +68,12 @@ export default async function ClientDashboard() {
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto py-8 px-4">
-            {/* Header and UI sections remain the same... */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex flex-col gap-1">
                     <h1 className="text-3xl font-black text-[#1E3A8A] tracking-tight uppercase">{t("title")}</h1>
                     <p className="text-gray-500 font-medium tracking-tight">{t("subtitle")}</p>
                 </div>
             </div>
-
-            {/* Validation Message for Pending Clients */}
-            {isPending && (
-                <Card className="border-none bg-amber-50 shadow-sm rounded-3xl overflow-hidden border border-amber-100 animate-in fade-in slide-in-from-top-4 duration-700">
-                    <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-5">
-                            <div className="bg-amber-100 p-4 rounded-2xl text-amber-700 shadow-sm">
-                                <Clock size={32} className="animate-pulse" />
-                            </div>
-                            <div className="space-y-1">
-                                <h3 className="text-xl font-bold text-amber-900 uppercase tracking-tight">{t("pendingApprovalTitle")}</h3>
-                                <p className="text-amber-800/80 font-medium text-sm leading-relaxed max-w-2xl">
-                                    {t("pendingApprovalDesc")}
-                                </p>
-                            </div>
-                        </div>
-                        <ContactAgencyButton
-                            label={t("contactAgencyNow")}
-                            className="bg-amber-600 hover:bg-amber-700 text-white font-black px-8 py-6 rounded-2xl shadow-lg shadow-amber-200 transition-all hover:scale-105"
-                        />
-                    </CardContent>
-                </Card>
-            )}
-
-            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard icon={<FileText size={26} />} label={t("statCards.totalCases")} value={totalApps} color="blue" />
                 <StatCard icon={<Clock size={26} />} label={t("statCards.pending")} value={pendingApps} color="amber" />

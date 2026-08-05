@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { STEP_LABELS, APP_STEP_SEQUENCE } from "@/lib/steps";
 import { updateStepAction, updateApplicationStatusAction } from "../actions";
-import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useParams, useRouter } from "next/navigation";
 
 interface StepManagementProps {
     applicationId: string;
@@ -16,7 +15,8 @@ interface StepManagementProps {
 
 export default function StepManagement({ applicationId, currentStatus, steps, country }: StepManagementProps) {
     const router = useRouter();
-    const locale = useLocale();
+    const params = useParams();
+    const locale = (params?.locale as string) || "en-US";
     const [appStatus, setAppStatus] = useState(currentStatus);
     const [loadingAppStatus, setLoadingAppStatus] = useState(false);
     const [loadingStepId, setLoadingStepId] = useState<string | null>(null);

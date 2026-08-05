@@ -36,7 +36,7 @@ export default async function middleware(request: NextRequest) {
     if (landingRoutes.includes(barePathname)) {
         const localeMatch = pathname.match(/^\/(en|fr)/);
         const localePrefix = localeMatch ? localeMatch[0] : "";
-        url.pathname = `${localePrefix}/sign-in`;
+        url.pathname = `${localePrefix}/dashboard`;
         return NextResponse.redirect(url);
     }
 
@@ -49,6 +49,11 @@ export default async function middleware(request: NextRequest) {
     } catch (e) {
         console.error("[Middleware] getSession error:", e);
     }
+
+    // TEMPORARY DEBUG — remove once the cookie persistence issue is confirmed fixed
+    console.log("[DEBUG] path:", barePathname);
+    console.log("[DEBUG] cookie header:", request.headers.get("cookie"));
+    console.log("[DEBUG] session found:", session ? `yes (user: ${session.user?.email})` : "NO");
 
     const publicAdminRoutes = ["/admin/login", "/admin/register", "/super-admin/login"];
 
@@ -69,7 +74,7 @@ export default async function middleware(request: NextRequest) {
         return isOutsideLocaleTree ? NextResponse.next() : intlMiddleware(request);
     }
 
-    const { role, profileCompleted, isSuspended, status } = session.user as any;
+    const { role, isSuspended } = session.user as any;
     const userRole = (role || "CLIENT").toUpperCase();
 
     if (isSuspended && barePathname !== "/sign-in") {
@@ -82,24 +87,6 @@ export default async function middleware(request: NextRequest) {
     if (mustChangePassword && barePathname !== "/change-password") {
         url.pathname = `/change-password`;
         return NextResponse.redirect(url);
-    }
-
-    if (userRole === "CLIENT" && !profileCompleted && barePathname !== "/complete-profile") {
-        url.pathname = `/complete-profile`;
-        return NextResponse.redirect(url);
-    }
-
-    if (userRole === "CLIENT" && status === "PENDING") {
-        const restrictedPaths = [
-            "/dashboard/client/submit-application",
-            "/applications/new",
-            "/dashboard/client/applications/new",
-        ];
-        if (restrictedPaths.some(p => barePathname.startsWith(p))) {
-            url.pathname = `/dashboard/client`;
-            url.searchParams.set("restricted", "true");
-            return NextResponse.redirect(url);
-        }
     }
 
     if (barePathname.startsWith("/admin") && !publicAdminRoutes.includes(barePathname)) {
@@ -121,11 +108,6 @@ export default async function middleware(request: NextRequest) {
             url.pathname = `/dashboard`;
             return NextResponse.redirect(url);
         }
-    }
-
-    if (barePathname === "/complete-profile" && profileCompleted) {
-        url.pathname = `/dashboard`;
-        return NextResponse.redirect(url);
     }
 
     if (barePathname === "/change-password" && !mustChangePassword) {
