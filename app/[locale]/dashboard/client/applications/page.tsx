@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Link } from "@/i18n/routing";
-import { Plus, Globe, ArrowRight, Clock, CheckCircle2, ChevronRight } from "lucide-react";
+import { Globe, ArrowRight, Clock, CheckCircle2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getTranslations } from "next-intl/server";
@@ -35,13 +35,6 @@ export default async function MyApplicationsPage() {
                     <h1 className="text-4xl font-extrabold tracking-tight text-gray-900" style={{ color: "#1E3A8A" }}>{t("myApplications")}</h1>
                     <p className="text-gray-500 mt-2 text-lg">{t("subtitle")}</p>
                 </div>
-                <Link
-                    href="/applications/new"
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-xl shadow-lg text-white bg-[#1E3A8A] hover:bg-blue-900 transition-all hover:scale-105 font-bold"
-                >
-                    <Plus className="w-5 h-5 mr-2" />
-                    {t("newApplication")}
-                </Link>
             </div>
 
             {applications.length === 0 ? (
@@ -49,9 +42,7 @@ export default async function MyApplicationsPage() {
                     <Globe className="h-16 w-16 text-gray-200 mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-gray-900">{t("noApplications")}</h3>
                     <p className="text-gray-500 mt-2 max-w-xs mx-auto">{t("noApplicationsDesc")}</p>
-                    <Link href="/applications/new">
-                        <Button className="mt-6 bg-[#1E3A8A] rounded-lg px-8 font-bold text-white">{t("getStarted")}</Button>
-                    </Link>
+                    <p className="text-gray-400 mt-4 text-sm font-bold uppercase tracking-widest">Contact your agent to start your first application.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -109,16 +100,6 @@ export default async function MyApplicationsPage() {
                             </Card>
                         );
                     })}
-
-                     <Link href="/applications/new" className="group p-8 rounded-[32px] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-4 text-gray-400 hover:text-[#1E3A8A] hover:border-[#1E3A8A] hover:bg-blue-50/50 transition-all min-h-[300px]">
-                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                            <Plus className="h-8 w-8" />
-                        </div>
-                        <div className="text-center">
-                            <span className="block text-sm font-black uppercase tracking-widest mb-1">{t("newJourney")}</span>
-                            <span className="text-xs font-bold text-gray-400">{t("addAnotherDestination")}</span>
-                        </div>
-                    </Link>
                 </div>
             )}
         </div>

@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -33,11 +31,9 @@ export default async function WelcomePage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6 pb-8">
-                    <Link href="/applications/new">
-                        <Button className="bg-[#1E3A8A] hover:bg-blue-800 text-white px-8 py-6 text-lg rounded-sm transition-colors shadow-md hover:shadow-lg">
-                            Start New Application
-                        </Button>
-                    </Link>
+                    <p className="text-gray-500 font-bold uppercase tracking-widest text-sm">
+                        Your agent will set up your first application shortly. Please contact your assigned specialist if you have any questions.
+                    </p>
                 </CardContent>
             </Card>
         </div>

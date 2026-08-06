@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { User, Mail, Calendar, MapPin, Shield, Phone, CreditCard, Award } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import prisma from "@/lib/prisma";
+import ChangePasswordButton from "@/components/ChangePasswordButton";
 
 export default async function AgentProfilePage() {
     const session = await auth.api.getSession({
@@ -27,7 +28,7 @@ export default async function AgentProfilePage() {
                 <div className="h-32 w-32 rounded-full bg-gradient-to-br from-[#1E3A8A] to-blue-500 flex items-center justify-center text-white text-5xl font-black shadow-lg ring-8 ring-blue-50">
                     {agent.name.charAt(0)}
                 </div>
-                <div className="text-center md:text-left space-y-2">
+                <div className="text-center md:text-left space-y-2 flex-1">
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">{agent.name}</h1>
                     <div className="flex flex-wrap justify-center md:justify-start gap-4">
                         <span className="inline-flex items-center px-4 py-1.5 text-sm font-bold bg-white-100 text-[#1E3A8A] ">
@@ -39,6 +40,7 @@ export default async function AgentProfilePage() {
                     </div>
                 
                 </div>
+                <ChangePasswordButton />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

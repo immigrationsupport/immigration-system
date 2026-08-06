@@ -4,6 +4,158 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { APP_STEP_SEQUENCE } from "@/lib/steps";
+import { ApplicationType } from "@prisma/client";
+
+export async function updateClientProfileAction(
+    clientId: string,
+    data: {
+        name: string;
+        email: string;
+        phoneNumber: string;
+        nationality?: string;
+        dateOfBirth?: string;
+        maritalStatus?: string;
+        numberOfChildren?: number;
+        address?: string;
+    }
+) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
+        return { error: "Unauthorized access." };
+    }
+
+    if (!data.name || !data.email || !data.phoneNumber) {
+        return { error: "Name, email, and phone number are required." };
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+        return { error: "Please provide a valid email address." };
+    }
+
+    try {
+        const isAdmin = (session.user as any).role === "ADMIN";
+        const agencyId = (session.user as any).agencyId;
+
+        // Confirm this agent/admin actually has access to this client
+        const existingClient = await prisma.user.findUnique({
+            where: isAdmin ? { id: clientId, agencyId } : { id: clientId, agentId: session.user.id },
+            select: { id: true }
+        });
+
+        if (!existingClient) {
+            return { error: "Client not found or not assigned to you." };
+        }
+
+        await prisma.user.update({
+            where: { id: clientId },
+            data: {
+                name: data.name,
+                email: data.email,
+                phoneNumber: data.phoneNumber,
+                nationality: data.nationality || null,
+                dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+                maritalStatus: (data.maritalStatus as any) || null,
+                numberOfChildren: data.numberOfChildren !== undefined ? Number(data.numberOfChildren) : 0,
+                address: data.address || null
+            }
+        });
+
+        // Audit Log
+        await prisma.auditLog.create({
+            data: {
+                action: "PROFILE_UPDATE",
+                details: `${(session.user as any).role === "ADMIN" ? "Admin" : "Agent"} ${session.user.name} updated the personal profile for client ${data.name}.`,
+                userId: session.user.id,
+                targetId: clientId
+            }
+        });
+
+        revalidatePath(`/dashboard/agent/clients/${clientId}`);
+        return { success: true };
+    } catch (e: any) {
+        console.error("Client profile update error:", e);
+        if (e.code === 'P2002' && e.meta?.target?.includes('email')) {
+            return { error: "This email address is already in use." };
+        }
+        return { error: e.message || "Failed to update client profile." };
+    }
+}
+
+export async function createApplicationForClientAction(
+    clientId: string,
+    data: { country: string; type: string; description?: string }
+) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
+        return { error: "Unauthorized access." };
+    }
+
+    if (!data.country || !data.type) {
+        return { error: "Country and application type are required." };
+    }
+
+    try {
+        const isAdmin = (session.user as any).role === "ADMIN";
+        const agencyId = (session.user as any).agencyId;
+
+        // Confirm this agent/admin actually has access to this client
+        const client = await prisma.user.findUnique({
+            where: isAdmin ? { id: clientId, agencyId } : { id: clientId, agentId: session.user.id },
+            select: { id: true, name: true, agentId: true, agencyId: true }
+        });
+
+        if (!client) {
+            return { error: "Client not found or not assigned to you." };
+        }
+
+        const application = await prisma.application.create({
+            data: {
+                country: data.country,
+                type: data.type as ApplicationType,
+                clientId: client.id,
+                agentId: client.agentId || session.user.id,
+                agencyId: client.agencyId,
+                status: "IN_PROGRESS",
+                steps: {
+                    create: APP_STEP_SEQUENCE.map((stepType, index) => {
+                        const isFirstThree = index < 3;
+                        const isStep4 = index === 3;
+                        return {
+                            type: stepType,
+                            status: isFirstThree ? "APPROVED" : (isStep4 ? "IN_PROGRESS" : "PENDING"),
+                            isLocked: isFirstThree ? false : (isStep4 ? false : true),
+                            description: isFirstThree ? "Automatically verified." : (data.description || null)
+                        };
+                    })
+                }
+            }
+        });
+
+        // Audit Log
+        await prisma.auditLog.create({
+            data: {
+                action: "APPLICATION_CREATION",
+                details: `${(session.user as any).role === "ADMIN" ? "Admin" : "Agent"} ${session.user.name} created a ${data.type} application for ${data.country} on behalf of ${client.name}.`,
+                userId: session.user.id,
+                targetId: client.id
+            }
+        });
+
+        revalidatePath(`/dashboard/agent/clients/${clientId}`);
+        return { success: true, applicationId: application.id };
+    } catch (e: any) {
+        console.error("Agent application creation error:", e);
+        return { error: e.message || "Failed to create application." };
+    }
+}
 
 export async function sendOfficialMessageAction(clientId: string, subject: string, content: string) {
     const session = await auth.api.getSession({
@@ -51,63 +203,5 @@ export async function sendOfficialMessageAction(clientId: string, subject: strin
     } catch (e: any) {
         console.error("Messaging Error:", e);
         return { error: "Failed to send official message." };
-    }
-}
-
-export async function completeClientProfileAction(clientId: string, formData: FormData) {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    });
-
-    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
-        return { error: "Unauthorized access." };
-    }
-
-    const agencyId = (session.user as any).agencyId;
-
-    const dateOfBirth = formData.get("dateOfBirth") as string;
-    const nationality = formData.get("nationality") as string;
-    const maritalStatus = formData.get("maritalStatus") as string;
-    const numberOfChildren = parseInt(formData.get("numberOfChildren") as string || "0");
-    const address = formData.get("address") as string;
-    const phoneNumber = formData.get("phoneNumber") as string;
-
-    if (!dateOfBirth || !nationality || !maritalStatus || !address) {
-        return { error: "All fields are required." };
-    }
-
-    try {
-        const client = await prisma.user.findUnique({ where: { id: clientId } });
-        if (!client) return { error: "Client not found." };
-        if (client.agencyId !== agencyId) return { error: "This client does not belong to your agency." };
-
-        await prisma.user.update({
-            where: { id: clientId },
-            data: {
-                dateOfBirth: new Date(dateOfBirth),
-                nationality,
-                maritalStatus: maritalStatus as any,
-                numberOfChildren,
-                address,
-                phoneNumber: phoneNumber || null,
-                profileCompleted: true
-            }
-        });
-
-        await prisma.auditLog.create({
-            data: {
-                action: "PROFILE_UPDATE",
-                details: `Profile for client ${client.name} completed by ${session.user.name}.`,
-                userId: session.user.id,
-                agencyId,
-                targetId: clientId
-            }
-        });
-
-        revalidatePath(`/dashboard/agent/clients/${clientId}`);
-        return { success: true };
-    } catch (e: any) {
-        console.error("Profile completion error:", e);
-        return { error: e.message || "An error occurred while updating the profile." };
     }
 }

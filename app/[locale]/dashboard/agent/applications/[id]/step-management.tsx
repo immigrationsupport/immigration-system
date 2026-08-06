@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { STEP_LABELS, APP_STEP_SEQUENCE } from "@/lib/steps";
-import { updateStepAction, updateApplicationStatusAction } from "../actions";
+import { updateStepAction, updateApplicationStatusAction, addDocumentAction, deleteDocumentAction } from "../actions";
 import { useParams, useRouter } from "next/navigation";
 
 interface StepManagementProps {
@@ -26,6 +26,37 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
     const [requestMsg, setRequestMsg] = useState("");
     const [isSubmittingRes, setIsSubmittingRes] = useState(false);
     const [successModal, setSuccessModal] = useState<string | null>(null);
+    const [uploadingStepId, setUploadingStepId] = useState<string | null>(null);
+
+    const handleFileUpload = async (stepId: string, file: File) => {
+        setUploadingStepId(stepId);
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+            const uploadData = await uploadRes.json();
+
+            if (!uploadRes.ok) {
+                alert(uploadData.error || "Upload failed.");
+                return;
+            }
+
+            const res = await addDocumentAction(stepId, file.name, uploadData.url);
+            if (res.error) alert(res.error);
+            else router.refresh();
+        } catch (e) {
+            alert("Upload failed. Please try again.");
+        } finally {
+            setUploadingStepId(null);
+        }
+    };
+
+    const handleDeleteDocument = async (documentId: string) => {
+        if (!confirm("Remove this document?")) return;
+        const res = await deleteDocumentAction(documentId);
+        if (res.error) alert(res.error);
+        else router.refresh();
+    };
 
     // Sort steps strictly according to sequence
     const sortedSteps = [...steps].sort((a, b) => {
@@ -181,21 +212,57 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                          )}
 
                                          {/* View Documents */}
-                                         {step.Document && step.Document.length > 0 ? (
+                                         {step.Document && step.Document.length > 0 && (
                                              <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl space-y-2">
                                                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Attachments</span>
                                                  <div className="flex flex-col gap-1.5">
                                                      {step.Document.map((doc: any) => (
-                                                         <a key={doc.id} href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 font-bold hover:underline flex items-center gap-2">
-                                                             <div className="h-1.5 w-1.5 bg-blue-400 rounded-full" />
-                                                             {doc.name.replace("_", " ")}
-                                                         </a>
+                                                         <div key={doc.id} className="flex items-center justify-between gap-2">
+                                                             <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 font-bold hover:underline flex items-center gap-2">
+                                                                 <div className="h-1.5 w-1.5 bg-blue-400 rounded-full" />
+                                                                 {doc.name.replace("_", " ")}
+                                                             </a>
+                                                             {dbStep && (
+                                                                 <button
+                                                                     type="button"
+                                                                     onClick={() => handleDeleteDocument(doc.id)}
+                                                                     className="text-[10px] font-black text-red-400 hover:text-red-600 uppercase tracking-widest"
+                                                                 >
+                                                                     Remove
+                                                                 </button>
+                                                             )}
+                                                         </div>
                                                      ))}
                                                  </div>
                                              </div>
-                                         ) : (
+                                         )}
+
+                                         {dbStep && (
+                                             <div className="mt-3">
+                                                 <label className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl cursor-pointer transition-all ${uploadingStepId === step.id ? "bg-gray-100 text-gray-400" : "bg-blue-50 text-blue-700 hover:bg-blue-100"}`}>
+                                                     {uploadingStepId === step.id ? (
+                                                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                     ) : (
+                                                         <span>+ Upload Document</span>
+                                                     )}
+                                                     <input
+                                                         type="file"
+                                                         accept=".pdf,.jpg,.jpeg,.png"
+                                                         className="hidden"
+                                                         disabled={uploadingStepId === step.id}
+                                                         onChange={(e) => {
+                                                             const file = e.target.files?.[0];
+                                                             if (file) handleFileUpload(step.id, file);
+                                                             e.target.value = "";
+                                                         }}
+                                                     />
+                                                 </label>
+                                             </div>
+                                         )}
+
+                                         {!step.Document?.length && !dbStep && (
                                               idx >= 3 && stepType !== "APPLICATION_SUBMISSION" && stepType !== "PASSPORT_SUBMISSION" && (
-                                                  <span className="text-[10px] font-bold text-gray-400 italic mt-2 px-1">Awaiting client documents...</span>
+                                                  <span className="text-[10px] font-bold text-gray-400 italic mt-2 px-1 block">Awaiting client documents...</span>
                                               )
                                           )}
                                      </td>

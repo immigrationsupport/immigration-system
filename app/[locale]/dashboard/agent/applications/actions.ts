@@ -283,3 +283,91 @@ export async function addStepCommentAction(stepId: string, comment: string) {
         return { error: e.message || "Failed to add comment." };
     }
 }
+
+export async function addDocumentAction(stepId: string, name: string, fileUrl: string, type: string = "OTHER") {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
+        return { error: "Unauthorized access." };
+    }
+
+    const agencyId = (session.user as any).agencyId;
+
+    try {
+        const step = await prisma.applicationStep.findUnique({
+            where: { id: stepId },
+            include: { application: { include: { client: true } } }
+        });
+
+        if (!step) return { error: "Step not found." };
+        if (step.application.agencyId !== agencyId) return { error: "This application does not belong to your agency." };
+
+        const document = await prisma.document.create({
+            data: {
+                name,
+                fileUrl,
+                type: type as any,
+                status: "UPLOADED",
+                procedureId: stepId,
+                uploaderId: session.user.id,
+            }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "DOCUMENT_UPLOAD",
+                details: `${session.user.name} uploaded "${name}" for ${step.application.client.name}'s ${step.type} step.`,
+                userId: session.user.id,
+                agencyId,
+                targetId: step.applicationId
+            }
+        });
+
+        revalidatePath(`/dashboard/agent/applications/${step.applicationId}`);
+        return { success: true, document };
+    } catch (e: any) {
+        console.error("Document upload error:", e);
+        return { error: e.message || "Failed to attach document." };
+    }
+}
+
+export async function deleteDocumentAction(documentId: string) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
+        return { error: "Unauthorized access." };
+    }
+
+    const agencyId = (session.user as any).agencyId;
+
+    try {
+        const document = await prisma.document.findUnique({
+            where: { id: documentId },
+            include: { Procedure: { include: { application: true } } }
+        });
+
+        if (!document) return { error: "Document not found." };
+        if (document.Procedure.application.agencyId !== agencyId) return { error: "This document does not belong to your agency." };
+
+        await prisma.document.delete({ where: { id: documentId } });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "DOCUMENT_DELETE",
+                details: `${session.user.name} removed document "${document.name}".`,
+                userId: session.user.id,
+                agencyId,
+                targetId: document.Procedure.applicationId
+            }
+        });
+
+        revalidatePath(`/dashboard/agent/applications/${document.Procedure.applicationId}`);
+        return { success: true };
+    } catch (e: any) {
+        return { error: e.message || "Failed to delete document." };
+    }
+}

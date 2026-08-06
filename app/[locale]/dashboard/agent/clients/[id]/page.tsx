@@ -8,7 +8,8 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import SendMessageModal from "./send-message-modal";
-import CompleteProfileButton from "./complete-profile-button";
+import NewApplicationModal from "./new-application-modal";
+import EditClientProfileModal from "./edit-client-profile-modal";
 import { getLocale } from "next-intl/server";
 
 export default async function ClientDetailPage({ params }: { params: { id: string } }) {
@@ -22,14 +23,11 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
     }
 
     const { id } = await params;
-    const isAdmin = (session.user as any).role === "ADMIN";
-    const agencyId = (session.user as any).agencyId;
-    if (isAdmin && !agencyId) {
-        return null;
-    }
+ const isAdmin = (session.user as any).role === "ADMIN";
+const agencyId = (session.user as any).agencyId;
 
-    const client = await prisma.user.findUnique({
-        where: isAdmin ? { id, agencyId } : { id, agentId: session.user.id },
+const client = await prisma.user.findUnique({
+    where: isAdmin ? { id, agencyId } : { id, agentId: session.user.id },
         include: {
             applications: {
                 include: {
@@ -42,7 +40,6 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
                 },
                 orderBy: { createdAt: "desc" }
             },
-            documents: true,
             receivedMessages: {
                 where: { senderId: session.user.id },
                 orderBy: { createdAt: "desc" }
@@ -54,16 +51,12 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
         notFound();
     }
 
-    // Fetch action history (audit logs)
-    const logs = await prisma.auditLog.findMany({
-        where: {
-            OR: [
-                { targetId: id },
-                { details: { contains: id } }
-            ]
-        },
-        orderBy: { createdAt: "desc" }
-    });
+    // Total documents attached to this client's case, regardless of who
+    // uploaded them (client or agent) — scoped by application, not uploaderId.
+    const documentsCount = client.applications.reduce(
+        (total, app) => total + (app as any).steps.reduce((s: number, step: any) => s + step.Document.length, 0),
+        0
+    );
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto px-4 py-8">
@@ -80,6 +73,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
                     </div>
                 </div>
                 <div className="flex gap-3">
+                    <NewApplicationModal clientId={id} clientName={client.name} />
                 </div>
             </div>
 
@@ -87,21 +81,11 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
                 {/* Profile Card */}
                 <div className="lg:col-span-1 space-y-6">
                     <Card className="border-none shadow-xl shadow-gray-200/50 rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-white border-b border-gray-50 py-6 flex flex-row items-center justify-between gap-3">
+                        <CardHeader className="bg-white border-b border-gray-50 py-6 flex flex-row items-center justify-between">
                             <CardTitle className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
                                 <User className="h-4 w-4 text-blue-500" /> Personal Profile
                             </CardTitle>
-                            <CompleteProfileButton
-                                clientId={client.id}
-                                defaults={{
-                                    dateOfBirth: client.dateOfBirth ? new Date(client.dateOfBirth).toISOString() : null,
-                                    nationality: client.nationality,
-                                    maritalStatus: client.maritalStatus,
-                                    numberOfChildren: client.numberOfChildren,
-                                    address: client.address,
-                                    phoneNumber: client.phoneNumber,
-                                }}
-                            />
+                            <EditClientProfileModal clientId={id} client={client} />
                         </CardHeader>
                         <CardContent className="p-6 space-y-4">
                             <div className="space-y-1">
@@ -141,7 +125,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
                                 </div>
                                 <div>
                                     <div className="text-[10px] font-black text-blue-200 uppercase tracking-wider mb-1">Documents</div>
-                                    <div className="text-2xl font-black">{client.documents.length}</div>
+                                    <div className="text-2xl font-black">{documentsCount}</div>
                                 </div>
                             </div>
                         </CardContent>
@@ -290,38 +274,6 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
                                 <p className="text-gray-400 font-medium max-w-xs mx-auto text-sm leading-relaxed">This client hasn't started any immigration applications yet.</p>
                             </div>
                         )}
-                    </div>
-
-                    {/* History Section */}
-                    <div className="space-y-4">
-                        <h2 className="text-xl font-black text-gray-900 flex items-center gap-2 uppercase tracking-tight">
-                            <Clock className="h-5 w-5 text-blue-600" /> Action History & Audit
-                        </h2>
-                        <Card className="border-none shadow-lg shadow-gray-100/50 rounded-2xl overflow-hidden">
-                            <CardContent className="p-0">
-                                <div className="divide-y divide-gray-50">
-                                    {logs.map((log) => (
-                                        <div key={log.id} className="p-4 hover:bg-gray-50/50 transition-colors">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">
-                                                    {log.action.replace(/_/g, " ")}
-                                                </span>
-                                                <span className="text-[9px] text-gray-400 font-medium">
-                                                    {new Date(log.createdAt).toLocaleString(locale)}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs font-bold text-gray-700 leading-snug">{log.details}</p>
-                                            <p className="text-[9px] text-gray-400 mt-1 font-mono uppercase">Ref: LOG-{log.logNumber?.toString().padStart(4, '0') || "N/A"}</p>
-                                        </div>
-                                    ))}
-                                    {logs.length === 0 && (
-                                        <div className="p-8 text-center text-gray-400 text-sm font-medium">
-                                            No action logs recorded for this client.
-                                        </div>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
                     </div>
                 </div>
             </div>

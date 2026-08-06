@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { getMyAgencyName } from "@/lib/agency-actions";
 
 export default function AdminDashboardLayout({
     children,
@@ -23,6 +24,7 @@ export default function AdminDashboardLayout({
     const { data: session, isPending } = useSession();
     const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [agencyName, setAgencyName] = useState<string | null>(null);
 
     useEffect(() => {
         // Simple role-based protection
@@ -33,6 +35,12 @@ export default function AdminDashboardLayout({
             }
         }
     }, [session, isPending, router]);
+
+    useEffect(() => {
+        if (session) {
+            getMyAgencyName().then(setAgencyName).catch(() => setAgencyName(null));
+        }
+    }, [session]);
 
     if (isPending) {
         return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -45,7 +53,6 @@ export default function AdminDashboardLayout({
         { icon: "Briefcase", label: "Manage Agents", href: "/admin/dashboard/agents" },
         { icon: "Users", label: "Manage Clients", href: "/admin/dashboard/clients" },
         { icon: "FileText", label: "All Applications", href: "/admin/dashboard/applications" },
-        { icon: "Briefcase", label: "Agent Workspace", href: "/dashboard/agent" },
         { icon: "FolderSearch", label: "Documents Monitoring", href: "/admin/dashboard/documents" },
         { icon: "List", label: "System Logs", href: "/admin/dashboard/logs" },
         { icon: "Settings", label: "System Settings", href: "/admin/dashboard/settings" }
@@ -58,6 +65,7 @@ export default function AdminDashboardLayout({
                 items={adminSidebarItems}
                 userRole="Admin"
                 userName={session?.user?.name || "System Admin"}
+                agencyName={agencyName}
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
             />
