@@ -42,6 +42,30 @@ const ROLE_STYLES: Record<string, string> = {
   CLIENT: "bg-gray-100 text-gray-700 border border-gray-200",
 };
 
+// Helper component for conditional truncation & tooltips
+function TruncatedText({ text, maxLength, className = "" }: { text: string; maxLength: number; className?: string }) {
+  if (!text) return null;
+  const isLong = text.length > maxLength;
+  const displayText = isLong ? `${text.slice(0, maxLength)}...` : text;
+
+  if (!isLong) {
+    return <span className={className}>{displayText}</span>;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className={`cursor-pointer hover:underline inline-block ${className}`}>
+          {displayText}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p className="font-semibold text-xs">{text}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 export default function UserList({ initialUsers }: { initialUsers: UserRow[] }) {
   const [users, setUsers] = useState(initialUsers);
   const [query, setQuery] = useState("");
@@ -138,24 +162,18 @@ export default function UserList({ initialUsers }: { initialUsers: UserRow[] }) 
               {filtered.map((u) => (
                 <tr key={u.id} className="hover:bg-blue-50/40 transition-colors">
                   <td className="px-6 py-4">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="font-bold text-gray-900 cursor-pointer hover:underline inline-block">
-                          {u.name}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-xs">
-                          Created: {new Date(u.createdAt).toLocaleDateString()}
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <div className="text-xs text-gray-400">{u.email}</div>
+                    <div>
+                      <TruncatedText text={u.name} maxLength={10} className="font-bold text-gray-900" />
+                    </div>
+                    <div>
+                      <TruncatedText text={u.email} maxLength={18} className="text-xs text-gray-400" />
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-gray-700 font-semibold">
                     {u.agency ? (
                       <div className="flex items-center gap-1.5">
-                        <Building2 className="h-3.5 w-3.5 text-gray-400" /> {u.agency.name}
+                        <Building2 className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                        <TruncatedText text={u.agency.name} maxLength={15} />
                       </div>
                     ) : (
                       <span className="text-gray-300">—</span>
