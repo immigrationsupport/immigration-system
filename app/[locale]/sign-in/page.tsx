@@ -98,6 +98,11 @@ function SignInForm() {
                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                     </div>
+                    <div className="mt-2 text-right">
+                        <a href="/forgot-password" className="text-sm font-semibold text-[#1E3A8A] hover:underline">
+                            {t("forgotPassword")}
+                        </a>
+                    </div>
                 </div>
 
                 <button

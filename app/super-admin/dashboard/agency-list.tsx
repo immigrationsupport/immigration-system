@@ -10,8 +10,18 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
-import { Building2, Plus, Users, FileText, Ban, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { createAgencyAction, toggleSuspendAgencyAction } from "./actions";
+import { Building2, Plus, Users, FileText, Ban, CheckCircle2, AlertCircle, Loader2, CreditCard } from "lucide-react";
+import { createAgencyAction, toggleSuspendAgencyAction, setAgencyPlanAction } from "./actions";
+
+interface Plan {
+    id: string;
+    name: string;
+    slug: string;
+    priceFcfa: number;
+    maxAgents: number | null;
+    maxClients: number | null;
+    isPublic: boolean;
+}
 
 interface Agency {
     id: string;
@@ -20,14 +30,25 @@ interface Agency {
     isInternal: boolean;
     createdAt: string;
     _count: { users: number; applications: number };
+    subscription: { plan: Plan } | null;
 }
 
-export default function AgencyList({ initialAgencies }: { initialAgencies: Agency[] }) {
+export default function AgencyList({ initialAgencies, plans }: { initialAgencies: Agency[]; plans: Plan[] }) {
     const [agencies, setAgencies] = useState(initialAgencies);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [error, setError] = useState("");
     const [isPending, startTransition] = useTransition();
     const formRef = useRef<HTMLFormElement>(null);
+
+    function handleChangePlan(agencyId: string, planId: string) {
+        startTransition(async () => {
+            const result = await setAgencyPlanAction(agencyId, planId);
+            if (!result?.error) {
+                const plan = plans.find(p => p.id === planId);
+                setAgencies(prev => prev.map(a => a.id === agencyId ? { ...a, subscription: plan ? { plan } : a.subscription } : a));
+            }
+        });
+    }
 
     function handleCreate(formData: FormData) {
         setError("");
@@ -73,6 +94,7 @@ export default function AgencyList({ initialAgencies }: { initialAgencies: Agenc
                                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">Agency</th>
                                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">Users</th>
                                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">Applications</th>
+                                <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">Plan</th>
                                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">Status</th>
                                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right">Actions</th>
                             </tr>
@@ -98,6 +120,23 @@ export default function AgencyList({ initialAgencies }: { initialAgencies: Agenc
                                     </td>
                                     <td className="px-6 py-4 text-gray-700 font-semibold">
                                         <div className="flex items-center gap-1.5"><FileText className="h-4 w-4 text-gray-400" /> {agency._count.applications}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {agency.isInternal ? (
+                                            <span className="text-xs font-bold text-gray-400 flex items-center gap-1"><CreditCard className="h-3.5 w-3.5" /> Internal</span>
+                                        ) : (
+                                            <select
+                                                disabled={isPending}
+                                                value={agency.subscription?.plan.id || ""}
+                                                onChange={(e) => handleChangePlan(agency.id, e.target.value)}
+                                                className="text-xs font-bold border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#1E3A8A] bg-white"
+                                            >
+                                                <option value="" disabled>Select plan</option>
+                                                {plans.filter(p => p.slug !== "internal").map((p) => (
+                                                    <option key={p.id} value={p.id}>{p.name} ({p.priceFcfa.toLocaleString()} FCFA)</option>
+                                                ))}
+                                            </select>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase ${

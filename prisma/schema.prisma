@@ -22,6 +22,7 @@ model Agency {
   users        User[]
   applications Application[]
   auditLogs    AuditLog[]
+  subscription Subscription?
 
   @@map("agency")
 }
@@ -29,6 +30,80 @@ model Agency {
 enum AgencyStatus {
   ACTIVE
   SUSPENDED
+}
+
+model Plan {
+  id            String         @id @default(uuid())
+  name          String
+  slug          String         @unique
+  priceFcfa     Int
+  // null = unlimited
+  maxAgents     Int?
+  maxClients    Int?
+  isPublic      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  subscriptions       Subscription[] @relation("PlanSubscriptions")
+  pendingSubscriptions Subscription[] @relation("PendingPlanSubscriptions")
+
+  @@map("plan")
+}
+
+model Subscription {
+  id                String             @id @default(uuid())
+  agencyId          String             @unique
+  planId            String
+  // set when a plan change is scheduled to take effect at the end of the
+  // current billing period (e.g. a downgrade), instead of immediately.
+  pendingPlanId     String?
+  status            SubscriptionStatus @default(ACTIVE)
+  autoRenew         Boolean            @default(true)
+  currentPeriodEnd  DateTime
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  agency            Agency             @relation(fields: [agencyId], references: [id])
+  plan              Plan               @relation("PlanSubscriptions", fields: [planId], references: [id])
+  pendingPlan       Plan?              @relation("PendingPlanSubscriptions", fields: [pendingPlanId], references: [id])
+  payments          Payment[]
+
+  @@map("subscription")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  subscriptionId String
+  amountFcfa     Int
+  method         PaymentMethod
+  status         PaymentStatus @default(PENDING)
+  reference      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  subscription   Subscription  @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId])
+  @@map("payment")
+}
+
+enum PaymentMethod {
+  MTN_MOBILE_MONEY
+  ORANGE_MONEY
+  CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
 }
 
 model User {

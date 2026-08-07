@@ -55,6 +55,7 @@ export default function AdminDashboardLayout({
         { icon: "FileText", label: "All Applications", href: "/admin/dashboard/applications" },
         { icon: "FolderSearch", label: "Documents Monitoring", href: "/admin/dashboard/documents" },
         { icon: "List", label: "System Logs", href: "/admin/dashboard/logs" },
+        { icon: "CreditCard", label: "Billing", href: "/admin/dashboard/billing" },
         { icon: "Settings", label: "System Settings", href: "/admin/dashboard/settings" }
     ];
 

@@ -23,6 +23,9 @@ export async function getAgencies() {
         include: {
             _count: {
                 select: { users: true, applications: true }
+            },
+            subscription: {
+                include: { plan: true }
             }
         }
     });
@@ -83,6 +86,19 @@ export async function createAgencyAction(formData: FormData) {
                 }
             });
 
+            const freePlan = await tx.plan.findUnique({ where: { slug: "free" } });
+            if (freePlan) {
+                await tx.subscription.create({
+                    data: {
+                        agencyId: agency.id,
+                        planId: freePlan.id,
+                        status: "ACTIVE",
+                        autoRenew: true,
+                        currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+                    }
+                });
+            }
+
             await tx.auditLog.create({
                 data: {
                     action: "CREATE_AGENCY",
@@ -132,5 +148,52 @@ export async function toggleSuspendAgencyAction(agencyId: string, currentlySuspe
         return { success: true };
     } catch (e: any) {
         return { error: "Failed to update agency status." };
+    }
+}
+
+export async function getPlans() {
+    const session = await requireSuperAdmin();
+    if (!session) throw new Error("Unauthorized");
+    return prisma.plan.findMany({ orderBy: { priceFcfa: "asc" } });
+}
+
+export async function setAgencyPlanAction(agencyId: string, planId: string) {
+    const session = await requireSuperAdmin();
+    if (!session) return { error: "Unauthorized access." };
+
+    try {
+        const [agency, plan] = await Promise.all([
+            prisma.agency.findUnique({ where: { id: agencyId } }),
+            prisma.plan.findUnique({ where: { id: planId } }),
+        ]);
+        if (!agency) return { error: "Agency not found." };
+        if (!plan) return { error: "Plan not found." };
+
+        await prisma.subscription.upsert({
+            where: { agencyId },
+            update: { planId, pendingPlanId: null, status: "ACTIVE" },
+            create: {
+                agencyId,
+                planId,
+                status: "ACTIVE",
+                autoRenew: true,
+                currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            },
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "SET_AGENCY_PLAN",
+                details: `Agency "${agency.name}" moved to plan "${plan.name}" by Super Admin.`,
+                userId: session.user.id,
+                agencyId,
+                targetId: agencyId,
+            }
+        });
+
+        revalidatePath("/super-admin/dashboard");
+        return { success: true };
+    } catch (e: any) {
+        return { error: e.message || "Failed to set agency plan." };
     }
 }

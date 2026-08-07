@@ -21,8 +21,11 @@ export default async function SuperAdminDashboardLayout({
 
     const agencyName = await getMyAgencyName();
 
-    const superAdminSidebarItems = [
+   const superAdminSidebarItems = [
         { icon: "LayoutDashboard", label: "Agencies", href: "/super-admin/dashboard" },
+        { icon: "CreditCard", label: "Payments", href: "/super-admin/dashboard/payments" },
+        { icon: "UserCog", label: "Users", href: "/super-admin/dashboard/users" },
+        { icon: "Settings", label: "Settings", href: "/super-admin/dashboard/settings" },
     ];
 
     return (

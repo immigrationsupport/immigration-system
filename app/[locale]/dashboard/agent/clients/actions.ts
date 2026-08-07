@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { APP_STEP_SEQUENCE } from "@/lib/steps";
 import { ApplicationType } from "@prisma/client";
 import { hashPassword } from "better-auth/crypto";
-
+import { checkClientQuota } from "@/lib/subscription";
 export async function createClientAction(formData: FormData) {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -53,7 +53,10 @@ export async function createClientAction(formData: FormData) {
         if (existingUser) {
             return { error: "A user with this email already exists." };
         }
-
+const quota = await checkClientQuota(agencyId);
+if (!quota.ok) {
+    return { error: quota.error };
+}
         const hashedPassword = await hashPassword(password);
 
         const newClient = await prisma.user.create({

@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { hashPassword } from "better-auth/crypto"; // Use Better Auth utility
 import { revalidatePath } from "next/cache";
-
+import { checkAgentQuota } from "@/lib/subscription";
 export async function createAgentAction(formData: FormData) {
     const session = await auth.api.getSession({
         headers: await headers()
@@ -49,6 +49,10 @@ export async function createAgentAction(formData: FormData) {
         }
 
         // 3. Hash the password using Better Auth's expected algorithm (scrypt)
+        const quota = await checkAgentQuota(adminAgencyId);
+if (!quota.ok) {
+    return { error: quota.error };
+}
         const hashedPassword = await hashPassword(password);
 
         // 4. Create the user record and associated credential account,
