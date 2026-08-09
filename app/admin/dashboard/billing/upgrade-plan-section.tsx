@@ -2,8 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import {
     Dialog,
@@ -12,7 +10,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
-import { CheckCircle2, Loader2, AlertCircle, ArrowUpCircle, ArrowDownCircle, Smartphone, CreditCard as CreditCardIcon, X } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle, ArrowUpCircle, ArrowDownCircle, X, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { upgradeSubscriptionAction, cancelPendingDowngradeAction } from "./actions";
 
@@ -25,12 +23,6 @@ interface Plan {
     maxClients: number | null;
 }
 
-const METHODS: { value: string; label: string; icon: any }[] = [
-    { value: "MTN_MOBILE_MONEY", label: "MTN Mobile Money", icon: Smartphone },
-    { value: "ORANGE_MONEY", label: "Orange Money", icon: Smartphone },
-    { value: "CARD", label: "Card", icon: CreditCardIcon },
-];
-
 export default function UpgradePlanSection({
     plans,
     currentPlanId,
@@ -41,24 +33,35 @@ export default function UpgradePlanSection({
     pendingPlan: Plan | null;
 }) {
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-    const [method, setMethod] = useState("MTN_MOBILE_MONEY");
     const [error, setError] = useState("");
     const [isPending, startTransition] = useTransition();
     const [isCancelPending, startCancelTransition] = useTransition();
 
     const currentPlan = plans.find((p) => p.id === currentPlanId);
 
-    function handleConfirm(formData: FormData) {
+    function handleConfirm() {
+        if (!selectedPlan) return;
         setError("");
         startTransition(async () => {
+            const formData = new FormData();
+            formData.set("planId", selectedPlan.id);
+
             const result = await upgradeSubscriptionAction(formData);
             if (result?.error) {
                 setError(result.error);
-            } else {
-                toast.success(result?.downgrade ? "Downgrade scheduled for the end of your billing period" : "Subscription upgraded");
-                setSelectedPlan(null);
-                window.location.reload();
+                return;
             }
+
+            if (result?.paymentUrl) {
+                // Hand off to Flutterwave's hosted checkout. The plan itself
+                // only changes once that payment is confirmed.
+                window.location.href = result.paymentUrl;
+                return;
+            }
+
+            toast.success(result?.downgrade ? "Downgrade scheduled for the end of your billing period" : "Subscription updated");
+            setSelectedPlan(null);
+            window.location.reload();
         });
     }
 
@@ -122,7 +125,7 @@ export default function UpgradePlanSection({
                                     </div>
                                 ) : (
                                     <Button
-                                        onClick={() => { setError(""); setMethod("MTN_MOBILE_MONEY"); setSelectedPlan(plan); }}
+                                        onClick={() => { setError(""); setSelectedPlan(plan); }}
                                         className="w-full font-bold rounded-xl gap-1.5 bg-[#1E3A8A] text-white hover:bg-blue-900"
                                     >
                                         {isUpgrade ? <ArrowUpCircle className="h-4 w-4" /> : <ArrowDownCircle className="h-4 w-4" />}
@@ -142,9 +145,9 @@ export default function UpgradePlanSection({
                             Switch to {selectedPlan?.name}
                         </DialogTitle>
                         <DialogDescription>
-                            {currentPlan && selectedPlan && selectedPlan.priceFcfa < currentPlan.priceFcfa
-                                ? "This downgrade will take effect at the end of your current billing period — no payment needed now."
-                                : "Confirm payment to switch immediately."}
+                            {currentPlan && selectedPlan && (selectedPlan.priceFcfa < currentPlan.priceFcfa || selectedPlan.priceFcfa === 0)
+                                ? "This takes effect at the end of your current billing period — no payment needed now."
+                                : "You'll be redirected to Flutterwave's secure checkout to complete payment."}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -156,53 +159,25 @@ export default function UpgradePlanSection({
                     )}
 
                     {selectedPlan && (
-                        <form action={handleConfirm} className="space-y-4">
-                            <input type="hidden" name="planId" value={selectedPlan.id} />
-
+                        <div className="space-y-4">
                             {currentPlan && selectedPlan.priceFcfa >= currentPlan.priceFcfa && selectedPlan.priceFcfa > 0 && (
-                                <>
-                                    <div className="p-3 bg-blue-50 rounded-xl text-sm font-bold text-[#1E3A8A] flex justify-between">
-                                        <span>Amount due</span>
-                                        <span>{selectedPlan.priceFcfa.toLocaleString()} FCFA</span>
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <Label>Payment method</Label>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            {METHODS.map((m) => (
-                                                <button
-                                                    type="button"
-                                                    key={m.value}
-                                                    onClick={() => setMethod(m.value)}
-                                                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-xs font-bold transition-all ${
-                                                        method === m.value
-                                                            ? "border-[#1E3A8A] bg-blue-50 text-[#1E3A8A]"
-                                                            : "border-gray-100 text-gray-400 hover:border-gray-300"
-                                                    }`}
-                                                >
-                                                    <m.icon className="h-4 w-4" />
-                                                    {m.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <input type="hidden" name="method" value={method} />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <Label>Transaction reference (optional)</Label>
-                                        <Input name="reference" placeholder="e.g. MTN transaction ID" disabled={isPending} />
-                                    </div>
-                                </>
+                                <div className="p-3 bg-blue-50 rounded-xl text-sm font-bold text-[#1E3A8A] flex justify-between">
+                                    <span>Amount due</span>
+                                    <span>{selectedPlan.priceFcfa.toLocaleString()} FCFA</span>
+                                </div>
                             )}
 
-                            {(!currentPlan || selectedPlan.priceFcfa < currentPlan.priceFcfa || selectedPlan.priceFcfa === 0) && (
-                                <input type="hidden" name="method" value={method} />
+                            {selectedPlan.priceFcfa > 0 && (currentPlan ? selectedPlan.priceFcfa >= currentPlan.priceFcfa : true) && (
+                                <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
+                                    <ShieldCheck className="h-4 w-4 shrink-0" />
+                                    Card and Mobile Money (MTN, Orange) payments are handled securely by Flutterwave.
+                                </div>
                             )}
 
-                            <Button type="submit" disabled={isPending} className="w-full bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold h-11 rounded-xl">
-                                {isPending ? <Loader2 className="animate-spin w-4 h-4" /> : "Confirm"}
+                            <Button onClick={handleConfirm} disabled={isPending} className="w-full bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold h-11 rounded-xl">
+                                {isPending ? <Loader2 className="animate-spin w-4 h-4" /> : "Continue"}
                             </Button>
-                        </form>
+                        </div>
                     )}
                 </DialogContent>
             </Dialog>

@@ -6,8 +6,8 @@ import { auth } from "@/lib/auth";
 // Create the next-intl locale routing middleware
 const intlMiddleware = createMiddleware(routing);
 
-export default async function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
+export default async function proxy(request: NextRequest) {   
+     const { pathname } = request.nextUrl;
 
     // Skip entirely for API routes and static assets
     if (pathname.startsWith("/api") || pathname.includes(".")) {

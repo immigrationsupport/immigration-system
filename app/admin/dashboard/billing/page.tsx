@@ -55,7 +55,7 @@ export default async function BillingPage() {
             </div>
 
             <Card className="border-none shadow-lg rounded-2xl overflow-hidden">
-                <CardHeader className="bg-[#1E3A8A] text-white py-6">
+                <CardHeader className="bg-[#2b62f8ff] text-white py-6">
                     <CardTitle className="flex items-center justify-between">
                         <span className="text-xl font-black flex items-center gap-2">
                             <CreditCard className="h-5 w-5" /> {plan.name} Plan
@@ -127,8 +127,7 @@ export default async function BillingPage() {
                             {subscription.payments.map((p) => (
                                 <div key={p.id} className="p-4 flex justify-between items-center text-sm">
                                     <div>
-                                        <p className="font-bold text-gray-800">{p.amountFcfa.toLocaleString()} FCFA — {p.method.replace("_", " ")}</p>
-                                        <p className="text-xs text-gray-400">{new Date(p.createdAt).toLocaleString()}</p>
+                                     <p className="font-bold text-gray-800">{p.amountFcfa.toLocaleString()} FCFA{p.method ? ` — ${p.method.replace("_", " ")}` : ""}</p>                                        <p className="text-xs text-gray-400">{new Date(p.createdAt).toLocaleString()}</p>
                                     </div>
                                     <span className={`text-xs font-black uppercase px-2 py-1 rounded ${p.status === "SUCCESS" ? "bg-green-100 text-green-700" : p.status === "FAILED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
                                         {p.status}

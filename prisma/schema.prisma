@@ -44,12 +44,12 @@ model Plan {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  subscriptions       Subscription[] @relation("PlanSubscriptions")
+  subscriptions        Subscription[] @relation("PlanSubscriptions")
   pendingSubscriptions Subscription[] @relation("PendingPlanSubscriptions")
+  targetPlanPayments   Payment[]      @relation("TargetPlanPayments")
 
   @@map("plan")
 }
-
 model Subscription {
   id                String             @id @default(uuid())
   agencyId          String             @unique
@@ -79,16 +79,19 @@ enum SubscriptionStatus {
 }
 
 model Payment {
-  id             String        @id @default(uuid())
-  subscriptionId String
-  amountFcfa     Int
-  method         PaymentMethod
-  status         PaymentStatus @default(PENDING)
-  reference      String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id               String        @id @default(uuid())
+  subscriptionId   String
+  amountFcfa       Int
+  method           PaymentMethod?
+  status           PaymentStatus @default(PENDING)
+  reference        String?       @unique
+  flwTransactionId String?
+  targetPlanId     String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
-  subscription   Subscription  @relation(fields: [subscriptionId], references: [id])
+  subscription     Subscription  @relation(fields: [subscriptionId], references: [id])
+  targetPlan       Plan?         @relation("TargetPlanPayments", fields: [targetPlanId], references: [id])
 
   @@index([subscriptionId])
   @@map("payment")

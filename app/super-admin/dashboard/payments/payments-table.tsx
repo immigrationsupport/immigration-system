@@ -7,7 +7,7 @@ import { Building2, Search } from "lucide-react";
 interface PaymentRow {
     id: string;
     amountFcfa: number;
-    method: "MTN_MOBILE_MONEY" | "ORANGE_MONEY" | "CARD";
+    method: "MTN_MOBILE_MONEY" | "ORANGE_MONEY" | "CARD" | null;
     status: "PENDING" | "SUCCESS" | "FAILED";
     reference: string | null;
     createdAt: string;
@@ -94,8 +94,7 @@ export default function PaymentsTable({ payments }: { payments: PaymentRow[] }) 
                                 </td>
                                 <td className="px-6 py-4 text-gray-700 font-semibold">{p.subscription.plan.name}</td>
                                 <td className="px-6 py-4 text-gray-900 font-bold">{p.amountFcfa.toLocaleString()} FCFA</td>
-                                <td className="px-6 py-4 text-gray-700 font-semibold">{METHOD_LABELS[p.method]}</td>
-                                <td className="px-6 py-4 text-gray-500 font-mono text-xs">{p.reference || "—"}</td>
+                                <td className="px-6 py-4 text-gray-700 font-semibold">{p.method ? METHOD_LABELS[p.method] : <span className="text-gray-300">—</span>}</td>                                <td className="px-6 py-4 text-gray-500 font-mono text-xs">{p.reference || "—"}</td>
                                 <td className="px-6 py-4 text-gray-500 text-sm">{new Date(p.createdAt).toLocaleString()}</td>
                                 <td className="px-6 py-4">
                                     <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase ${STATUS_STYLES[p.status]}`}>

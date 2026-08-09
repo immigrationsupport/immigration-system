@@ -4,6 +4,10 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { randomUUID } from "crypto";
+import { initializePayment } from "@/lib/flutterwave";
+
+const CURRENCY = "XAF";
 
 async function requireAdmin() {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -20,19 +24,21 @@ export async function getAvailablePlans() {
     });
 }
 
-const VALID_METHODS = ["MTN_MOBILE_MONEY", "ORANGE_MONEY", "CARD"];
-
+/**
+ * Free plans and downgrades never touch Flutterwave — they just change
+ * the subscription directly. Paid upgrades create a PENDING Payment and
+ * hand back a Flutterwave checkout link for the browser to redirect to;
+ * the plan itself only changes once that payment is confirmed (see
+ * lib/subscription-payments.ts, called from the webhook and the
+ * redirect-back page).
+ */
 export async function upgradeSubscriptionAction(formData: FormData) {
     const ctx = await requireAdmin();
     if (!ctx) return { error: "Unauthorized access." };
     const { session, agencyId } = ctx;
 
     const planId = formData.get("planId") as string;
-    const method = formData.get("method") as string;
-    const reference = (formData.get("reference") as string)?.trim() || null;
-
-    if (!planId || !method) return { error: "Select a plan and a payment method." };
-    if (!VALID_METHODS.includes(method)) return { error: "Invalid payment method." };
+    if (!planId) return { error: "Select a plan." };
 
     try {
         const [subscription, newPlan] = await Promise.all([
@@ -46,53 +52,76 @@ export async function upgradeSubscriptionAction(formData: FormData) {
 
         const isDowngrade = newPlan.priceFcfa < subscription.plan.priceFcfa;
 
-        await prisma.$transaction(async (tx) => {
-            if (isDowngrade) {
-                // Takes effect at the end of the current billing period instead
-                // of immediately, so the agency keeps what it already paid for.
-                await tx.subscription.update({
-                    where: { agencyId },
-                    data: { pendingPlanId: newPlan.id },
-                });
-            } else {
-                if (newPlan.priceFcfa > 0) {
-                    await tx.payment.create({
+        // Downgrade or switching to a free plan: no payment required.
+        if (isDowngrade || newPlan.priceFcfa === 0) {
+            await prisma.$transaction(async (tx) => {
+                if (isDowngrade) {
+                    await tx.subscription.update({
+                        where: { agencyId },
+                        data: { pendingPlanId: newPlan.id },
+                    });
+                } else {
+                    await tx.subscription.update({
+                        where: { agencyId },
                         data: {
-                            subscriptionId: subscription.id,
-                            amountFcfa: newPlan.priceFcfa,
-                            method: method as any,
-                            status: "SUCCESS",
-                            reference,
+                            planId: newPlan.id,
+                            pendingPlanId: null,
+                            status: "ACTIVE",
+                            currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
                         },
                     });
                 }
 
-                await tx.subscription.update({
-                    where: { agencyId },
+                await tx.auditLog.create({
                     data: {
-                        planId: newPlan.id,
-                        pendingPlanId: null,
-                        status: "ACTIVE",
-                        currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+                        action: isDowngrade ? "SCHEDULE_PLAN_DOWNGRADE" : "UPGRADE_SUBSCRIPTION",
+                        details: isDowngrade
+                            ? `Agency scheduled a downgrade to plan "${newPlan.name}", effective ${subscription.currentPeriodEnd.toDateString()}.`
+                            : `Agency switched to the free plan "${newPlan.name}".`,
+                        userId: session.user.id,
+                        agencyId,
+                        targetId: subscription.id,
                     },
                 });
-            }
-
-            await tx.auditLog.create({
-                data: {
-                    action: isDowngrade ? "SCHEDULE_PLAN_DOWNGRADE" : "UPGRADE_SUBSCRIPTION",
-                    details: isDowngrade
-                        ? `Agency scheduled a downgrade to plan "${newPlan.name}", effective ${subscription.currentPeriodEnd.toDateString()}.`
-                        : `Agency upgraded to plan "${newPlan.name}" (${newPlan.priceFcfa.toLocaleString()} FCFA) via ${method}.`,
-                    userId: session.user.id,
-                    agencyId,
-                    targetId: subscription.id,
-                },
             });
+
+            revalidatePath("/admin/dashboard/billing");
+            return { success: true, downgrade: isDowngrade };
+        }
+
+        // Paid upgrade: create a pending payment and start a Flutterwave checkout.
+        const txRef = `UPG-${agencyId.slice(0, 8)}-${Date.now()}-${randomUUID().slice(0, 8)}`;
+
+        await prisma.payment.create({
+            data: {
+                subscriptionId: subscription.id,
+                amountFcfa: newPlan.priceFcfa,
+                status: "PENDING",
+                reference: txRef,
+                targetPlanId: newPlan.id,
+            },
         });
 
-        revalidatePath("/admin/dashboard/billing");
-        return { success: true, downgrade: isDowngrade };
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "";
+
+        const init = await initializePayment({
+            txRef,
+            amount: newPlan.priceFcfa,
+            currency: CURRENCY,
+            redirectUrl: `${appUrl}/admin/dashboard/billing/verify`,
+            customerEmail: session.user.email,
+            customerName: session.user.name,
+            title: `${newPlan.name} plan subscription`,
+            meta: { agencyId, subscriptionId: subscription.id, planId: newPlan.id },
+        });
+
+        if (!init.ok || !init.paymentUrl) {
+            // Clean up the pending payment we just created so it doesn't linger.
+            await prisma.payment.update({ where: { reference: txRef }, data: { status: "FAILED" } });
+            return { error: init.error || "Could not start the payment. Please try again." };
+        }
+
+        return { success: true, paymentUrl: init.paymentUrl };
     } catch (e: any) {
         console.error("Upgrade subscription error:", e);
         return { error: e.message || "Failed to update your subscription." };

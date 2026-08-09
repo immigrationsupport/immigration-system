@@ -6,11 +6,13 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function sendEmail({
     to,
     subject,
-    html
+    html,
+    fromName
 }: {
     to: string;
     subject: string;
     html: string;
+    fromName?: string;
 }) {
     if (!process.env.RESEND_API_KEY) {
         console.error("RESEND_API_KEY is not set");
@@ -19,7 +21,7 @@ export async function sendEmail({
 
     try {
         await resend.emails.send({
-            from: "ATLE immigration <onboarding@resend.dev>",
+            from: `${fromName || "ATLE immigration"} <onboarding@resend.dev>`,
             to,
             subject,
             html,

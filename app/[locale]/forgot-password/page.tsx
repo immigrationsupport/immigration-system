@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
         setError(null);
         setLoading(true);
 
-        const result = await requestPasswordResetAction(email);
+const result = await requestPasswordResetAction(email, locale);
 
         setLoading(false);
         if (result.error) {
@@ -89,8 +89,7 @@ export default function ForgotPasswordPage() {
                     )}
 
                     <div className="mt-6 text-center">
-                        <a href="/sign-in" className="text-sm font-semibold text-[#1E3A8A] hover:underline">
-                            {locale === "fr" ? "Retour à la connexion" : "Back to sign in"}
+<a href={`/${locale}/sign-in`} className="text-sm font-semibold text-[#1E3A8A] hover:underline">                            {locale === "fr" ? "Retour à la connexion" : "Back to sign in"}
                         </a>
                     </div>
                 </div>
