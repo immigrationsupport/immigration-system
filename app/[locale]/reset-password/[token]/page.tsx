@@ -20,11 +20,23 @@ export default async function ResetPasswordPage({
 
     const isValid = !!verification && verification.expiresAt > new Date();
 
+    let agencyName: string | null = null;
+    if (isValid && verification) {
+        const user = await prisma.user.findUnique({
+            where: { id: verification.value },
+            select: { agency: { select: { name: true } } },
+        });
+        agencyName = user?.agency?.name || null;
+    }
+
     return (
         <div className="flex flex-col min-h-screen bg-gray-50">
             <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
                 <div className="w-full max-w-md bg-white rounded-md shadow-sm border border-gray-100 p-8 relative z-10">
                     <div className="text-center mb-8">
+                        {agencyName && (
+                            <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A8A] mb-2">{agencyName}</p>
+                        )}
                         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                             {locale === "fr" ? "Réinitialiser le mot de passe" : "Reset your password"}
                         </h1>

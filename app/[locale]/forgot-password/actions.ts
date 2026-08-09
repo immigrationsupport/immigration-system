@@ -63,15 +63,14 @@ export async function requestPasswordResetAction(email: string, locale: string =
 
         // Use the client's own agency name when they belong to one (so the
         // email doesn't say "ATLE Immigration" for another agency's client).
-        const brandName = user.agency?.name || "ATLE Immigration";
-
-        const subject = isFr ? `Réinitialisation de mot de passe - ${brandName}` : `Password Reset - ${brandName}`;
+        const agencyName = user.agency?.name || "ATLE immigration";
+        const subject = isFr ? `Réinitialisation de mot de passe - ${agencyName}` : `Password Reset - ${agencyName}`;
 
         const html = `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
                 <div style="background-color: #1E3A8A; padding: 20px; text-align: center;">
-                    <h1 style="color: white; margin: 0; font-size: 20px;">${brandName}</h1>
-                </div>
+                    <h1 style="color: white; margin: 0; font-size: 20px;">${agencyName}</h1>
+                </div>  
                 <div style="padding: 30px;">
                     <p style="font-size: 16px; color: #374151;">
                         ${isFr ? "Bonjour" : "Hello"} <strong>${user.name}</strong>,
