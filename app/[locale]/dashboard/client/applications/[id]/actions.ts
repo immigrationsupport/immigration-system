@@ -5,7 +5,6 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { ProcedureStatus } from "@prisma/client";
-import { APP_STEP_SEQUENCE } from "@/lib/steps";
 
 const AGENT_ONLY_STEPS = ["DIPLOMA_EQUIVALENCE", "PROFILE_CREATION", "APPLICATION_SUBMISSION", "PASSPORT_SUBMISSION"];
 
@@ -18,7 +17,7 @@ export async function submitProcedureAction(stepId: string) {
 
     const step = await prisma.applicationStep.findUnique({
         where: { id: stepId },
-        include: { application: true }
+        include: { application: { include: { steps: true } } }
     });
 
     if (!step || step.application.clientId !== session.user.id) {
@@ -35,8 +34,9 @@ export async function submitProcedureAction(stepId: string) {
     }
 
     try {
-        const currentTypeIndex = APP_STEP_SEQUENCE.indexOf(step.type as any);
-        const isClientFinalizableStep = currentTypeIndex < 4; // Steps 1 through 4 can be completed by the client
+        const appSteps = [...step.application.steps].sort((a, b) => a.order - b.order);
+        const currentIdx = appSteps.findIndex(s => s.id === step.id);
+        const isClientFinalizableStep = currentIdx < 4; // Steps 1 through 4 can be completed by the client
 
         if (isClientFinalizableStep) {
             await prisma.applicationStep.update({
@@ -48,14 +48,8 @@ export async function submitProcedureAction(stepId: string) {
             });
 
             // Find the next step in the sequence and unlock it
-            if (currentTypeIndex !== -1 && currentTypeIndex < APP_STEP_SEQUENCE.length - 1) {
-                const nextType = APP_STEP_SEQUENCE[currentTypeIndex + 1];
-                const nextStep = await prisma.applicationStep.findFirst({
-                    where: { 
-                        applicationId: step.applicationId,
-                        type: nextType
-                    }
-                });
+            if (currentIdx !== -1 && currentIdx < appSteps.length - 1) {
+                const nextStep = appSteps[currentIdx + 1];
 
                 if (nextStep) {
                     await prisma.applicationStep.update({

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { STEP_LABELS, APP_STEP_SEQUENCE } from "@/lib/steps";
+import { STEP_LABELS } from "@/lib/steps";
 import { updateStepAction, updateApplicationStatusAction, addDocumentAction, deleteDocumentAction } from "../actions";
 import { useParams, useRouter } from "next/navigation";
 
@@ -58,10 +58,9 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
         else router.refresh();
     };
 
-    // Sort steps strictly according to sequence
-    const sortedSteps = [...steps].sort((a, b) => {
-        return APP_STEP_SEQUENCE.indexOf(a.type) - APP_STEP_SEQUENCE.indexOf(b.type);
-    });
+    // Sort steps by the order they were created with (matches the agency's
+    // step workflow at the time this application was created).
+    const sortedSteps = [...steps].sort((a, b) => a.order - b.order);
 
     const handleUpdateAppStatus = async (status: string) => {
         setLoadingAppStatus(true);
@@ -121,26 +120,16 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                         </tr>
                     </thead>
                     <tbody className="text-sm">
-                        {APP_STEP_SEQUENCE.map((stepType, idx) => {
-                            const dbStep = steps.find(s => s.type === stepType);
-                            
-                            const step = dbStep || {
-                                id: `placeholder-${idx}`,
-                                type: stepType,
-                                status: idx < 3 ? "APPROVED" : "PENDING",
-                                isLocked: idx < 3 ? false : true,
-                                updatedAt: new Date(),
-                                Document: []
-                            };
-
+                        {sortedSteps.map((step, idx) => {
+                            const dbStep = step;
                             const isLocked = step.isLocked;
                             return (
                                 <tr key={step.id} className={`border-b border-gray-100 ${isLocked ? 'bg-gray-50 text-gray-400' : 'text-gray-900 hover:bg-gray-50'}`}>
                                     <td className="p-4 font-bold">{idx + 1}</td>
                                     <td className="p-4 font-semibold text-gray-800">
-                                        {step.type === "PROFILE_CREATION" 
-                                            ? "Profile Creation (Express Entry / Arrima)"
-                                            : STEP_LABELS[step.type as keyof typeof STEP_LABELS]
+                                        {step.type === "PROFILE_CREATION"
+                                            ? (step.label || "Profile Creation (Express Entry / Arrima)")
+                                            : (step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS])
                                         }
                                     </td>
                                     
@@ -180,7 +169,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                                  
                                                  {idx >= 3 && dbStep && (
                                                      <button
-                                                         onClick={() => setRequestModal({ stepId: step.id, stepName: STEP_LABELS[step.type as keyof typeof STEP_LABELS] })}
+                                                         onClick={() => setRequestModal({ stepId: step.id, stepName: step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS] })}
                                                          disabled={loadingStepId === step.id}
                                                          className="px-4 py-2 text-[10px] font-black uppercase tracking-widest bg-amber-500 text-white hover:bg-amber-600 rounded-xl transition-all shadow-lg shadow-amber-100 flex items-center gap-2"
                                                      >
@@ -193,7 +182,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                          )}
 
                                          {/* Step 5 Specialized Input */}
-                                         {stepType === "DIPLOMA_EQUIVALENCE" && dbStep && (
+                                         {step.type === "DIPLOMA_EQUIVALENCE" && dbStep && (
                                              <div className="mt-4 p-4 bg-blue-50/50 border border-blue-100 rounded-xl space-y-3">
                                                  <p className="text-[10px] font-black text-blue-800 uppercase tracking-widest">Equivalence Details</p>
                                                  <select 
@@ -260,11 +249,6 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                              </div>
                                          )}
 
-                                         {!step.Document?.length && !dbStep && (
-                                              idx >= 3 && stepType !== "APPLICATION_SUBMISSION" && stepType !== "PASSPORT_SUBMISSION" && (
-                                                  <span className="text-[10px] font-bold text-gray-400 italic mt-2 px-1 block">Awaiting client documents...</span>
-                                              )
-                                          )}
                                      </td>
                                 </tr>
                             );

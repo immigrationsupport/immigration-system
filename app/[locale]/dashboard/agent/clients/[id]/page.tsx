@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Mail, Phone, MapPin, Calendar, FileText, Clock, Send, Shield, Briefcase, Globe, ArrowRight, CheckCircle2, Lock, Circle, ExternalLink, XCircle } from "lucide-react";
-import { STEP_LABELS, APP_STEP_SEQUENCE } from "@/lib/steps";
+import { STEP_LABELS } from "@/lib/steps";  // was: { STEP_LABELS, APP_STEP_SEQUENCE }
 import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
@@ -185,11 +185,7 @@ const client = await prisma.user.findUnique({
                                             <div className="absolute left-[31px] top-6 bottom-6 w-1 bg-gray-50 rounded-full" />
                                             
                                             <div className="space-y-6">
-                                                {(app as any).steps.sort((a: any, b: any) => {
-                                                    const idxA = APP_STEP_SEQUENCE.indexOf(a.type as any);
-                                                    const idxB = APP_STEP_SEQUENCE.indexOf(b.type as any);
-                                                    return idxA - idxB;
-                                                }).map((proc: any, idx: number) => (
+                                                 {(app as any).steps.sort((a: any, b: any) => a.order - b.order).map((proc: any, idx: number) => (
                                                     <div key={proc.id} className="relative pl-20 group/step">
                                                         {/* Icon/Circle */}
                                                         <div className={`absolute left-0 top-0 h-16 w-16 rounded-3xl flex items-center justify-center transition-all duration-500 shadow-xl border-4 border-white z-10 ${
@@ -213,8 +209,7 @@ const client = await prisma.user.findUnique({
                                                                             "bg-blue-50 text-blue-600"
                                                                         }`}>{proc.status.replace(/_/g, " ")}</span>
                                                                     </div>
-                                                                    <h4 className="text-xl font-black text-gray-900 uppercase tracking-tight">{STEP_LABELS[proc.type as keyof typeof STEP_LABELS] || proc.type}</h4>
-                                                                </div>
+                                                           <h4 className="text-xl font-black text-gray-900 uppercase tracking-tight">{proc.label || STEP_LABELS[proc.type as keyof typeof STEP_LABELS] || proc.type}</h4>                                                                </div>
                                                                 <Link href={`/dashboard/agent/applications/${app.id}`}>
                                                                     <Button variant="ghost" className="rounded-xl h-10 px-5 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] hover:bg-blue-50 border border-transparent hover:border-blue-100">
                                                                         Manage Decision <ArrowRight className="ml-2 h-3 w-3" />

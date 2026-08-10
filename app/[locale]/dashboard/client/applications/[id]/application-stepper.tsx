@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { APP_STEP_SEQUENCE, STEP_LABELS } from "@/lib/steps";
+import { STEP_LABELS } from "@/lib/steps";
 import { CheckCircle2, Clock, Lock, FileText, Download, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -26,7 +26,7 @@ export default function ApplicationStepper({ steps, applicationId, country }: Ap
     const completedStepsCount = steps.filter((s) => s.status === "APPROVED" || s.status === "COMPLETED").length;
     const progressPercentage = Math.round((completedStepsCount / (steps.length || 1)) * 100);
     const firstIncompleteStepIdx = [...steps]
-        .sort((a, b) => APP_STEP_SEQUENCE.indexOf(a.type) - APP_STEP_SEQUENCE.indexOf(b.type))
+        .sort((a, b) => a.order - b.order)
         .findIndex((s) => s.status !== "APPROVED" && s.status !== "COMPLETED");
 
     return (
@@ -66,28 +66,20 @@ export default function ApplicationStepper({ steps, applicationId, country }: Ap
                         </tr>
                     </thead>
                     <tbody className="text-sm">
-                        {APP_STEP_SEQUENCE.map((stepType, idx) => {
-                            const dbStep = steps.find((s) => s.type === stepType);
-                            const step = dbStep || {
-                                id: `placeholder-${idx}`,
-                                type: stepType,
-                                status: idx < 3 ? "APPROVED" : "PENDING",
-                                isLocked: idx < 3 ? false : true,
-                                updatedAt: new Date(),
-                                Document: [],
-                            };
-
+                        {[...steps].sort((a, b) => a.order - b.order).map((step, idx) => {
                             const isCompleted = step.status === "APPROVED" || step.status === "COMPLETED";
                             const isUnlockedByAgent = !step.isLocked && step.status !== "PENDING";
-                            const isNextActive = dbStep ? idx === firstIncompleteStepIdx : idx === 3;
+                            const isNextActive = idx === firstIncompleteStepIdx;
                             const isActive = (isNextActive || isUnlockedByAgent) && !isCompleted;
                             const isLocked = !isActive && !isCompleted;
 
-                            let label = STEP_LABELS[stepType];
-                            try {
-                                label = tStepLabels(stepType as any);
-                            } catch {
-                                // fall back to the static label if no translation exists
+                            let label = step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS];
+                            if (!step.label) {
+                                try {
+                                    label = tStepLabels(step.type as any);
+                                } catch {
+                                    // fall back to the static label if no translation exists
+                                }
                             }
 
                             return (
@@ -110,7 +102,7 @@ export default function ApplicationStepper({ steps, applicationId, country }: Ap
                                         )}
                                     </td>
                                     <td className="p-4 text-gray-500 font-medium text-xs">
-                                        {dbStep ? new Date(step.updatedAt).toLocaleDateString() : "—"}
+                                        {new Date(step.updatedAt).toLocaleDateString()}
                                     </td>
                                     <td className="p-4">
                                         {step.Document && step.Document.length > 0 ? (

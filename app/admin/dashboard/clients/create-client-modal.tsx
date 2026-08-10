@@ -14,8 +14,8 @@ interface Agent {
 
 interface CreateClientModalProps {
     agents: Agent[];
+    onClientCreated?: (client: any) => void;
 }
-
 // Generates a random secure-looking password
 function generatePassword(): string {
     const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -33,8 +33,7 @@ function generatePassword(): string {
     return pw.sort(() => Math.random() - 0.5).join("");
 }
 
-export default function CreateClientModal({ agents }: CreateClientModalProps) {
-    const [isOpen, setIsOpen] = useState(false);
+export default function CreateClientModal({ agents, onClientCreated }: CreateClientModalProps) {    const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(true);
@@ -91,9 +90,18 @@ export default function CreateClientModal({ agents }: CreateClientModalProps) {
         } else {
             // Show success screen with the credentials
             setSuccess({ name, email, password });
-        }
-    };
 
+            // Let the parent list insert this client immediately instead of
+            // requiring a manual reload to see it.
+            if (onClientCreated && res.client) {
+                const assignedAgent = agentId ? agents.find(a => a.id === agentId) : null;
+                onClientCreated({
+                    ...res.client,
+                    agent: assignedAgent ? { name: assignedAgent.name } : null,
+                });
+            }
+        }
+    }
     return (
         <>
             <Button

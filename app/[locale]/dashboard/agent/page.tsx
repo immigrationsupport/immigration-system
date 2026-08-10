@@ -152,8 +152,7 @@ export default async function AgentDashboard() {
                                                     PASSPORT_SUBMISSION: "Passport & Visa"
                                                 };
                                                 const activeStep = (app as any).steps.find((s: any) => s.status === "IN_PROGRESS" || (s.status === "PENDING" && !s.isLocked));
-                                                const stepLabel = activeStep ? STEP_LABELS[activeStep.type] ?? activeStep.type : "Document Collection";
-                                                return (
+                                                const stepLabel = activeStep ? (activeStep.label || STEP_LABELS[activeStep.type] || activeStep.type) : "Document Collection";                                                return (
                                                     <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[11px] font-bold">
                                                         {stepLabel}
                                                     </span>

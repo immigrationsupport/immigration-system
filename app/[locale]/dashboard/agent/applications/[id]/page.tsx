@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowLeft, User, Globe, Briefcase, GraduationCap, Users, Clock, CheckCircle2 } from "lucide-react";
 import StepManagement from "./step-management";
+import { getAgencyStepDefinitions } from "@/lib/steps";
 
 export default async function AgentApplicationManagementPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
     const { id } = await (params as any);
@@ -21,31 +22,32 @@ export default async function AgentApplicationManagementPage({ params }: { param
             client: { select: { name: true, email: true, id: true } },
             steps: {
                 include: { Document: true },
-                orderBy: { updatedAt: "asc" }
+                orderBy: { order: "asc" }
             }
         }
     });
 
-    if (application && application.steps.length < 11) {
-        // Auto-repair legacy applications
+    if (application && application.steps.length === 0) {
+        // Auto-repair applications that somehow ended up with zero steps
+        // (very old legacy rows). Normal creation always creates every step
+        // atomically, so partial/missing-a-few-steps is no longer possible —
+        // an agency may legitimately have fewer than 11 active steps by design.
         const appId = application.id;
-        const APP_STEP_SEQUENCE = [
-            "REGISTRATION", "CONTRACT_SIGNING", "FEE_PAYMENT", "DOCUMENT_COLLECTION", 
-            "DIPLOMA_EQUIVALENCE", "LANGUAGE_TEST_REGISTRATION", "LANGUAGE_TEST_RESULTS", 
-            "PROFILE_CREATION", "APPLICATION_SUBMISSION", "MEDICAL_EXAMINATION", "PASSPORT_SUBMISSION"
-        ];
-        const existingTypes = application.steps.map((s: any) => s.type);
-        const missingSteps = APP_STEP_SEQUENCE.filter((type: string) => !existingTypes.includes(type));
-        
-        if (missingSteps.length > 0) {
+        const stepDefs = await getAgencyStepDefinitions(application.agencyId);
+
+        if (stepDefs.length > 0) {
             await prisma.applicationStep.createMany({
-                data: missingSteps.map((type: string) => {
-                    const realIndex = APP_STEP_SEQUENCE.indexOf(type as any);
+                data: stepDefs.map((def, index) => {
+                    const isFirstThree = index < 3;
+                    const isStep4 = index === 3;
                     return {
                         applicationId: appId,
-                        type: type as any,
-                        status: realIndex < 3 ? "APPROVED" : (realIndex === 3 ? "IN_PROGRESS" : "PENDING"),
-                        isLocked: realIndex < 3 ? false : (realIndex === 3 ? false : true),
+                        type: def.type,
+                        label: def.label,
+                        order: index,
+                        status: isFirstThree ? "APPROVED" : (isStep4 ? "IN_PROGRESS" : "PENDING"),
+                        isLocked: isFirstThree ? false : (isStep4 ? false : true),
+                        description: isFirstThree ? "Automatically verified." : (def.description || null)
                     };
                 })
             });
@@ -56,7 +58,7 @@ export default async function AgentApplicationManagementPage({ params }: { param
                     client: { select: { name: true, email: true, id: true } },
                     steps: {
                         include: { Document: true },
-                        orderBy: { updatedAt: "asc" }
+                        orderBy: { order: "asc" }
                     }
                 }
             });

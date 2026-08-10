@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { APP_STEP_SEQUENCE } from "@/lib/steps";
+import { getAgencyStepDefinitions } from "@/lib/steps";
 import { ApplicationType } from "@prisma/client";
 import { hashPassword } from "better-auth/crypto";
 import { checkClientQuota } from "@/lib/subscription";
@@ -134,6 +134,8 @@ export async function createApplicationForClientAction(
             return { error: "Client not found or not assigned to you." };
         }
 
+        const stepDefs = await getAgencyStepDefinitions(client.agencyId);
+
         const application = await prisma.application.create({
             data: {
                 country: data.country,
@@ -143,14 +145,16 @@ export async function createApplicationForClientAction(
                 agencyId: client.agencyId,
                 status: "IN_PROGRESS",
                 steps: {
-                    create: APP_STEP_SEQUENCE.map((stepType, index) => {
+                    create: stepDefs.map((def, index) => {
                         const isFirstThree = index < 3;
                         const isStep4 = index === 3;
                         return {
-                            type: stepType,
+                            type: def.type,
+                            label: def.label,
+                            order: index,
                             status: isFirstThree ? "APPROVED" : (isStep4 ? "IN_PROGRESS" : "PENDING"),
                             isLocked: isFirstThree ? false : (isStep4 ? false : true),
-                            description: isFirstThree ? "Automatically verified." : (data.description || null)
+                            description: isFirstThree ? "Automatically verified." : (def.description || data.description || null)
                         };
                     })
                 }

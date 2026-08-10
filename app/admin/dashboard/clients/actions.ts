@@ -78,7 +78,7 @@ if (!quota.ok) return { error: quota.error };
         });
 
         revalidatePath("/admin/dashboard/clients");
-        return { success: true };
+        return { success: true, client: newClient };
     } catch (e: any) {
         console.error("Create client error:", e);
         return { error: "An error occurred while creating the client." };

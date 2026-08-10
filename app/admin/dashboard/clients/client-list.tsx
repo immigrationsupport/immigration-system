@@ -81,7 +81,10 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
             {/* Header row with title and Create Client button */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 className="text-2xl font-semibold" style={{ color: "#1E3A8A" }}>Manage Clients</h1>
-                <CreateClientModal agents={agents} />
+                <CreateClientModal
+                    agents={agents}
+                    onClientCreated={(newClient) => setClients(prev => [newClient, ...prev])}
+                />
             </div>
 
             <div className="bg-[#F9FAFB] p-6 lg:p-8 shadow-sm border border-gray-200" style={{ borderRadius: "8px" }}>

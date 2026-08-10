@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { ApplicationStatus, ProcedureStatus } from "@prisma/client";
-import { APP_STEP_SEQUENCE, STEP_LABELS } from "@/lib/steps";
+import { STEP_LABELS } from "@/lib/steps";
 import { getMyAgencyName } from "@/lib/agency-actions";
 export async function updateApplicationStatusAction(
     applicationId: string,
@@ -119,16 +119,14 @@ export async function updateStepAction(
 
         if (!step) return { error: "Step not found." };
 
-        const currentIdx = APP_STEP_SEQUENCE.indexOf(step.type as any);
+        const appSteps = [...step.application.steps].sort((a, b) => a.order - b.order);
+        const currentIdx = appSteps.findIndex(s => s.id === step.id);
 
         // Validation for "APPROVED" status
         if (data.status === "APPROVED") {
             // ... (rest of validation)
             if (currentIdx > 0) {
-                const previousSteps = step.application.steps.filter(s => {
-                    const idx = APP_STEP_SEQUENCE.indexOf(s.type as any);
-                    return idx < currentIdx;
-                });
+                const previousSteps = appSteps.slice(0, currentIdx);
                 const allPreviousApproved = previousSteps.every(s => s.status === "APPROVED");
                 if (!allPreviousApproved) {
                     return { error: "Must approve previous steps before completing this one." };
@@ -169,7 +167,7 @@ export async function updateStepAction(
 
         // Create an Official Message if this is a modification request (ACTION_REQUIRED)
         if (data.status === "ACTION_REQUIRED" && data.description) {
-            const stepLabel = STEP_LABELS[step.type as keyof typeof STEP_LABELS] || step.type;
+            const stepLabel = step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS] || step.type;
             
             // 1. Create database record
             await prisma.officialMessage.create({
@@ -215,12 +213,9 @@ export async function updateStepAction(
 
         // Auto-unlock next step ONLY IF status is APPROVED
         if (data.status === "APPROVED") {
-            if (currentIdx !== -1 && currentIdx < APP_STEP_SEQUENCE.length - 1) {
-                const nextType = APP_STEP_SEQUENCE[currentIdx + 1];
-                const nextStep = await prisma.applicationStep.findFirst({
-                    where: { applicationId: step.applicationId, type: nextType }
-                });
-                
+            if (currentIdx !== -1 && currentIdx < appSteps.length - 1) {
+                const nextStep = appSteps[currentIdx + 1];
+
                 if (nextStep && nextStep.isLocked) {
                     await prisma.applicationStep.update({
                         where: { id: nextStep.id },

@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, Globe, Briefcase, GraduationCap, Users } from "lucide-react";import ApplicationStepper from "./application-stepper";
-import { APP_STEP_SEQUENCE } from "@/lib/steps";
+import { getAgencyStepDefinitions } from "@/lib/steps";
 import { getTranslations } from "next-intl/server";
 
 export default async function ApplicationDetailsPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
@@ -22,26 +22,32 @@ export default async function ApplicationDetailsPage({ params }: { params: Promi
         include: {
             steps: {
                 include: { Document: true },
-                orderBy: { updatedAt: "asc" }
+                orderBy: { order: "asc" }
             }
         }
     });
 
-    if (application && application.steps.length < 11) {
-        // Auto-repair legacy applications
+    if (application && application.steps.length === 0) {
+        // Auto-repair applications that somehow ended up with zero steps
+        // (very old legacy rows). Normal creation always creates every step
+        // atomically, so partial/missing-a-few-steps is no longer possible —
+        // an agency may legitimately have fewer than 11 active steps by design.
         const appId = application.id;
-        const existingTypes = application.steps.map((s: any) => s.type);
-        const missingSteps = APP_STEP_SEQUENCE.filter((type: string) => !existingTypes.includes(type));
-        
-        if (missingSteps.length > 0) {
+        const stepDefs = await getAgencyStepDefinitions(application.agencyId);
+
+        if (stepDefs.length > 0) {
             await prisma.applicationStep.createMany({
-                data: missingSteps.map((type: string) => {
-                    const realIndex = APP_STEP_SEQUENCE.indexOf(type as any);
+                data: stepDefs.map((def, index) => {
+                    const isFirstThree = index < 3;
+                    const isStep4 = index === 3;
                     return {
                         applicationId: appId,
-                        type: type as any,
-                        status: realIndex < 3 ? "APPROVED" : (realIndex === 3 ? "IN_PROGRESS" : "PENDING"),
-                        isLocked: realIndex < 3 ? false : (realIndex === 3 ? false : true),
+                        type: def.type,
+                        label: def.label,
+                        order: index,
+                        status: isFirstThree ? "APPROVED" : (isStep4 ? "IN_PROGRESS" : "PENDING"),
+                        isLocked: isFirstThree ? false : (isStep4 ? false : true),
+                        description: isFirstThree ? "Automatically verified." : (def.description || null)
                     };
                 })
             });
@@ -51,7 +57,7 @@ export default async function ApplicationDetailsPage({ params }: { params: Promi
                 include: {
                     steps: {
                         include: { Document: true },
-                        orderBy: { updatedAt: "asc" }
+                        orderBy: { order: "asc" }
                     }
                 }
             });

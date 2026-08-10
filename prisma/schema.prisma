@@ -23,6 +23,7 @@ model Agency {
   applications Application[]
   auditLogs    AuditLog[]
   subscription Subscription?
+  stepTemplates StepTemplate[]
 
   @@map("agency")
 }
@@ -50,6 +51,7 @@ model Plan {
 
   @@map("plan")
 }
+
 model Subscription {
   id                String             @id @default(uuid())
   agencyId          String             @unique
@@ -82,10 +84,17 @@ model Payment {
   id               String        @id @default(uuid())
   subscriptionId   String
   amountFcfa       Int
+  // Null while the payment is still PENDING — Flutterwave tells us which
+  // method the payer actually used once the charge completes.
   method           PaymentMethod?
   status           PaymentStatus @default(PENDING)
+  // Flutterwave tx_ref. Unique so a webhook/redirect retry can never be
+  // applied twice.
   reference        String?       @unique
+  // Flutterwave's own numeric transaction id, filled in once verified.
   flwTransactionId String?
+  // Plan this payment is meant to unlock once it succeeds. Only set for
+  // upgrade payments awaiting confirmation.
   targetPlanId     String?
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
@@ -276,6 +285,11 @@ model ApplicationStep {
   applicationId String
   isLocked      Boolean         @default(false)
   type          ProcedureType
+  // Materialized from the agency's StepTemplate at the time this step was
+  // created, so the position/wording of an in-progress application never
+  // shifts under it if the admin edits the template afterwards.
+  order         Int             @default(0)
+  label         String?
   Document      Document[]
   Message       Message[]
   application   Application     @relation(fields: [applicationId], references: [id])
@@ -357,6 +371,30 @@ enum ProcedureType {
   APPLICATION_SUBMISSION
   MEDICAL_EXAMINATION
   PASSPORT_SUBMISSION
+}
+
+// Per-agency customization of which of the fixed ProcedureType steps a new
+// application goes through, in what order, and under what display name.
+// The underlying `type` stays one of the ProcedureType values (some, like
+// DOCUMENT_COLLECTION and PROFILE_CREATION, have real behavior tied to
+// them elsewhere) — admins can reorder, rename, re-describe, and
+// enable/disable, but not invent an entirely new type.
+model StepTemplate {
+  id          String        @id @default(uuid())
+  agencyId    String
+  type        ProcedureType
+  label       String
+  description String?
+  order       Int
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  agency      Agency        @relation(fields: [agencyId], references: [id])
+
+  @@unique([agencyId, type])
+  @@index([agencyId])
+  @@map("step_template")
 }
 
 enum ApplicationType {
