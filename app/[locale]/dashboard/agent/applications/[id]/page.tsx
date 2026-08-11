@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowLeft, User, Globe, Briefcase, GraduationCap, Users, Clock, CheckCircle2 } from "lucide-react";
 import StepManagement from "./step-management";
-import { getAgencyStepDefinitions } from "@/lib/steps";
+import { getAgencyStepDefinitions } from "@/lib/steps-server";
 
 export default async function AgentApplicationManagementPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
     const { id } = await (params as any);

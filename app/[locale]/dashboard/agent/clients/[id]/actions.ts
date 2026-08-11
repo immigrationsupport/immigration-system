@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getAgencyStepDefinitions } from "@/lib/steps";
+import { getAgencyStepDefinitions } from "@/lib/steps-server";
 import { ApplicationType } from "@prisma/client";
 
 export async function updateClientProfileAction(

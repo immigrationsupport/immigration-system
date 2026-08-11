@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, Globe, Briefcase, GraduationCap, Users } from "lucide-react";import ApplicationStepper from "./application-stepper";
-import { getAgencyStepDefinitions } from "@/lib/steps";
+import { getAgencyStepDefinitions } from "@/lib/steps-server";
 import { getTranslations } from "next-intl/server";
 
 export default async function ApplicationDetailsPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
