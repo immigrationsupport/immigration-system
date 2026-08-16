@@ -67,7 +67,7 @@ export async function submitProcedureAction(stepId: string) {
                 where: { id: stepId },
                 data: {
                     status: "IN_PROGRESS" as ProcedureStatus,
-                    isLocked: true 
+                    isLocked: true
                 }
             });
         }
@@ -120,7 +120,7 @@ export async function addDocumentAction(formData: FormData) {
         });
 
         if (!step) return { error: "Application step not found." };
-        
+
         if (step.application.clientId !== session.user.id) {
             return { error: "Unauthorized access." };
         }

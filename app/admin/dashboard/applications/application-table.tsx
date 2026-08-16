@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { updateApplicationAction, deleteApplicationAction } from "./actions";
+import CreateApplicationModal from "./create-application-modal";
 import ApplicationDetailsModal from "./application-details-modal";
 import { TruncatedText } from "@/components/ui/truncated-text";
 
@@ -147,6 +148,19 @@ export default function ApplicationTable({
                         <option value="APPROVED">Approved</option>
                         <option value="REJECTED">Rejected</option>
                     </select>
+                    <CreateApplicationModal
+                        onCreated={(newApp) => {
+                            setApplications((prev) => [
+                                {
+                                    ...newApp,
+                                    destination: newApp.country,
+                                    type: newApp.applicationTemplateId ? "CUSTOM" : "GENERAL",
+                                    agent: null
+                                },
+                                ...prev
+                            ]);
+                        }}
+                    />
                 </div>
             </div>
 

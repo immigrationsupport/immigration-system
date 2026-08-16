@@ -23,7 +23,7 @@ model Agency {
   applications Application[]
   auditLogs    AuditLog[]
   subscription Subscription?
-  stepTemplates StepTemplate[]
+  applicationTemplates ApplicationTemplate[]
 
   @@map("agency")
 }
@@ -45,7 +45,7 @@ model Plan {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  subscriptions        Subscription[] @relation("PlanSubscriptions")
+  subscriptions       Subscription[] @relation("PlanSubscriptions")
   pendingSubscriptions Subscription[] @relation("PendingPlanSubscriptions")
   targetPlanPayments   Payment[]      @relation("TargetPlanPayments")
 
@@ -219,9 +219,13 @@ model Application {
   agentId   String?
   agencyId  String?
   type      ApplicationType   @default(PR)
+  // The named template this application's steps were built from (e.g.
+  // "PR - Canada"). Nullable: legacy applications predate templates.
+  applicationTemplateId String?
   agent     User?             @relation("AgentApplications", fields: [agentId], references: [id])
   client    User              @relation("ClientApplications", fields: [clientId], references: [id])
   agency    Agency?           @relation(fields: [agencyId], references: [id])
+  template  ApplicationTemplate? @relation(fields: [applicationTemplateId], references: [id])
   steps     ApplicationStep[]
 
   @@index([agencyId])
@@ -284,17 +288,37 @@ model ApplicationStep {
   updatedAt     DateTime        @updatedAt
   applicationId String
   isLocked      Boolean         @default(false)
-  type          ProcedureType
-  // Materialized from the agency's StepTemplate at the time this step was
-  // created, so the position/wording of an in-progress application never
-  // shifts under it if the admin edits the template afterwards.
+  // Null for a fully custom step the admin invented — set only when this
+  // step maps to one of the built-in types that carries real behavior
+  // elsewhere (e.g. DOCUMENT_COLLECTION's document checks).
+  type          ProcedureType?
+  // Materialized from the template at the time this step was created, so
+  // an in-progress application never shifts under it if the admin edits
+  // the template afterwards.
   order         Int             @default(0)
   label         String?
   Document      Document[]
   Message       Message[]
   application   Application     @relation(fields: [applicationId], references: [id])
+  subSteps      ApplicationSubStep[]
 
   @@map("Procedure")
+}
+
+model ApplicationSubStep {
+  id                String          @id @default(uuid())
+  applicationStepId String
+  label             String
+  description       String?
+  order             Int
+  isCompleted       Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  applicationStep   ApplicationStep @relation(fields: [applicationStepId], references: [id], onDelete: Cascade)
+
+  @@index([applicationStepId])
+  @@map("application_sub_step")
 }
 
 enum Role {
@@ -373,28 +397,61 @@ enum ProcedureType {
   PASSPORT_SUBMISSION
 }
 
-// Per-agency customization of which of the fixed ProcedureType steps a new
-// application goes through, in what order, and under what display name.
-// The underlying `type` stays one of the ProcedureType values (some, like
-// DOCUMENT_COLLECTION and PROFILE_CREATION, have real behavior tied to
-// them elsewhere) — admins can reorder, rename, re-describe, and
-// enable/disable, but not invent an entirely new type.
-model StepTemplate {
-  id          String        @id @default(uuid())
+// A named, reusable set of steps an agency builds once and reuses whenever
+// they start a new application (e.g. "PR - Canada", "Study - France").
+// Admins can invent steps freely — a step only keeps its `type` when it
+// should carry one of the built-in behaviors (see StepTemplate below).
+model ApplicationTemplate {
+  id          String   @id @default(uuid())
   agencyId    String
-  type        ProcedureType
-  label       String
+  name        String
   description String?
-  order       Int
-  isActive    Boolean       @default(true)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  agency      Agency        @relation(fields: [agencyId], references: [id])
+  agency       Agency         @relation(fields: [agencyId], references: [id])
+  steps        StepTemplate[]
+  applications Application[]
 
-  @@unique([agencyId, type])
   @@index([agencyId])
+  @@map("application_template")
+}
+
+model StepTemplate {
+  id                     String        @id @default(uuid())
+  applicationTemplateId  String
+  // Set only when this step should keep one of the built-in behaviors
+  // (e.g. DOCUMENT_COLLECTION's document checks, PROFILE_CREATION's
+  // confirmation upload). Null for a step the admin invented from scratch.
+  type                   ProcedureType?
+  label                  String
+  description            String?
+  order                  Int
+  isActive               Boolean       @default(true)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  applicationTemplate ApplicationTemplate @relation(fields: [applicationTemplateId], references: [id], onDelete: Cascade)
+  subSteps            SubStepTemplate[]
+
+  @@index([applicationTemplateId])
   @@map("step_template")
+}
+
+model SubStepTemplate {
+  id             String   @id @default(uuid())
+  stepTemplateId String
+  label          String
+  description    String?
+  order          Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  stepTemplate StepTemplate @relation(fields: [stepTemplateId], references: [id], onDelete: Cascade)
+
+  @@index([stepTemplateId])
+  @@map("sub_step_template")
 }
 
 enum ApplicationType {

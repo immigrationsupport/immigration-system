@@ -4,8 +4,20 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getAgencyStepDefinitions } from "@/lib/steps-server";
+import { getAgencyStepDefinitions, getAgencyTemplates, getTemplateSteps } from "@/lib/steps-server";
 import { ApplicationType } from "@prisma/client";
+
+export async function getWorkflowTemplatesAction() {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
+        return { error: "Unauthorized access." };
+    }
+    const agencyId = (session.user as any).agencyId;
+    if (!agencyId) return { error: "Your account is not linked to an agency." };
+
+    const templates = await getAgencyTemplates(agencyId);
+    return { templates: templates.filter((t) => t.isActive) };
+}
 
 export async function updateClientProfileAction(
     clientId: string,
@@ -88,7 +100,7 @@ export async function updateClientProfileAction(
 
 export async function createApplicationForClientAction(
     clientId: string,
-    data: { country: string; type: string; description?: string }
+    data: { country: string; type: string; templateId?: string; description?: string }
 ) {
     const session = await auth.api.getSession({
         headers: await headers()
@@ -98,8 +110,8 @@ export async function createApplicationForClientAction(
         return { error: "Unauthorized access." };
     }
 
-    if (!data.country || !data.type) {
-        return { error: "Country and application type are required." };
+    if (!data.country) {
+        return { error: "Country is required." };
     }
 
     try {
@@ -116,15 +128,25 @@ export async function createApplicationForClientAction(
             return { error: "Client not found or not assigned to you." };
         }
 
-        const stepDefs = await getAgencyStepDefinitions(client.agencyId);
+        let stepDefs;
+        if (data.templateId) {
+            const template = await prisma.applicationTemplate.findUnique({ where: { id: data.templateId } });
+            if (!template || template.agencyId !== client.agencyId) {
+                return { error: "This workflow does not belong to your agency." };
+            }
+            stepDefs = await getTemplateSteps(data.templateId);
+        } else {
+            stepDefs = await getAgencyStepDefinitions(client.agencyId);
+        }
 
         const application = await prisma.application.create({
             data: {
                 country: data.country,
-                type: data.type as ApplicationType,
+                type: (data.type as ApplicationType) || "PR",
                 clientId: client.id,
                 agentId: client.agentId || session.user.id,
                 agencyId: client.agencyId,
+                applicationTemplateId: data.templateId || null,
                 status: "IN_PROGRESS",
                 steps: {
                     create: stepDefs.map((def, index) => {
@@ -136,7 +158,14 @@ export async function createApplicationForClientAction(
                             order: index,
                             status: isFirstThree ? "APPROVED" : (isStep4 ? "IN_PROGRESS" : "PENDING"),
                             isLocked: isFirstThree ? false : (isStep4 ? false : true),
-                            description: isFirstThree ? "Automatically verified." : (def.description || data.description || null)
+                            description: isFirstThree ? "Automatically verified." : (def.description || data.description || null),
+                            subSteps: {
+                                create: def.subSteps.map((sub, subIndex) => ({
+                                    label: sub.label,
+                                    description: sub.description,
+                                    order: subIndex
+                                }))
+                            }
                         };
                     })
                 }

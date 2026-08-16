@@ -5,17 +5,23 @@ import { FileText, Info, Loader2, ExternalLink, Download, X, ArrowRight } from "
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Link from "next/link";
+import CreateApplicationModal from "./create-application-modal";
 
 interface ApplicationListProps {
     initialApplications: any[];
 }
 
 export default function ApplicationList({ initialApplications }: ApplicationListProps) {
-    const [applications] = useState(initialApplications);
+    const [applications, setApplications] = useState(initialApplications);
     const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null);
 
     return (
-        <div className="grid grid-cols-1 space-y-6 animate-in fade-in duration-500">
+        <div className="space-y-6">
+            <div className="flex justify-end">
+                <CreateApplicationModal onCreated={(newApp) => setApplications((prev) => [newApp, ...prev])} />
+            </div>
+
+            <div className="grid grid-cols-1 space-y-6 animate-in fade-in duration-500">
             {applications.map((app) => (
                 <ApplicationCard
                     key={app.id}
@@ -76,6 +82,7 @@ export default function ApplicationList({ initialApplications }: ApplicationList
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 }

@@ -4,6 +4,109 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getAgencyTemplates } from "@/lib/steps-server";
+import { getTemplateSteps } from "@/lib/steps-server";
+
+export async function getClientsAndTemplates() {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session || (session.user as any).role !== "ADMIN") {
+        return { error: "Unauthorized access." };
+    }
+    const agencyId = (session.user as any).agencyId;
+    if (!agencyId) return { error: "Your account is not linked to an agency." };
+
+    const [clients, templates] = await Promise.all([
+        prisma.user.findMany({
+            where: { role: "CLIENT", agencyId },
+            select: { id: true, name: true, email: true },
+            orderBy: { name: "asc" }
+        }),
+        getAgencyTemplates(agencyId)
+    ]);
+
+    return { clients, templates: templates.filter((t) => t.isActive) };
+}
+
+export async function createApplicationAction(clientId: string, templateId: string, country: string) {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session || (session.user as any).role !== "ADMIN") {
+        return { error: "Unauthorized access." };
+    }
+    const agencyId = (session.user as any).agencyId;
+    if (!agencyId) return { error: "Your account is not linked to an agency." };
+
+    if (!clientId) return { error: "Select a client." };
+    if (!templateId) return { error: "Select a workflow." };
+    if (!country || !country.trim()) return { error: "Enter a destination country." };
+
+    try {
+        const [client, template] = await Promise.all([
+            prisma.user.findUnique({ where: { id: clientId } }),
+            prisma.applicationTemplate.findUnique({ where: { id: templateId } })
+        ]);
+
+        if (!client || client.agencyId !== agencyId || client.role !== "CLIENT") {
+            return { error: "This client does not belong to your agency." };
+        }
+        if (!template || template.agencyId !== agencyId) {
+            return { error: "This workflow does not belong to your agency." };
+        }
+
+        const stepDefs = await getTemplateSteps(templateId);
+        if (stepDefs.length === 0) {
+            return { error: "This workflow has no steps yet — add some under Application Steps first." };
+        }
+
+        const application = await prisma.application.create({
+            data: {
+                country: country.trim(),
+                clientId: client.id,
+                agentId: client.agentId || null,
+                agencyId,
+                applicationTemplateId: templateId,
+                status: "IN_PROGRESS",
+                steps: {
+                    create: stepDefs.map((def, index) => {
+                        const isFirstThree = index < 3;
+                        const isStep4 = index === 3;
+                        return {
+                            type: def.type,
+                            label: def.label,
+                            order: index,
+                            status: isFirstThree ? "APPROVED" : isStep4 ? "IN_PROGRESS" : "PENDING",
+                            isLocked: isFirstThree ? false : isStep4 ? false : true,
+                            description: isFirstThree ? "Automatically verified." : def.description || null,
+                            subSteps: {
+                                create: def.subSteps.map((sub, subIndex) => ({
+                                    label: sub.label,
+                                    description: sub.description,
+                                    order: subIndex
+                                }))
+                            }
+                        };
+                    })
+                }
+            },
+            include: { client: { select: { name: true, email: true } } }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "CREATE_APPLICATION",
+                details: `Application (${template.name}) created for ${client.name} by Admin ${session.user.name}.`,
+                userId: session.user.id,
+                agencyId,
+                targetId: application.id
+            }
+        });
+
+        revalidatePath("/admin/dashboard/applications");
+        return { success: true, application };
+    } catch (e: any) {
+        console.error("Create application error:", e);
+        return { error: "Failed to create the application." };
+    }
+}
 
 export async function deleteApplicationAction(applicationId: string) {
     const session = await auth.api.getSession({

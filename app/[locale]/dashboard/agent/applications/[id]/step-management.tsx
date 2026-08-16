@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { STEP_LABELS } from "@/lib/steps";
-import { updateStepAction, updateApplicationStatusAction, addDocumentAction, deleteDocumentAction } from "../actions";
+import { updateStepAction, updateApplicationStatusAction, addDocumentAction, deleteDocumentAction, toggleSubStepAction } from "../actions";
 import { useParams, useRouter } from "next/navigation";
 
 interface StepManagementProps {
@@ -27,6 +27,15 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
     const [isSubmittingRes, setIsSubmittingRes] = useState(false);
     const [successModal, setSuccessModal] = useState<string | null>(null);
     const [uploadingStepId, setUploadingStepId] = useState<string | null>(null);
+    const [loadingSubStepId, setLoadingSubStepId] = useState<string | null>(null);
+
+    const handleToggleSubStep = async (subStepId: string, isCompleted: boolean) => {
+        setLoadingSubStepId(subStepId);
+        const res = await toggleSubStepAction(subStepId, isCompleted);
+        setLoadingSubStepId(null);
+        if (res.error) alert(res.error);
+        else router.refresh();
+    };
 
     const handleFileUpload = async (stepId: string, file: File) => {
         setUploadingStepId(stepId);
@@ -221,6 +230,26 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                                                  </button>
                                                              )}
                                                          </div>
+                                                     ))}
+                                                 </div>
+                                             </div>
+                                         )}
+
+                                         {/* Sub-steps checklist */}
+                                         {step.subSteps && step.subSteps.length > 0 && (
+                                             <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl space-y-2">
+                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Checklist</span>
+                                                 <div className="flex flex-col gap-1.5">
+                                                     {step.subSteps.map((sub: any) => (
+                                                         <label key={sub.id} className="flex items-center gap-2 text-xs font-semibold text-gray-700 cursor-pointer">
+                                                             <input
+                                                                 type="checkbox"
+                                                                 checked={sub.isCompleted}
+                                                                 disabled={loadingSubStepId === sub.id}
+                                                                 onChange={() => handleToggleSubStep(sub.id, !sub.isCompleted)}
+                                                             />
+                                                             <span className={sub.isCompleted ? "line-through text-gray-400" : ""}>{sub.label}</span>
+                                                         </label>
                                                      ))}
                                                  </div>
                                              </div>

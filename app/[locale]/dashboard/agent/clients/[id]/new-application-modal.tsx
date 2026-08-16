@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
     Dialog,
@@ -13,30 +13,50 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Loader2, Globe } from "lucide-react";
-import { createApplicationForClientAction } from "./actions";
+import { Plus, Loader2, Globe, ListOrdered } from "lucide-react";
+import { createApplicationForClientAction, getWorkflowTemplatesAction } from "./actions";
 import { toast } from "sonner";
+import Link from "next/link";
+
+interface TemplateOption {
+    id: string;
+    name: string;
+    description: string | null;
+    stepCount: number;
+}
 
 export default function NewApplicationModal({ clientId, clientName }: { clientId: string; clientName: string }) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [loadingTemplates, setLoadingTemplates] = useState(false);
+    const [templates, setTemplates] = useState<TemplateOption[]>([]);
     const [country, setCountry] = useState("Canada");
-    const [type, setType] = useState("PR");
+    const [templateId, setTemplateId] = useState("");
     const [description, setDescription] = useState("");
+
+    useEffect(() => {
+        if (!open) return;
+        setLoadingTemplates(true);
+        getWorkflowTemplatesAction().then((res) => {
+            setLoadingTemplates(false);
+            if ("error" in res) return;
+            setTemplates(res.templates || []);
+            if (res.templates && res.templates.length > 0) setTemplateId(res.templates[0].id);
+        });
+    }, [open]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
-        const result = await createApplicationForClientAction(clientId, { country, type, description });
+        const result = await createApplicationForClientAction(clientId, { country, type: "PR", templateId, description });
 
         setLoading(false);
         if (result.success) {
             toast.success("Application created successfully");
             setOpen(false);
             setCountry("Canada");
-            setType("PR");
             setDescription("");
             router.refresh();
         } else {
@@ -62,58 +82,74 @@ export default function NewApplicationModal({ clientId, clientName }: { clientId
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-5 py-4">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Destination Country</label>
-                        <Input
-                            placeholder="e.g., Canada"
-                            className="h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-blue-100 font-bold"
-                            value={country}
-                            onChange={(e) => setCountry(e.target.value)}
-                            required
-                        />
+                {loadingTemplates ? (
+                    <div className="py-10 flex justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin text-gray-300" />
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Application Type</label>
-                        <select
-                            className="w-full h-12 border border-gray-100 rounded-xl bg-gray-50/50 px-4 font-bold focus:ring-4 focus:ring-blue-100 outline-none transition-all"
-                            value={type}
-                            onChange={(e) => setType(e.target.value)}
-                        >
-                            <option value="PR">Permanent Residency</option>
-                            <option value="WORK">Work Visa</option>
-                            <option value="STUDY">Study Visa</option>
-                            <option value="SCHOLARSHIP">Scholarship</option>
-                        </select>
+                ) : templates.length === 0 ? (
+                    <div className="py-8 text-center space-y-3">
+                        <p className="text-sm text-gray-500">No workflows available yet.</p>
+                        <Link href="/admin/dashboard/steps" className="inline-block px-5 py-2.5 rounded-xl bg-[#1E3A8A] text-white font-bold text-sm">
+                            Set up a Workflow
+                        </Link>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Notes (Optional)</label>
-                        <Input
-                            placeholder="e.g. Master's in CS"
-                            className="h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-blue-100 font-bold"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                        />
-                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className="space-y-5 py-4">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Destination Country</label>
+                            <Input
+                                placeholder="e.g., Canada"
+                                className="h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-blue-100 font-bold"
+                                value={country}
+                                onChange={(e) => setCountry(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Workflow</label>
+                            <select
+                                className="w-full h-12 border border-gray-100 rounded-xl bg-gray-50/50 px-4 font-bold focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                                value={templateId}
+                                onChange={(e) => setTemplateId(e.target.value)}
+                                required
+                            >
+                                {templates.map((t) => (
+                                    <option key={t.id} value={t.id}>{t.name} ({t.stepCount} steps)</option>
+                                ))}
+                            </select>
+                            <p className="text-[10px] text-gray-400 flex items-center gap-1 ml-1">
+                                <ListOrdered className="h-3 w-3" /> Manage these under Application Steps.
+                            </p>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Notes (Optional)</label>
+                            <Input
+                                placeholder="e.g. Master's in CS"
+                                className="h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-blue-100 font-bold"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                            />
+                        </div>
 
-                    <DialogFooter className="pt-4">
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => setOpen(false)}
-                            className="font-bold text-gray-500 hover:bg-gray-50 rounded-xl"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={loading}
-                            className="bg-[#1E3A8A] hover:bg-[#152a6a] text-white font-black rounded-xl px-8 shadow-lg shadow-blue-200"
-                        >
-                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Application"}
-                        </Button>
-                    </DialogFooter>
-                </form>
+                        <DialogFooter className="pt-4">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setOpen(false)}
+                                className="font-bold text-gray-500 hover:bg-gray-50 rounded-xl"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="bg-[#1E3A8A] hover:bg-[#152a6a] text-white font-black rounded-xl px-8 shadow-lg shadow-blue-200"
+                            >
+                                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Application"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                )}
             </DialogContent>
         </Dialog>
     );

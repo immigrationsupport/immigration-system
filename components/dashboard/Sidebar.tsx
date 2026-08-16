@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
     LogOut, LayoutDashboard, Users, UserCog, FileText,
     Settings as SettingsIcon, Briefcase, FolderSearch,
-    List, MessageSquare, X, Menu,CreditCard,
+    List, MessageSquare, X, Menu,CreditCard, ListOrdered,
 } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -14,7 +14,7 @@ import { useState } from "react";
 const iconMap: Record<string, any> = {
     LayoutDashboard, Users, UserCog, FileText,
     Settings: SettingsIcon, Briefcase, FolderSearch,
-    List, MessageSquare, CreditCard
+    List, MessageSquare, CreditCard,  ListOrdered
 };
 interface SidebarItem {
     icon: string;

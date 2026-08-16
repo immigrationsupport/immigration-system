@@ -28,11 +28,19 @@ export const STEP_LABELS: Record<ProcedureType, string> = {
     PASSPORT_SUBMISSION: "Passport Submission & Visa Processing"
 };
 
-export interface StepDefinition {
-    type: ProcedureType;
+export interface SubStepDefinition {
     label: string;
     description: string | null;
     order: number;
+}
+
+export interface StepDefinition {
+    // Null for a fully custom step with no built-in behavior attached.
+    type: ProcedureType | null;
+    label: string;
+    description: string | null;
+    order: number;
+    subSteps: SubStepDefinition[];
 }
 
 /** Every possible step an agency could enable, with its built-in default label — used to seed the admin's customization screen. */

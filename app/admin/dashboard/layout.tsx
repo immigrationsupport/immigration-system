@@ -47,18 +47,17 @@ export default function AdminDashboardLayout({
     }
 
     if (!session) return null; // Prevent flicker while redirecting
-
-    const adminSidebarItems = [
+const adminSidebarItems = [
         { icon: "LayoutDashboard", label: "Overview", href: "/admin/dashboard" },
         { icon: "Briefcase", label: "Manage Agents", href: "/admin/dashboard/agents" },
         { icon: "Users", label: "Manage Clients", href: "/admin/dashboard/clients" },
         { icon: "FileText", label: "All Applications", href: "/admin/dashboard/applications" },
+        { icon: "ListOrdered", label: "Application Steps", href: "/admin/dashboard/steps" },
         { icon: "FolderSearch", label: "Documents Monitoring", href: "/admin/dashboard/documents" },
         { icon: "List", label: "System Logs", href: "/admin/dashboard/logs" },
         { icon: "CreditCard", label: "Billing", href: "/admin/dashboard/billing" },
         { icon: "Settings", label: "System Settings", href: "/admin/dashboard/settings" }
     ];
-
     return (
         <div className="flex bg-white min-h-screen" style={{ fontFamily: "var(--font-geist-sans)" }}>
             {/* Sidebar */}

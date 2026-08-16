@@ -22,7 +22,7 @@ export default async function MyApplicationsPage() {
         where: { clientId: session.user.id },
         include: {
             steps: {
-                orderBy: { updatedAt: "asc" }
+                orderBy: { order: "asc" }
             }
         },
         orderBy: { createdAt: "desc" }
