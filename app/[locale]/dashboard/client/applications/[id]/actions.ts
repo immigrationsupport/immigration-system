@@ -25,7 +25,7 @@ export async function submitProcedureAction(stepId: string) {
     }
 
     // Role-based validation: Clients cannot submit Agent-Only steps
-    if (AGENT_ONLY_STEPS.includes(step.type)) {
+    if (step.type && AGENT_ONLY_STEPS.includes(step.type)) {
         return { error: "This step is handled strictly by the agent. You will be notified when it is complete." };
     }
 
@@ -126,7 +126,7 @@ export async function addDocumentAction(formData: FormData) {
         }
 
         // Role-based validation: Clients cannot upload to Agent-Only steps (unless specifically allowed, e.g. Step 5)
-        if (step.type !== "DIPLOMA_EQUIVALENCE" && AGENT_ONLY_STEPS.includes(step.type)) {
+        if (step.type && step.type !== "DIPLOMA_EQUIVALENCE" && AGENT_ONLY_STEPS.includes(step.type)) {
             return { error: "Uploads for this step are handled strictly by the agent." };
         }
 
