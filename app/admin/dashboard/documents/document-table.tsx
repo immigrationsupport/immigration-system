@@ -49,7 +49,8 @@ interface DocumentItem {
     };
     step: {
         id: string;
-        type: string;
+        // Null for a fully custom step with no built-in type attached.
+        type: string | null;
     };
 }
 
@@ -192,7 +193,7 @@ export default function DocumentTable({
                                 <td className="px-6 py-5 text-[#4B5563] text-[16px] lg:text-[18px] font-bold">
                                     <div className="flex items-center gap-2 whitespace-nowrap">
                                         <Calendar size={18} className="text-[#9CA3AF]" />
-                                        {new Date(doc.uploadedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        {new Date(doc.uploadedAt).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
                                 </td>
 
