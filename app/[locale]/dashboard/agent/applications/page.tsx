@@ -53,11 +53,11 @@ export default async function AssignedApplicationsPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between border-b pb-4 border-gray-100">
                 <div className="space-y-1">
                     <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: "#1E3A8A" }}>Agent Workspace</h1>
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest">Manage & Update Assigned Applications</p>
+                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest">Manage & Update Assigned Procedures</p>
                 </div>
                 <div className="mt-4 md:mt-0 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-bold border border-blue-100 flex items-center gap-2">
                     <span className="h-2 w-2 bg-blue-500 rounded-full animate-pulse" />
-                    {applications.length} Active Applications
+                    {applications.length} Active Procedures
                 </div>
             </div>
 

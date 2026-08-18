@@ -54,7 +54,7 @@ export default function NewApplicationModal({ clientId, clientName }: { clientId
 
         setLoading(false);
         if (result.success) {
-            toast.success("Application created successfully");
+            toast.success("Procedure created successfully");
             setOpen(false);
             setCountry("Canada");
             setDescription("");
@@ -68,7 +68,7 @@ export default function NewApplicationModal({ clientId, clientName }: { clientId
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button className="bg-[#1E3A8A] hover:bg-[#152a6a] text-white font-black rounded-2xl px-6 h-12 uppercase tracking-widest text-xs shadow-lg shadow-blue-200 flex items-center gap-2">
-                    <Plus size={16} /> New Application
+                    <Plus size={16} /> New Procedure
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] border-none shadow-2xl rounded-2xl">
@@ -76,7 +76,7 @@ export default function NewApplicationModal({ clientId, clientName }: { clientId
                     <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
                         <Globe className="h-6 w-6 text-blue-600" />
                     </div>
-                    <DialogTitle className="text-2xl font-black text-gray-900">Start a New Application</DialogTitle>
+                    <DialogTitle className="text-2xl font-black text-gray-900">Start a New Procedure</DialogTitle>
                     <DialogDescription className="text-gray-500 font-medium">
                         Creating a new immigration application for <span className="text-blue-600 font-bold">{clientName}</span>.
                     </DialogDescription>
@@ -118,7 +118,7 @@ export default function NewApplicationModal({ clientId, clientName }: { clientId
                                 ))}
                             </select>
                             <p className="text-[10px] text-gray-400 flex items-center gap-1 ml-1">
-                                <ListOrdered className="h-3 w-3" /> Manage these under Application Steps.
+                                <ListOrdered className="h-3 w-3" /> Manage these under Procedure Steps.
                             </p>
                         </div>
                         <div className="space-y-2">
@@ -145,7 +145,7 @@ export default function NewApplicationModal({ clientId, clientName }: { clientId
                                 disabled={loading}
                                 className="bg-[#1E3A8A] hover:bg-[#152a6a] text-white font-black rounded-xl px-8 shadow-lg shadow-blue-200"
                             >
-                                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Application"}
+                                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Procedure"}
                             </Button>
                         </DialogFooter>
                     </form>

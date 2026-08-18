@@ -62,7 +62,7 @@ export default function SendMessageModal({ clientId, clientName, defaultSubject 
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Message Subject</label>
                         <Input 
-                            placeholder="e.g., Update on PR Application" 
+                            placeholder="e.g., Update on PR Procedure" 
                             className="h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-blue-100 font-bold"
                             value={subject}
                             onChange={(e) => setSubject(e.target.value)}

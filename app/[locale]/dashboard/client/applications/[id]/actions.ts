@@ -119,7 +119,7 @@ export async function addDocumentAction(formData: FormData) {
             include: { application: true }
         });
 
-        if (!step) return { error: "Application step not found." };
+        if (!step) return { error: "Procedure step not found." };
 
         if (step.application.clientId !== session.user.id) {
             return { error: "Unauthorized access." };

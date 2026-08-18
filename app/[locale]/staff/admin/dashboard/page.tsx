@@ -34,7 +34,7 @@ export default function AdminDashboardOverview() {
                         <FileText size={24} />
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 font-medium">Active Applications</p>
+                        <p className="text-sm text-gray-500 font-medium">Active Procedures</p>
                         <h3 className="text-2xl font-bold text-gray-900">0</h3>
                     </div>
                 </div>
@@ -46,7 +46,7 @@ export default function AdminDashboardOverview() {
                     <p className="text-sm text-gray-600">• Create or Manage Agent accounts.</p>
                     <p className="text-sm text-gray-600">• View and suspend Client profiles.</p>
                     <p className="text-sm text-gray-600">• Assign or Reassign clients to agents.</p>
-                    <p className="text-sm text-gray-600">• Monitor all immigration application statuses.</p>
+                    <p className="text-sm text-gray-600">• Monitor all immigration procedure statuses.</p>
                 </div>
             </div>
         </div>

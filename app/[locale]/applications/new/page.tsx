@@ -13,7 +13,7 @@ export default function NewApplicationPage() {
             <div className="max-w-2xl mx-auto">
                 <Card className="shadow-xl border-gray-100 overflow-hidden rounded-[32px]">
                     <CardHeader className="bg-white border-b border-gray-100 p-8">
-                        <CardTitle className="text-2xl font-black text-[#1E3A8A] uppercase tracking-tight">Starting a New Application</CardTitle>
+                        <CardTitle className="text-2xl font-black text-[#1E3A8A] uppercase tracking-tight">Starting a New Procedure</CardTitle>
                         <CardDescription className="text-gray-500 font-medium mt-1">
                             New applications are now created by your assigned agent.
                         </CardDescription>

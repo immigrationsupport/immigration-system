@@ -265,7 +265,7 @@ export default function ApplicationTable({
                                             className="h-12 w-12 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 bg-white"
                                             onClick={() => handleDelete(app.id)}
                                             disabled={loadingId === app.id}
-                                            title="Delete Application"
+                                            title="Delete Procedure"
                                         >
                                             <Trash2 size={24} />
                                         </Button>
@@ -278,7 +278,7 @@ export default function ApplicationTable({
                 {filteredApplications.length === 0 && (
                     <div className="py-24 flex flex-col items-center justify-center text-[#6B7280]">
                         <Briefcase size={50} className="mb-4 opacity-30" />
-                        <p className="text-[18px] font-bold">No applications found.</p>
+                        <p className="text-[18px] font-bold">No procedures found.</p>
                     </div>
                 )}
             </div>

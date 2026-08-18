@@ -39,7 +39,7 @@ export default function AddProcedurePage() {
                 <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-8">
                     {/* General Details */}
                     <div className="space-y-6">
-                        <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-2">Application Details</h2>
+                        <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-2">Procedure Details</h2>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
@@ -55,7 +55,7 @@ export default function AddProcedurePage() {
                                     <option value="student_visa">Student Visa</option>
                                     <option value="permanent_residency">Permanent Residency</option>
                                     <option value="tourist_visa">Tourist / Visitor Visa</option>
-                                    <option value="citizenship">Citizenship Application</option>
+                                    <option value="citizenship">Citizenship Procedure</option>
                                     <option value="corporate">Business / Corporate Visa</option>
                                 </select>
                             </div>
@@ -130,7 +130,7 @@ export default function AddProcedurePage() {
                         >
                             {loading ? "Submitting..." : (
                                 <>
-                                    <Send className="w-4 h-4 mr-2 inline-block" /> Submit Application
+                                    <Send className="w-4 h-4 mr-2 inline-block" /> Submit Procedure
                                 </>
                             )}
                         </button>

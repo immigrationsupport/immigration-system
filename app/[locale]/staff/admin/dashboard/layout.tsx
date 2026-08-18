@@ -36,7 +36,7 @@ export default function AdminDashboardLayout({
         },
         {
             icon: "FileText",
-            label: "All Applications",
+            label: "All Procedures",
             href: "/staff/admin/dashboard/applications"
         },
         {

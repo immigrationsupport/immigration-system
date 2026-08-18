@@ -42,7 +42,7 @@ export default async function MyApplicationsPage() {
                     <Globe className="h-16 w-16 text-gray-200 mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-gray-900">{t("noApplications")}</h3>
                     <p className="text-gray-500 mt-2 max-w-xs mx-auto">{t("noApplicationsDesc")}</p>
-                    <p className="text-gray-400 mt-4 text-sm font-bold uppercase tracking-widest">Contact your agent to start your first application.</p>
+                    <p className="text-gray-400 mt-4 text-sm font-bold uppercase tracking-widest">Contact your agent to start your first procedure.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

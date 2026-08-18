@@ -56,7 +56,7 @@ export default async function AgentDashboard() {
         <div className="space-y-8 max-w-7xl mx-auto px-4 py-8">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 tracking-tight" style={{ color: "#1E3A8A" }}>{isAdmin ? "Applications Overview" : "Agent Overview"}</h1>
+                    <h1 className="text-3xl font-black text-gray-900 tracking-tight" style={{ color: "#1E3A8A" }}>{isAdmin ? "Procedures Overview" : "Agent Overview"}</h1>
                     <p className="text-gray-500 font-medium">{isAdmin ? "All applications across your agency." : "Welcome back to your workspace."}</p>
                 </div>
                 <Link href="/dashboard/agent/profile">
@@ -76,7 +76,7 @@ export default async function AgentDashboard() {
                         <Briefcase size={26} color="black" />
                     </div>
                     <div>
-                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Total Applications</p>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Total Procedures</p>
                         <h3 className="text-3xl font-black text-gray-900 mt-0.5">{assignedApps}</h3>
                     </div>
                 </div>
@@ -147,7 +147,7 @@ export default async function AgentDashboard() {
                                                     LANGUAGE_TEST_REGISTRATION: "Language Test Reg.",
                                                     LANGUAGE_TEST_RESULTS: "Language Test Results",
                                                     PROFILE_CREATION: "Profile Creation",
-                                                    APPLICATION_SUBMISSION: "Application Submission",
+                                                    APPLICATION_SUBMISSION: "Procedure Submission",
                                                     MEDICAL_EXAMINATION: "Medical Examination",
                                                     PASSPORT_SUBMISSION: "Passport & Visa"
                                                 };

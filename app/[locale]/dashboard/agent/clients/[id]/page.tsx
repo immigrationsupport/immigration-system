@@ -120,7 +120,7 @@ const client = await prisma.user.findUnique({
                         <CardContent className="p-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="text-[10px] font-black text-blue-200 uppercase tracking-wider mb-1">Applications</div>
+                                    <div className="text-[10px] font-black text-blue-200 uppercase tracking-wider mb-1">Procedures</div>
                                     <div className="text-2xl font-black">{client.applications.length}</div>
                                 </div>
                                 <div>

@@ -60,7 +60,7 @@ export default async function AdminStats() {
                     <FileText size={26} color="black"/>
                 </div>
                 <div>
-                    <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">All Applications</p>
+                    <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">All Procedures</p>
                     <h3 className="text-3xl font-black text-gray-900 mt-0.5">{totalApplications.toLocaleString()}</h3>
                 </div>
             </Link>

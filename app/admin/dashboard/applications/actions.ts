@@ -54,7 +54,7 @@ export async function createApplicationAction(clientId: string, templateId: stri
 
         const stepDefs = await getTemplateSteps(templateId);
         if (stepDefs.length === 0) {
-            return { error: "This workflow has no steps yet — add some under Application Steps first." };
+            return { error: "This workflow has no steps yet — add some under Procedure Steps first." };
         }
 
         const application = await prisma.application.create({
@@ -125,7 +125,7 @@ export async function deleteApplicationAction(applicationId: string) {
             include: { client: true }
         });
 
-        if (!application) return { error: "Application not found." };
+        if (!application) return { error: "Procedure not found." };
         if (application.agencyId !== adminAgencyId) return { error: "This application does not belong to your agency." };
 
         await prisma.$transaction(async (tx) => {
@@ -198,7 +198,7 @@ export async function updateApplicationAction(
             include: { client: true }
         });
 
-        if (!oldApp) return { error: "Application not found." };
+        if (!oldApp) return { error: "Procedure not found." };
         if (oldApp.agencyId !== adminAgencyId) return { error: "This application does not belong to your agency." };
 
         if (data.agentId) {

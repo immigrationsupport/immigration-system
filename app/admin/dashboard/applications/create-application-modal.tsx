@@ -72,7 +72,7 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
             if (result?.error) {
                 setError(result.error);
             } else {
-                toast.success("Application created");
+                toast.success("Procedure created");
                 onCreated(result.application);
                 setOpen(false);
                 resetForm();
@@ -84,13 +84,13 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
             <DialogTrigger asChild>
                 <Button className="bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold rounded-xl gap-2 h-12 px-6">
-                    <Plus className="h-4 w-4" /> New Application
+                    <Plus className="h-4 w-4" /> New Procedure
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md rounded-2xl">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-black text-[#1E3A8A]">New Application</DialogTitle>
-                    <DialogDescription>Create an application for a client using one of your workflows.</DialogDescription>
+                    <DialogTitle className="text-xl font-black text-[#1E3A8A]">New Procedure</DialogTitle>
+                    <DialogDescription>Create a procedure for a client using one of your workflows.</DialogDescription>
                 </DialogHeader>
 
                 {error && (
@@ -106,7 +106,7 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
                     </div>
                 ) : templates.length === 0 ? (
                     <div className="py-8 text-center space-y-3">
-                        <p className="text-sm text-gray-500">You don't have any workflows to build an application from yet.</p>
+                        <p className="text-sm text-gray-500">You don't have any workflows to build a procedure from yet.</p>
                         <Link href="/admin/dashboard/steps" className="inline-block px-5 py-2.5 rounded-xl bg-[#1E3A8A] text-white font-bold text-sm">
                             Create a Workflow
                         </Link>
@@ -147,7 +147,7 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
                             </select>
                             <p className="text-xs text-gray-400 flex items-center gap-1.5">
                                 <ListOrdered className="h-3.5 w-3.5" />
-                                Manage these under Application Steps.
+                                Manage these under Procedure Steps.
                             </p>
                         </div>
 
@@ -167,7 +167,7 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
                             disabled={isPending || clients.length === 0}
                             className="w-full bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold h-11 rounded-xl"
                         >
-                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Application"}
+                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Procedure"}
                         </Button>
                     </form>
                 )}

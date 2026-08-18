@@ -65,7 +65,7 @@ export default async function AgentApplicationManagementPage({ params }: { param
         }
     }
 
-    if (!application) return <div className="p-8 text-center font-black text-red-500 uppercase">Application Not Found</div>;
+    if (!application) return <div className="p-8 text-center font-black text-red-500 uppercase">Procedure Not Found</div>;
 
     const completedSteps = application.steps.filter(s => s.status === "APPROVED").length;
     const progress = Math.round((completedSteps / application.steps.length) * 100);
@@ -87,7 +87,7 @@ export default async function AgentApplicationManagementPage({ params }: { param
                         </div>
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-3">
-                                <span className="bg-blue-50 text-[#1E3A8A] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{application.country} Application</span>
+                                <span className="bg-blue-50 text-[#1E3A8A] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{application.country} Procedure</span>
                                 <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{appType}</span>
                                 <span className="bg-gray-100 text-gray-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">ID: #{application.id.slice(-6)}</span>
                             </div>
@@ -118,7 +118,7 @@ export default async function AgentApplicationManagementPage({ params }: { param
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-10">
                     <div className="space-y-2">
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">Overall Completion</p>
-                        <h3 className="text-4xl font-black text-gray-900 uppercase tracking-tighter">Application Progress</h3>
+                        <h3 className="text-4xl font-black text-gray-900 uppercase tracking-tighter">Procedure Progress</h3>
                         <p className="text-xs font-bold text-[#1E3A8A] opacity-60 uppercase tracking-widest">
                             {completedSteps} of {application.steps.length} Milestones Validated
                         </p>

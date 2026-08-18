@@ -27,7 +27,7 @@ export async function updateApplicationStatusAction(
             include: { client: true }
         });
 
-        if (!application) return { error: "Application not found." };
+        if (!application) return { error: "Procedure not found." };
         
         await prisma.$transaction(async (tx) => {
             // 1. Update Application status
@@ -449,7 +449,7 @@ export async function createApplicationAction(clientId: string, templateId: stri
 
         const stepDefs = await getTemplateSteps(templateId);
         if (stepDefs.length === 0) {
-            return { error: "This workflow has no steps yet — add some under Application Steps first." };
+            return { error: "This workflow has no steps yet — add some under Procedure Steps first." };
         }
 
         const application = await prisma.application.create({

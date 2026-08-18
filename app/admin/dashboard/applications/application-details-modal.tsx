@@ -53,7 +53,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
         setActionLoading("unlock");
         const res = await unlockApplication(applicationId);
         if (res.success) {
-            toast.success("Application unlocked successfully.");
+            toast.success("Procedure unlocked successfully.");
             fetchDetails();
         } else {
             toast.error(res.error || "Failed to unlock.");
@@ -91,7 +91,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                             <FileText size={24} />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 leading-tight">Application: {data.id.substring(0, 8).toUpperCase()}</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 leading-tight">Procedure: {data.id.substring(0, 8).toUpperCase()}</h2>
                             <p className="text-sm text-gray-500 flex items-center gap-2">
                                 <Globe size={14} /> {data.destination} <span className="text-gray-300">|</span> {data.type.replace('_', ' ')}
                             </p>
@@ -112,8 +112,8 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                 <Lock className="h-6 w-6 text-red-600" />
                             </div>
                             <div>
-                                <h4 className="font-extrabold text-[15px] uppercase tracking-wide">Application Locked by Submission</h4>
-                                <p className="text-sm font-medium opacity-90 mt-0.5">The client has submitted this application. Their profile and procedures are now read-only to them. Unlock the application to grant edit access back to the client.</p>
+                                <h4 className="font-extrabold text-[15px] uppercase tracking-wide">Procedure Locked by Submission</h4>
+                                <p className="text-sm font-medium opacity-90 mt-0.5">The client has submitted this  procedure. Their profile and procedures are now read-only to them. Unlock the procedure to grant edit access back to the client.</p>
                             </div>
                         </div>
                     )}
@@ -247,7 +247,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                 disabled={actionLoading !== null}
                                 className="rounded-xl font-bold px-8 h-11 border-blue-200 text-blue-700 hover:bg-blue-50"
                             >
-                                {actionLoading === "unlock" ? "Unlocking..." : "Unlock Application"}
+                                {actionLoading === "unlock" ? "Unlocking..." : "Unlock Procedure"}
                             </Button>
                         )}
                     </div>

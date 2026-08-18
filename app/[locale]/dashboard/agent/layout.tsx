@@ -16,12 +16,12 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
         if (session?.user) {
             getMyAgencyName().then(setAgencyName);
         }
-    }, [session?.user]);
+    }, [session?.user]);        
 
     const agentItems = [
         { icon: "LayoutDashboard", label: "Overview", href: "/dashboard/agent" },
         { icon: "Users", label: "Assigned Clients", href: "/dashboard/agent/clients" },
-        { icon: "FileText", label: "Assigned Applications", href: "/dashboard/agent/applications" },
+        { icon: "FileText", label: "Assigned Procedures", href: "/dashboard/agent/applications" },
         { icon: "UserCog", label: "Profile", href: "/dashboard/agent/profile" },
     ];
 

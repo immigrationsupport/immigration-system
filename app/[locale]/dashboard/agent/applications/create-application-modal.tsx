@@ -71,7 +71,7 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
             if (result?.error) {
                 setError(result.error);
             } else {
-                toast.success("Application created");
+                toast.success("Procedure created");
                 onCreated(result.application);
                 setOpen(false);
                 resetForm();
@@ -83,13 +83,13 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
             <DialogTrigger asChild>
                 <Button className="bg-[#1E3A8A] hover:bg-blue-900 text-white font-black rounded-2xl px-6 h-11 uppercase tracking-widest text-xs shadow-lg shadow-blue-100 flex items-center gap-2">
-                    <Plus className="h-4 w-4" /> New Application
+                    <Plus className="h-4 w-4" /> New Procedure
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md rounded-2xl">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-black text-[#1E3A8A]">New Application</DialogTitle>
-                    <DialogDescription>Create an application for one of your clients using an agency workflow.</DialogDescription>
+                    <DialogTitle className="text-xl font-black text-[#1E3A8A]">New Procedure</DialogTitle>
+                    <DialogDescription>Create a procedure for one of your clients using an agency workflow.</DialogDescription>
                 </DialogHeader>
 
                 {error && (
@@ -167,7 +167,7 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
                             disabled={isPending}
                             className="w-full bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold h-11 rounded-xl"
                         >
-                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Application"}
+                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Procedure"}
                         </Button>
                     </form>
                 )}

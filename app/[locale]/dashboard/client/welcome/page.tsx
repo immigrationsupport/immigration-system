@@ -27,12 +27,12 @@ export default async function WelcomePage() {
                 <CardHeader className="pb-4">
                     <CardTitle className="text-3xl font-bold text-[#1E3A8A] mb-2">Welcome</CardTitle>
                     <CardDescription className="text-gray-600 text-lg">
-                        Welcome to your Immigration Portal. Start your first application to begin your process.
+                        Welcome to your Immigration Portal. Start your first procedure to begin your process.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6 pb-8">
                     <p className="text-gray-500 font-bold uppercase tracking-widest text-sm">
-                        Your agent will set up your first application shortly. Please contact your assigned specialist if you have any questions.
+                        Your agent will set up your first procedure shortly. Please contact your assigned specialist if you have any questions.
                     </p>
                 </CardContent>
             </Card>

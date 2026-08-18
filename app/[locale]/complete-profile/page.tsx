@@ -285,7 +285,7 @@ export default function CompleteProfilePage() {
                             className="w-full bg-[#1E3A8A] hover:bg-blue-900 h-12 text-base font-bold transition-all shadow-md mt-4"
                             disabled={loading}
                         >
-                            {loading ? <Loader2 className="animate-spin h-5 w-5" /> : "Complete Profile & Start Application"}
+                            {loading ? <Loader2 className="animate-spin h-5 w-5" /> : "Complete Profile & Start Procedure"}
                         </Button>
                     </form>
                 </CardContent>

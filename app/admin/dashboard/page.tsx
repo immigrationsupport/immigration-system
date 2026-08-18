@@ -72,11 +72,11 @@ export default async function AdminDashboardOverview() {
             </Suspense>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
-                {/* Applications by Status */}
+                {/* Procedures by Status */}
                 <div className="bg-white shadow-sm border border-gray-100 p-6" style={{ borderRadius: "12px" }}>
                     <div className="flex items-center gap-2 mb-6 border-b border-gray-50 pb-4">
                         <Activity className="h-5 w-5 text-[#1E3A8A]" />
-                        <h2 className="text-lg font-bold text-gray-900">Applications by Status</h2>
+                        <h2 className="text-lg font-bold text-gray-900">Procedures by Status</h2>
                     </div>
                     <div className="space-y-4">
                         <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-100 transition-colors hover:bg-white">

@@ -65,7 +65,7 @@ export default async function AssignedClientsPage() {
                             <thead>
                                 <tr className="bg-gray-100/80">
                                     <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">Client Detail</th>
-                                    <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Latest Application</th>
+                                    <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Latest Procedure</th>
                                     <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Status</th>
                                     <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Documents</th>
                                     <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">Actions</th>
@@ -100,7 +100,7 @@ export default async function AssignedClientsPage() {
                                                             latestApp?.status === "IN_REVIEW" ? "bg-yellow-100 text-yellow-700 border border-yellow-200" :
                                                                 latestApp ? "bg-blue-100 text-blue-700 border border-blue-200" : "bg-gray-100 text-gray-500 border border-gray-200"
                                                     }`}>
-                                                    {latestApp ? latestApp.status.replace(/_/g, " ") : "No Application"}
+                                                    {latestApp ? latestApp.status.replace(/_/g, " ") : "No Procedure"}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-5">

@@ -51,7 +51,7 @@ export async function getApplicationDetails(applicationId: string) {
             }
         }) as any;
 
-        if (!app) return { error: "Application not found." };
+        if (!app) return { error: "Procedure not found." };
         if (app.agencyId !== agencyId) return { error: "This application does not belong to your agency." };
 
         const mappedApp = {
@@ -75,7 +75,7 @@ export async function unlockApplication(applicationId: string) {
         const agencyId = (session.user as any).agencyId;
 
         const existing = await prisma.application.findUnique({ where: { id: applicationId } });
-        if (!existing) return { error: "Application not found." };
+        if (!existing) return { error: "Procedure not found." };
         if (existing.agencyId !== agencyId) return { error: "This application does not belong to your agency." };
 
         await prisma.application.update({

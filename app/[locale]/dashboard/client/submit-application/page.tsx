@@ -62,12 +62,12 @@ export default function SubmitApplicationPage() {
                 <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center">
                     <CheckCircle2 className="h-10 w-10 text-green-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Application Submitted!</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Procedure Submitted!</h2>
                 <p className="text-gray-500 max-w-md">
-                    Your application has been successfully submitted and is now pending review. You can track its status in the "My Applications" section.
+                    Your procedure has been successfully submitted and is now pending review. You can track its status in the "My Procedures" section.
                 </p>
                 <Button onClick={() => router.push("/dashboard/client/applications")}>
-                    View Applications
+                    View Procedures
                 </Button>
             </div>
         );
@@ -76,20 +76,20 @@ export default function SubmitApplicationPage() {
     return (
         <div className="max-w-3xl mx-auto space-y-6">
             <div>
-                <h1 className="text-3xl font-bold text-[var(--color-primary)]">Submit New Application</h1>
+                <h1 className="text-3xl font-bold text-[var(--color-primary)]">Submit New Procedure</h1>
                 <p className="text-gray-500">Fill in the details below to start your immigration process.</p>
             </div>
 
             <Card>
                 <form onSubmit={handleSubmit}>
                     <CardHeader>
-                        <CardTitle>Application Details</CardTitle>
+                        <CardTitle>Procedure Details</CardTitle>
                         <CardDescription>All fields marked with * are required.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="type">Application Type *</Label>
+                                <Label htmlFor="type">Procedure Type *</Label>
                                 <select
                                     id="type"
                                     name="type"
@@ -119,7 +119,7 @@ export default function SubmitApplicationPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="title">Application Title *</Label>
+                            <Label htmlFor="title">Procedure Title *</Label>
                             <Input id="title" name="title" placeholder="e.g., Work Visa for Canada" required />
                         </div>
 
@@ -204,7 +204,7 @@ export default function SubmitApplicationPage() {
                         <div className="space-x-2">
                             <Button type="button" variant="outline">Save as Draft</Button>
                             <Button type="submit" disabled={loading}>
-                                {loading ? "Submitting..." : "Submit Application"}
+                                {loading ? "Submitting..." : "Submit Procedure"}
                             </Button>
                         </div>
                     </CardFooter>

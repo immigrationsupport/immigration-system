@@ -61,14 +61,14 @@
       "client": {
         "atleClient": "ATLE Client",
         "overview": "Dashboard",
-        "applications": "Applications",
+        "applications": "Procedures",
         "messages": "Official Messages",
         "profile": "Profile"
       },
       "agent": {
         "atleAgent": "ATLE Agent",
         "overview": "Overview",
-        "applications": "All Applications",
+        "applications": "All Procedures",
         "profile": "Profile",
         "clients": "Clients"
       },
@@ -77,7 +77,7 @@
         "overview": "Dashboard",
         "clients": "Clients",
         "agents": "Agents",
-        "applications": "Applications",
+        "applications": "Procedures",
         "documentsMonitoring": "Documents Monitoring",
         "auditLogs": "Audit Logs"
       }
@@ -102,12 +102,12 @@
       "title": "Core Immigration Services",
       "subtitle": "Dedicated solutions tailored for your unique immigration pathway.",
       "visaApplication": {
-        "title": "Visa Application",
+        "title": "Visa Procedure",
         "description": "Comprehensive support for tourist, work, student, and specialized visa categories worldwide."
       },
       "permanentResidency": {
         "title": "Permanent Residency",
-        "description": "Strategic planning and complete application management for pathways to permanent residency statuses."
+        "description": "Strategic planning and complete procedure management for pathways to permanent residency statuses."
       },
       "documentProcessing": {
         "title": "Document Processing",
@@ -120,7 +120,7 @@
       "subtitle": "We combine years of legal expertise with a commitment to client success, ensuring your case is handled with the highest level of professionalism and diligence.",
       "provenTrackRecord": {
         "title": "Proven Track Record",
-        "description": "Thousands of successful applications and satisfied clients globally."
+        "description": "Thousands of successful procedures and satisfied clients globally."
       },
       "secureConfidential": {
         "title": "Secure & Confidential",
@@ -143,27 +143,27 @@
     "workVisa": {
       "title": "Work Visa Processing",
       "description": "End-to-end assistance for obtaining specialized work visas (H-1B, L-1, O-1, etc.) enabling professionals to join global workforces legally.",
-      "startApplication": "Start Application"
+      "startApplication": "Start Procedure"
     },
     "studentVisa": {
       "title": "Student Visa Assistance",
       "description": "Complete documentation processing for international educational enrollment, ensuring full compliance with academic immigration protocols.",
-      "startApplication": "Start Application"
+      "startApplication": "Start Procedure"
     },
     "permanentResidency": {
       "title": "Permanent Residency",
-      "description": "Strategic long-term planning, file preparation, and status adjustment applications to secure permanent resident status.",
-      "startApplication": "Start Application"
+      "description": "Strategic long-term planning, file preparation, and status adjustment procedures to secure permanent resident status.",
+      "startApplication": "Start Procedure"
     },
     "citizenship": {
-      "title": "Citizenship Application",
+      "title": "Citizenship Procedure",
       "description": "Guided preparation for naturalization processes, documentation review, and exam coordination.",
-      "startApplication": "Start Application"
+      "startApplication": "Start Procedure"
     },
     "businessImmigration": {
       "title": "Business Immigration",
       "description": "Corporate-level advisory for establishing new commercial enterprises, investor visas (EB-5, E-2), and multi-national executive relocations.",
-      "startApplication": "Start Application"
+      "startApplication": "Start Procedure"
     },
     "customCaseReview": {
       "title": "Custom Case Review",
@@ -178,10 +178,10 @@
     "missionText1": "Founded with the goal of providing transparent, ethical, and efficient immigration guidance, ATLE Immigration has developed an elite practice focusing on the precise processing of legal visas, residency statuses, and corporate immigration structures.",
     "missionText2": "Our firm operates at the intersection of international law and local regulations, guaranteeing that our clients' filings meet strict governmental criteria. We pride ourselves on confidentiality, reducing risk, and eliminating the administrative burdens common to complex immigration pipelines.",
     "consultantsTitle": "Professional Consultants",
-    "consultantsText": "Our network consists of certified immigration authorities, legal strategists, and former consulate officers. By employing individuals with deep institutional knowledge, we provide our clients with accurate foresight regarding application timelines, documentation requirements, and potential legal hurdles. Every case is assigned to a specialized senior consultant ensuring customized, dedicated representation.",
+    "consultantsText": "Our network consists of certified immigration authorities, legal strategists, and former consulate officers. By employing individuals with deep institutional knowledge, we provide our clients with accurate foresight regarding procedure timelines, documentation requirements, and potential legal hurdles. Every case is assigned to a specialized senior consultant ensuring customized, dedicated representation.",
     "metricsTitle": "Agency Performance Metrics",
     "yearsOfExperience": "Years of Experience",
-    "applicationsProcessed": "Applications Processed",
+    "applicationsProcessed": "Procedures Processed",
     "successRate": "Success Rate"
   },
   "contact": {
@@ -273,17 +273,17 @@
         "actionRequired": "Action Required",
         "revisionNeeded": "Revision Needed"
       },
-      "activeApplications": "Active Applications",
+      "activeApplications": "Active Procedures",
       "pathway": "Pathway / Country",
       "type": "Type",
       "lastUpdate": "Last Update",
       "status": "Status",
       "action": "Action",
       "pendingApprovalTitle": "Account Awaiting Validation",
-      "pendingApprovalDesc": "To get started, please contact the agency to open your file and begin your application process.",
+      "pendingApprovalDesc": "To get started, please contact the agency to open your file and begin your procedure process.",
       "contactAgencyNow": "Contact Agency Now",
-      "viewApplication": "View Application",
-      "noApplications": "No applications found.",
+      "viewApplication": "View Procedure",
+      "noApplications": "No procedures found.",
       "tableHeaders": {
         "country": "Country",
         "currentStep": "Current Step",
@@ -305,7 +305,7 @@
         "LANGUAGE_TEST_REGISTRATION": "Language Test Reg.",
         "LANGUAGE_TEST_RESULTS": "Language Test Results",
         "PROFILE_CREATION": "Profile Creation",
-        "APPLICATION_SUBMISSION": "Application Submission",
+        "APPLICATION_SUBMISSION": "Procedure Submission",
         "MEDICAL_EXAMINATION": "Medical Examination",
         "PASSPORT_SUBMISSION": "Passport & Visa"
       }
@@ -331,13 +331,13 @@
     },
     "adminDashboard": {
       "title": "Admin Dashboard",
-      "pipeline": "Application Pipeline",
+      "pipeline": "Procedure Pipeline",
       "liveActivity": "Live Activity Feed",
       "noActivityPulse": "No recent activity pulse detected.",
       "stats": {
         "totalClients": "Total Clients",
         "totalAgents": "Total Agents",
-        "liveApplications": "Live Applications"
+        "liveApplications": "Live Procedures"
       },
       "statuses": {
         "pendingReview": "Pending Review",
@@ -346,21 +346,21 @@
         "rejected": "Rejected"
       },
       "overview": "Overview",
-      "activeApplications": "Active Applications",
+      "activeApplications": "Active Procedures",
       "quickActions": "Quick Actions"
     }
   },
   "applications": {
-    "myApplications": "My Applications",
-    "subtitle": "Track your applications and procedures across different countries.",
-    "newApplication": "New Application",
-    "noApplications": "No applications found",
-    "noApplicationsDesc": "Start your journey by creating your first application for a destination country.",
+    "myApplications": "My Procedures",
+    "subtitle": "Track your procedures and procedures across different countries.",
+    "newApplication": "New Procedure",
+    "noApplications": "No procedures found",
+    "noApplicationsDesc": "Start your journey by creating your first procedure for a destination country.",
     "destinationCountry": "Destination Country",
     "activeProcedures": "Active Procedures",
     "addPathway": "Add Pathway",
     "viewDetails": "View Details",
-    "applicationDetails": "Application Details",
+    "applicationDetails": "Procedure Details",
     "globalStatus": "Global Status",
     "procedures": "Procedures",
     "procedure": "Procedure",
@@ -372,7 +372,7 @@
     "awaitingAdminValidationTooltip": "Awaiting admin validation",
     "awaitingValidation": "Awaiting Validation",
     "getStarted": "Get Started",
-    "manageApplication": "Manage Application",
+    "manageApplication": "Manage Procedure",
     "newJourney": "New Journey",
     "addAnotherDestination": "Add another destination",
     "types": {
@@ -380,7 +380,7 @@
       "WORK": "Work Permit",
       "STUDY": "Study Visa",
       "SCHOLARSHIP": "Scholarship",
-      "GENERAL": "General Application"
+      "GENERAL": "General Procedure"
     },
     "statuses": {
       "PENDING": "Pending",
@@ -396,7 +396,7 @@
     },
     "stepper": {
       "processReliability": "Process Reliability",
-      "applicationStatus": "Application Status",
+      "applicationStatus": "Procedure Status",
       "milestonesValidated": "{completed} of {total} Milestones Validated",
       "headers": {
         "stepNumber": "Step Number",
@@ -411,7 +411,7 @@
         "pending": "Pending"
       },
       "locked": "Locked",
-      "legacyApplication": "Legacy Application",
+      "legacyApplication": "Legacy Procedure",
       "actionDescriptions": {
         "feePayment": "Upload Payment Receipt",
         "medicalExam": "Upload Medical Report",
@@ -482,10 +482,10 @@
     },
     "detail": {
       "accessRestricted": "Access Restricted",
-      "accessRestrictedDesc": "This application could not be found or you do not have permission to view it.",
+      "accessRestrictedDesc": "This procedure could not be found or you do not have permission to view it.",
       "returnToDashboard": "Return to Dashboard",
       "backToOverview": "Back to Overview",
-      "applicationTracking": "Application Tracking",
+      "applicationTracking": "Procedure Tracking",
       "journeySuffix": "Journey",
       "currentPathway": "Current Pathway",
       "accountAwaitingApproval": "Account Awaiting Approval",
@@ -544,7 +544,7 @@
   },
   "messages": {
     "officialNotifications": "Official Notifications",
-    "subtitle": "Formal communications regarding your immigration status and applications.",
+    "subtitle": "Formal communications regarding your immigration status and procedures.",
     "messages": "Messages",
     "from": "From",
     "subject": "Subject",
@@ -552,7 +552,7 @@
     "inboxClear": "Your inbox is clear",
     "noMessagesDesc": "Any official announcements or document requests from your agent will appear here.",
     "professionalNotice": "Professional Notice",
-    "noticText": "These messages are considered official legal communications. Please respond to any requests for information promptly to avoid delays in your application processing.",
+    "noticText": "These messages are considered official legal communications. Please respond to any requests for information promptly to avoid delays in your procedure processing.",
     "communicationChannel": "Communication Channel",
     "sendMessage": "Send Message",
     "typeMessage": "Type your message...",
@@ -564,7 +564,7 @@
     "activeClients": "Active Clients",
     "clientRoster": "Client Roster",
     "clientDetail": "Client Detail",
-    "applicationID": "Application ID",
+    "applicationID": "Procedure ID",
     "documents": "Documents",
     "noClientsAssigned": "No clients assigned yet",
     "files": "files",
@@ -573,8 +573,8 @@
   },
   "agents": {
     "agentWorkspace": "Agent Workspace",
-    "manageUpdate": "Manage & Update Assigned Applications",
-    "noAssignedApplications": "No assigned applications found.",
+    "manageUpdate": "Manage & Update Assigned Procedures",
+    "noAssignedApplications": "No assigned procedures found.",
     "submitDocuments": "Submit Documents",
     "updateStatus": "Update Status",
     "pendingReview": "Pending Review",
@@ -596,15 +596,15 @@
     "actionHistory": "Action History & Audit"
   },
   "applicationManagement": {
-    "title": "Application Management",
+    "title": "Procedure Management",
     "subtitle": "Supervise and manage all client immigration processes.",
-    "totalApplications": "Total Applications",
+    "totalApplications": "Total Procedures",
     "countryDestination": "Country Destination",
     "applicantAttempts": "Applicant Attempts",
-    "applicationID": "Application ID",
+    "applicationID": "Procedure ID",
     "lastModified": "Last Modified",
     "deepDetails": "Retrieving Deep Details...",
-    "applicationDetails": "Application Details",
+    "applicationDetails": "Procedure Details",
     "clientInformation": "Client Information",
     "agentInformation": "Agent Information",
     "procedures": "Procedures",

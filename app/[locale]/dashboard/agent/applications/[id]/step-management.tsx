@@ -93,7 +93,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
             {/* Global Status Control */}
             <div className="bg-white p-6 border border-gray-200 shadow-sm flex flex-col md:flex-row items-center gap-6 justify-between">
                 <div>
-                    <h3 className="text-lg font-bold text-gray-900">Update Application Status</h3>
+                    <h3 className="text-lg font-bold text-gray-900">Update Procedure Status</h3>
                     <p className="text-sm text-gray-500">Global status control</p>
                 </div>
 
@@ -187,7 +187,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                                  )}
                                              </div>
                                          ) : (
-                                             <span className="text-xs text-gray-400 italic font-bold">Legacy Application</span>
+                                             <span className="text-xs text-gray-400 italic font-bold">Legacy Procedure</span>
                                          )}
 
                                          {/* Step 5 Specialized Input */}
