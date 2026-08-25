@@ -21,7 +21,7 @@ export default async function ApplicationDetailsPage({ params }: { params: Promi
         where: { id: id },
         include: {
             steps: {
-                include: { Document: true },
+                include: { Document: true, subSteps: { orderBy: { order: "asc" } } },
                 orderBy: { order: "asc" }
             }
         }
@@ -56,7 +56,7 @@ export default async function ApplicationDetailsPage({ params }: { params: Promi
                 where: { id: id },
                 include: {
                     steps: {
-                        include: { Document: true },
+                include: { Document: true, subSteps: { orderBy: { order: "asc" } } },
                         orderBy: { order: "asc" }
                     }
                 }

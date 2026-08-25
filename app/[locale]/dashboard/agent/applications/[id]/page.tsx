@@ -21,7 +21,7 @@ export default async function AgentApplicationManagementPage({ params }: { param
         include: {
             client: { select: { name: true, email: true, id: true } },
             steps: {
-                include: { Document: true },
+                include: { Document: true, subSteps: { orderBy: { order: "asc" } } },
                 orderBy: { order: "asc" }
             }
         }
@@ -57,7 +57,7 @@ export default async function AgentApplicationManagementPage({ params }: { param
                 include: {
                     client: { select: { name: true, email: true, id: true } },
                     steps: {
-                        include: { Document: true },
+                include: { Document: true, subSteps: { orderBy: { order: "asc" } } },
                         orderBy: { order: "asc" }
                     }
                 }

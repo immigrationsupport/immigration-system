@@ -13,10 +13,10 @@ interface ApplicationStepperProps {
 
 /**
  * Read-only for the client. They can see exactly where their case stands —
- * step by step, with the documents their agent has already attached — but
- * cannot upload, submit, or otherwise act on anything. Every action here
- * (uploading documents, changing a step's status) is now handled
- * exclusively by their agent, on the agent's own step-management screen.
+ * step by step — but cannot upload, submit, or otherwise act on anything.
+ * Every action here (uploading documents, changing a step's status) is
+ * handled exclusively by their agent, on the agent's own step-management
+ * screen.
  */
 export default function ApplicationStepper({ steps, applicationId, country }: ApplicationStepperProps) {
     const t = useTranslations("applications.stepper");
@@ -62,7 +62,6 @@ export default function ApplicationStepper({ steps, applicationId, country }: Ap
                             <th className="p-4">{t("headers.stepName")}</th>
                             <th className="p-4">{t("headers.status")}</th>
                             <th className="p-4">{t("headers.lastUpdated")}</th>
-                            <th className="p-4">Documents</th>
                         </tr>
                     </thead>
                     <tbody className="text-sm">
@@ -83,7 +82,8 @@ export default function ApplicationStepper({ steps, applicationId, country }: Ap
                             }
 
                             return (
-                                <tr key={step.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                                <React.Fragment key={step.id}>
+                                <tr className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                                     <td className="p-4 text-gray-400 font-black">{idx + 1}</td>
                                     <td className="p-4 font-bold text-gray-900">{label}</td>
                                     <td className="p-4">
@@ -104,75 +104,33 @@ export default function ApplicationStepper({ steps, applicationId, country }: Ap
                                     <td className="p-4 text-gray-500 font-medium text-xs">
                                         {new Date(step.updatedAt).toLocaleDateString()}
                                     </td>
-                                    <td className="p-4">
-                                        {step.Document && step.Document.length > 0 ? (
-                                            <div className="flex flex-wrap gap-2">
-                                                {step.Document.map((doc: any) => (
-                                                    <button
-                                                        key={doc.id}
-                                                        onClick={() => setViewingDoc({ url: doc.fileUrl, name: doc.name })}
-                                                        className="inline-flex items-center gap-1.5 bg-gray-50 hover:bg-blue-50 text-[10px] font-black text-blue-600 uppercase tracking-widest px-3 py-1.5 rounded-xl transition-all border border-transparent hover:border-blue-100"
-                                                    >
-                                                        <FileText size={12} /> {doc.name.replace("_", " ")}
-                                                    </button>
+                                </tr>
+                                {step.subSteps && step.subSteps.length > 0 && (
+                                    <tr className="border-b border-gray-100 bg-gray-50/40">
+                                        <td></td>
+                                        <td colSpan={3} className="p-4 pt-2">
+                                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2">Checklist</span>
+                                            <div className="flex flex-col gap-1.5">
+                                                {step.subSteps.map((sub: any) => (
+                                                    <div key={sub.id} className="flex items-center gap-2 text-xs font-semibold text-gray-600">
+                                                        {sub.isCompleted ? (
+                                                            <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                                                        ) : (
+                                                            <Lock size={14} className="text-gray-300 shrink-0" />
+                                                        )}
+                                                        <span className={sub.isCompleted ? "line-through text-gray-400" : ""}>{sub.label}</span>
+                                                    </div>
                                                 ))}
                                             </div>
-                                        ) : (
-                                            <span className="text-gray-300 text-xs italic">—</span>
-                                        )}
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
+                                )}
+                                </React.Fragment>
                             );
                         })}
                     </tbody>
                 </table>
             </div>
-
-            {/* Document Viewer Overlay */}
-            {viewingDoc && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="bg-[#1a1a1a] w-full max-w-6xl h-[90vh] rounded-3xl flex flex-col overflow-hidden shadow-2xl relative">
-                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
-                            <div className="flex items-center gap-3">
-                                <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
-                                    <FileText size={18} />
-                                </div>
-                                <h3 className="text-white font-bold truncate max-w-md">{viewingDoc?.name}</h3>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <a
-                                    href={viewingDoc?.url}
-                                    download
-                                    className="h-10 px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center gap-2 text-sm font-bold transition-all"
-                                >
-                                    <Download size={16} /> Download
-                                </a>
-                                <button
-                                    onClick={() => setViewingDoc(null)}
-                                    className="h-10 w-10 text-white hover:bg-white/10 rounded-xl flex items-center justify-center"
-                                >
-                                    <X size={20} />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="flex-1 bg-[#121212] overflow-hidden relative flex items-center justify-center p-4">
-                            {/\.(jpe?g|png|gif|webp)$/i.test(viewingDoc?.url || "") ? (
-                                <img
-                                    src={viewingDoc?.url}
-                                    alt={viewingDoc?.name}
-                                    className="max-h-full max-w-full object-contain rounded-lg shadow-2xl"
-                                />
-                            ) : (
-                                <iframe
-                                    src={`${viewingDoc?.url}#toolbar=1&navpanes=0&view=FitH`}
-                                    className="w-full h-full border-none"
-                                    title="Document Viewer"
-                                />
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

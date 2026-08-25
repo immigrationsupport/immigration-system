@@ -33,7 +33,17 @@ export async function createTemplateAction(name: string, description: string) {
             data: {
                 agencyId: ctx.agencyId,
                 name: name.trim(),
-                description: description?.trim() || null
+                description: description?.trim() || null,
+                // Pre-fill the 11 standard steps so the admin edits from a
+                // useful starting point instead of a blank page — they can
+                // still rename, reorder, delete, or add to any of these.
+                steps: {
+                    create: Object.entries(STEP_LABELS).map(([type, label], index) => ({
+                        type: type as ProcedureType,
+                        label,
+                        order: index
+                    }))
+                }
             }
         });
 
