@@ -114,6 +114,11 @@ export default async function proxy(request: NextRequest) {
         url.pathname = `/dashboard`;
         return NextResponse.redirect(url);
     }
+    if ((userRole === "AGENT" || userRole === "ADMIN") && pathname === barePathname && !isOutsideLocaleTree) {
+        url.pathname = `/fr${barePathname}`;
+        return NextResponse.redirect(url);
+    }
+
 
     // All auth checks passed — let next-intl finalize locale routing
     // (skip for /admin and /super-admin, which aren't part of the [locale] tree)

@@ -29,19 +29,44 @@ export async function createTemplateAction(name: string, description: string) {
     if (!name || !name.trim()) return { error: "Give this workflow a name." };
 
     try {
+        // Clone the agency's current "Default" workflow as the starting
+        // point for every new one — so if the admin edits Default (adds,
+        // removes, or renames steps), all workflows created afterwards
+        // pick up that change automatically. Falls back to the built-in
+        // 11-step catalog only if no "Default" workflow exists at all
+        // (e.g. it was renamed or deleted).
+        const defaultTemplate = await prisma.applicationTemplate.findFirst({
+            where: { agencyId: ctx.agencyId, name: "Default" }
+        });
+
+        const seedSteps = defaultTemplate
+            ? await getTemplateSteps(defaultTemplate.id)
+            : Object.entries(STEP_LABELS).map(([type, label], index) => ({
+                  type: type as ProcedureType,
+                  label,
+                  description: null as string | null,
+                  order: index,
+                  subSteps: [] as { label: string; description: string | null; order: number }[]
+              }));
+
         const template = await prisma.applicationTemplate.create({
             data: {
                 agencyId: ctx.agencyId,
                 name: name.trim(),
                 description: description?.trim() || null,
-                // Pre-fill the 11 standard steps so the admin edits from a
-                // useful starting point instead of a blank page — they can
-                // still rename, reorder, delete, or add to any of these.
                 steps: {
-                    create: Object.entries(STEP_LABELS).map(([type, label], index) => ({
-                        type: type as ProcedureType,
-                        label,
-                        order: index
+                    create: seedSteps.map((s, index) => ({
+                        type: s.type,
+                        label: s.label,
+                        description: s.description,
+                        order: index,
+                        subSteps: {
+                            create: s.subSteps.map((sub, subIndex) => ({
+                                label: sub.label,
+                                description: sub.description,
+                                order: subIndex
+                            }))
+                        }
                     }))
                 }
             }
