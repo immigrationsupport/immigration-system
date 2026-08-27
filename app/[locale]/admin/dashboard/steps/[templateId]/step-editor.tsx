@@ -14,7 +14,9 @@ import {
     ChevronDown,
     ChevronRight,
     AlertCircle,
-    ListTree
+    ListTree,
+    FileCheck2,
+    X
 } from "lucide-react";
 import { toast } from "sonner";
 import { saveTemplateStepsAction } from "../actions";
@@ -35,6 +37,7 @@ interface StepRow {
     isActive: boolean;
     expanded: boolean;
     subSteps: SubStepRow[];
+    requiredDocuments: string[];
 }
 
 function makeKey() {
@@ -53,7 +56,8 @@ function toStepRows(steps: StepDefinition[]): StepRow[] {
             key: makeKey(),
             label: sub.label,
             description: sub.description || ""
-        }))
+        })),
+        requiredDocuments: s.requiredDocuments || []
     }));
 }
 
@@ -85,12 +89,32 @@ export default function StepEditor({
     function addStep() {
         setSteps((prev) => [
             ...prev,
-            { key: makeKey(), type: "", label: "", description: "", isActive: true, expanded: true, subSteps: [] }
+            { key: makeKey(), type: "", label: "", description: "", isActive: true, expanded: true, subSteps: [], requiredDocuments: [] }
         ]);
     }
 
     function removeStep(index: number) {
         setSteps((prev) => prev.filter((_, i) => i !== index));
+    }
+
+    function addRequiredDocument(stepIndex: number, name: string) {
+        const trimmed = name.trim();
+        if (!trimmed) return;
+        setSteps((prev) =>
+            prev.map((s, i) =>
+                i === stepIndex && !s.requiredDocuments.includes(trimmed)
+                    ? { ...s, requiredDocuments: [...s.requiredDocuments, trimmed] }
+                    : s
+            )
+        );
+    }
+
+    function removeRequiredDocument(stepIndex: number, docIndex: number) {
+        setSteps((prev) =>
+            prev.map((s, i) =>
+                i === stepIndex ? { ...s, requiredDocuments: s.requiredDocuments.filter((_, j) => j !== docIndex) } : s
+            )
+        );
     }
 
     function addSubStep(stepIndex: number) {
@@ -140,7 +164,8 @@ export default function StepEditor({
                     label: s.label,
                     description: s.description,
                     isActive: s.isActive,
-                    subSteps: s.subSteps.map((sub) => ({ label: sub.label, description: sub.description }))
+                    subSteps: s.subSteps.map((sub) => ({ label: sub.label, description: sub.description })),
+                    requiredDocuments: s.requiredDocuments
                 }))
             );
             if (result?.error) {
@@ -220,6 +245,36 @@ export default function StepEditor({
                                 placeholder="Instructions shown to agents/clients for this step (optional)"
                                 className="ml-8 w-[calc(100%-2rem)] text-sm min-h-[50px]"
                             />
+
+                            <div className="ml-8 w-[calc(100%-2rem)] pt-1">
+                                <p className="text-[11px] font-black uppercase tracking-wide text-gray-300 flex items-center gap-1.5 mb-1.5">
+                                    <FileCheck2 className="h-3.5 w-3.5" /> Required documents
+                                </p>
+                                <div className="flex flex-wrap gap-1.5 mb-2">
+                                    {step.requiredDocuments.map((doc, docIndex) => (
+                                        <span key={docIndex} className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                                            {doc}
+                                            <button type="button" onClick={() => removeRequiredDocument(index, docIndex)} className="text-blue-300 hover:text-red-600">
+                                                <X className="h-3 w-3" />
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                                <Input
+                                    placeholder="Type a document name and press Enter (e.g. Passport)"
+                                    className="text-sm h-9"
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            addRequiredDocument(index, e.currentTarget.value);
+                                            e.currentTarget.value = "";
+                                        }
+                                    }}
+                                />
+                                <p className="text-[10px] text-gray-400 mt-1">
+                                    Shown to the agent as a checklist reminder on this step — it doesn't block uploads of other document types.
+                                </p>
+                            </div>
 
                             {step.expanded && (
                                 <div className="ml-8 pl-4 border-l-2 border-gray-100 space-y-2 pt-1">

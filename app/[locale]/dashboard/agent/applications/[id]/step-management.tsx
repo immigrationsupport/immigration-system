@@ -1,19 +1,68 @@
 "use client";
 
 import React, { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, FileCheck2, ChevronDown } from "lucide-react";
 import { STEP_LABELS } from "@/lib/steps";
 import { updateStepAction, updateApplicationStatusAction, addDocumentAction, deleteDocumentAction, toggleSubStepAction } from "../actions";
 import { useParams, useRouter } from "next/navigation";
+import { UploadButton } from "@/src/utils/uploadthing";
+
+// Same document types the client picks from when uploading — kept here so
+// the agent/admin can label an upload the same way the client would.
+const DOCUMENT_TYPE_OPTIONS: { value: string; label: string }[] = [
+    { value: "PASSPORT", label: "Passport" },
+    { value: "PASSPORT_PHOTO", label: "Passport Photo" },
+    { value: "BIRTH_CERTIFICATE", label: "Birth Certificate" },
+    { value: "ID_CARD", label: "National ID Card" },
+    { value: "DIPLOMA", label: "Diploma / Degree" },
+    { value: "TRANSCRIPT", label: "Academic Transcript" },
+    { value: "CV", label: "CV / Resume" },
+    { value: "WORK_CERTIFICATE", label: "Work Certificate" },
+    { value: "LANGUAGE_REGISTRATION", label: "Language Test Registration" },
+    { value: "LANGUAGE_RESULT", label: "Language Test Result" },
+    { value: "MEDICAL", label: "Medical Examination" },
+    { value: "POLICE_CLEARANCE", label: "Police Clearance" },
+    { value: "VISA_APPROVAL", label: "Visa Approval" },
+    { value: "OTHER", label: "Other Document" }
+];
+
+// Built-in step types where the whole point of the step IS getting a
+// document from the client (a collected ID, a test result certificate, a
+// medical certificate, a passport/visa copy). Registration, Contract
+// Signing, Fee Payment, Application Submission, Profile Creation, and
+// Language Test Registration are actions/status changes, not document
+// hand-offs, so they don't get an upload control by default.
+const DOCUMENT_BEARING_STEP_TYPES = [
+    "DOCUMENT_COLLECTION",
+    "LANGUAGE_TEST_RESULTS",
+    "MEDICAL_EXAMINATION",
+    "PASSPORT_SUBMISSION"
+];
+
+// A step gets the upload control only if it's one of the built-in
+// document-bearing types above, OR the admin has explicitly listed
+// required documents for it (custom steps, or a built-in step the admin
+// decided also needs proof — e.g. Diploma Equivalence).
+function stepNeedsDocuments(step: any): boolean {
+    if (step.type && DOCUMENT_BEARING_STEP_TYPES.includes(step.type)) return true;
+    return Array.isArray(step.requiredDocuments) && step.requiredDocuments.length > 0;
+}
 
 interface StepManagementProps {
     applicationId: string;
     currentStatus: string;
     steps: any[];
     country: string;
+    // Called after any successful mutation (upload, delete, status change,
+    // sub-step toggle...) in addition to router.refresh(). Server-rendered
+    // pages don't need this — router.refresh() alone re-fetches their data.
+    // But client-fetched views (e.g. the admin's details modal, which loads
+    // its own data in a useEffect) need this to actually see the change
+    // without the user manually reloading the page.
+    onRefresh?: () => void;
 }
 
-export default function StepManagement({ applicationId, currentStatus, steps, country }: StepManagementProps) {
+export default function StepManagement({ applicationId, currentStatus, steps, country, onRefresh }: StepManagementProps) {
     const router = useRouter();
     const params = useParams();
     const locale = (params?.locale as string) || "en-US";
@@ -28,31 +77,33 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
     const [successModal, setSuccessModal] = useState<string | null>(null);
     const [uploadingStepId, setUploadingStepId] = useState<string | null>(null);
     const [loadingSubStepId, setLoadingSubStepId] = useState<string | null>(null);
+    // Which document type is currently selected per step, before upload.
+    const [docType, setDocType] = useState<Record<string, string>>({});
+
+    // Refreshes both the server-rendered route (if any) and the caller's
+    // own data source (if it passed one) — see onRefresh above.
+    const refreshAll = () => {
+        router.refresh();
+        onRefresh?.();
+    };
 
     const handleToggleSubStep = async (subStepId: string, isCompleted: boolean) => {
         setLoadingSubStepId(subStepId);
         const res = await toggleSubStepAction(subStepId, isCompleted);
         setLoadingSubStepId(null);
         if (res.error) alert(res.error);
-        else router.refresh();
+        else refreshAll();
     };
 
-    const handleFileUpload = async (stepId: string, file: File) => {
-        setUploadingStepId(stepId);
+    // Called once UploadThing has finished hosting the file — we just save
+    // the resulting URL against this step, labeled with the chosen document type.
+    const handleUploadComplete = async (stepId: string, file: { url: string; name: string }) => {
         try {
-            const formData = new FormData();
-            formData.append("file", file);
-            const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-            const uploadData = await uploadRes.json();
-
-            if (!uploadRes.ok) {
-                alert(uploadData.error || "Upload failed.");
-                return;
-            }
-
-            const res = await addDocumentAction(stepId, file.name, uploadData.url);
+            const type = docType[stepId] || "OTHER";
+            const label = DOCUMENT_TYPE_OPTIONS.find((o) => o.value === type)?.label || file.name;
+            const res = await addDocumentAction(stepId, label, file.url, type);
             if (res.error) alert(res.error);
-            else router.refresh();
+            else refreshAll();
         } catch (e) {
             alert("Upload failed. Please try again.");
         } finally {
@@ -64,7 +115,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
         if (!confirm("Remove this document?")) return;
         const res = await deleteDocumentAction(documentId);
         if (res.error) alert(res.error);
-        else router.refresh();
+        else refreshAll();
     };
 
     // Sort steps by the order they were created with (matches the agency's
@@ -76,7 +127,10 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
         const res = await updateApplicationStatusAction(applicationId, status);
         setLoadingAppStatus(false);
         if (res.error) alert(res.error);
-        else setAppStatus(status);
+        else {
+            setAppStatus(status);
+            onRefresh?.();
+        }
     };
 
     const handleUpdateStep = async (stepId: string, data: any) => {
@@ -84,7 +138,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
         const res = await updateStepAction(stepId, data);
         setLoadingStepId(null);
         if (res.error) alert(res.error);
-        else router.refresh();
+        else refreshAll();
     };
 
     return (
@@ -209,6 +263,51 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                              </div>
                                          )}
 
+                                         {/* Language Test Registration - test type selector */}
+                                         {step.type === "LANGUAGE_TEST_REGISTRATION" && dbStep && (
+                                             <div className="mt-4 p-4 bg-blue-50/50 border border-blue-100 rounded-xl space-y-3">
+                                                 <p className="text-[10px] font-black text-blue-800 uppercase tracking-widest">Language Test</p>
+                                                 <select
+                                                     onChange={(e) => handleUpdateStep(step.id, { languageTest: e.target.value })}
+                                                     className="w-full text-xs font-bold p-2 border border-blue-200 rounded-lg bg-white"
+                                                     defaultValue={step.description?.match(/Test: ([^|]+)/)?.[1]?.trim() || ""}
+                                                 >
+                                                     <option value="">Select Test</option>
+                                                     <option value="TCF">TCF</option>
+                                                     <option value="TEF">TEF</option>
+                                                     <option value="IELTS">IELTS</option>
+                                                 </select>
+                                             </div>
+                                         )}
+
+                                         {/* Required documents checklist — set by the admin per workflow, purely informational */}
+                                         {step.requiredDocuments && step.requiredDocuments.length > 0 && (
+                                             <div className="mt-4 p-4 bg-amber-50/60 border border-amber-100 rounded-xl space-y-2">
+                                                 <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest flex items-center gap-1.5">
+                                                     <FileCheck2 className="h-3.5 w-3.5" /> Documents needed for this step
+                                                 </span>
+                                                 <div className="flex flex-wrap gap-1.5">
+                                                     {step.requiredDocuments.map((docName: string, i: number) => {
+                                                         const isProvided = step.Document?.some((d: any) =>
+                                                             d.name.toLowerCase().includes(docName.toLowerCase())
+                                                         );
+                                                         return (
+                                                             <span
+                                                                 key={i}
+                                                                 className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full border ${
+                                                                     isProvided
+                                                                         ? "bg-green-50 border-green-200 text-green-700"
+                                                                         : "bg-white border-amber-200 text-amber-700"
+                                                                 }`}
+                                                             >
+                                                                 {docName}
+                                                             </span>
+                                                         );
+                                                     })}
+                                                 </div>
+                                             </div>
+                                         )}
+
                                          {/* View Documents */}
                                          {step.Document && step.Document.length > 0 && (
                                              <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl space-y-2">
@@ -255,26 +354,55 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                              </div>
                                          )}
 
-                                         {dbStep && (
-                                             <div className="mt-3">
-                                                 <label className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl cursor-pointer transition-all ${uploadingStepId === step.id ? "bg-gray-100 text-gray-400" : "bg-blue-50 text-blue-700 hover:bg-blue-100"}`}>
-                                                     {uploadingStepId === step.id ? (
-                                                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                                     ) : (
-                                                         <span>+ Upload Document</span>
+                                         {dbStep && stepNeedsDocuments(step) && (
+                                             <div className="mt-3 p-3 bg-gray-50 border border-gray-100 rounded-xl flex flex-wrap items-center gap-2">
+                                                 <div className="relative">
+                                                     <select
+                                                         value={docType[step.id] || "OTHER"}
+                                                         onChange={(e) => setDocType((prev) => ({ ...prev, [step.id]: e.target.value }))}
+                                                         className="appearance-none text-xs font-bold pl-3 pr-7 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 cursor-pointer"
+                                                     >
+                                                         {DOCUMENT_TYPE_OPTIONS.map((opt) => (
+                                                             <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                         ))}
+                                                     </select>
+                                                     <ChevronDown className="h-3 w-3 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                                 </div>
+
+                                                 <div className="relative">
+                                                     <div className={`inline-flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${uploadingStepId === step.id ? "bg-gray-100 text-gray-400" : "bg-blue-600 text-white hover:bg-blue-700"}`}>
+                                                         {uploadingStepId === step.id ? (
+                                                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                         ) : (
+                                                             <>
+                                                                 <Upload className="h-3.5 w-3.5" />
+                                                                 <span>Upload File</span>
+                                                             </>
+                                                         )}
+                                                     </div>
+                                                     {uploadingStepId !== step.id && (
+                                                         <div className="absolute inset-0 opacity-0">
+                                                             <UploadButton
+                                                                 endpoint="documentUploader"
+                                                                 appearance={{
+                                                                     button: "w-full h-full cursor-pointer",
+                                                                     container: "w-full h-full",
+                                                                     allowedContent: "hidden"
+                                                                 }}
+                                                                 onUploadBegin={() => setUploadingStepId(step.id)}
+                                                                 onClientUploadComplete={(res) => {
+                                                                     const file = res[0];
+                                                                     handleUploadComplete(step.id, file);
+                                                                 }}
+                                                                 onUploadError={(error: Error) => {
+                                                                     setUploadingStepId(null);
+                                                                     alert(`Upload error: ${error.message}`);
+                                                                 }}
+                                                             />
+                                                         </div>
                                                      )}
-                                                     <input
-                                                         type="file"
-                                                         accept=".pdf,.jpg,.jpeg,.png"
-                                                         className="hidden"
-                                                         disabled={uploadingStepId === step.id}
-                                                         onChange={(e) => {
-                                                             const file = e.target.files?.[0];
-                                                             if (file) handleFileUpload(step.id, file);
-                                                             e.target.value = "";
-                                                         }}
-                                                     />
-                                                 </label>
+                                                 </div>
+                                                 <span className="text-[10px] text-gray-400 font-semibold">PDF, JPG, PNG</span>
                                              </div>
                                          )}
 
@@ -330,7 +458,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                     else {
                                         setRequestModal(null);
                                         setRequestMsg("");
-                                        router.refresh();
+                                        refreshAll();
                                     }
                                 }}
                                 disabled={isSubmittingRes}

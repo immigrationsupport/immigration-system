@@ -83,7 +83,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-2xl w-full max-w-5xl shadow-2xl relative animate-in zoom-in-95 duration-200 my-auto">
+            <div className="bg-white rounded-2xl w-full max-w-7xl shadow-2xl relative animate-in zoom-in-95 duration-200 my-auto">
                 {/* Header */}
                 <div className="p-6 border-b sticky top-0 bg-white rounded-t-2xl z-10 flex justify-between items-center">
                     <div className="flex items-center gap-4">
@@ -182,6 +182,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                     currentStatus={data.status}
                                     steps={data.steps}
                                     country={data.country}
+                                    onRefresh={fetchDetails}
                                 />
                             </div>
                         </div>

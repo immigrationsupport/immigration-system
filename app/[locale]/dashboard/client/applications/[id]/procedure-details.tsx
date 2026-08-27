@@ -14,18 +14,13 @@ import {
     ChevronDown,
     ChevronUp,
     Paperclip,
-    Plus,
     Download,
     X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { submitProcedureAction, addDocumentAction, deleteDocumentAction } from "./actions";
-import { generateUploadDropzone } from "@uploadthing/react";
-import type { OurFileRouter } from "@/app/api/uploadthing/core";
-import { UploadButton } from "@/src/utils/uploadthing";
+import { submitProcedureAction } from "./actions";
 
-const UploadDropzone = generateUploadDropzone<OurFileRouter>();
 interface ProcedureDetailsProps {
     procedure: any;
 }
@@ -33,56 +28,12 @@ interface ProcedureDetailsProps {
 export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
     const [isExpanded, setIsExpanded] = useState(true);
     const [loading, setLoading] = useState(false);
-    const [uploading, setUploading] = useState(false);
-    const [uploadedFile, setUploadedFile] = useState<any | null>(null);
     const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null);
 
     const handleSubmit = async () => {
         if (!confirm("Are you sure? Once submitted, you cannot edit this procedure until an agent unlocks it.")) return;
         setLoading(true);
         const res = await submitProcedureAction(procedure.id);
-        setLoading(false);
-        if (res.error) alert(res.error);
-    };
-
-    const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        if (!uploadedFile) {
-            alert("Please upload a file first.");
-            return;
-        }
-
-        setUploading(true);
-        const form = e.currentTarget;
-        const formData = new FormData(form);
-
-        try {
-            const serverFormData = new FormData();
-            serverFormData.append("procedureId", formData.get("procedureId") as string);
-            serverFormData.append("name", formData.get("name") as string);
-            serverFormData.append("type", formData.get("type") as string);
-            serverFormData.append("fileUrl", uploadedFile.url);
-
-            const res = await addDocumentAction(serverFormData);
-
-            if (res.error) {
-                alert(res.error);
-            } else {
-                form.reset();
-                setUploadedFile(null);
-            }
-        } catch (err) {
-            alert("Upload failed.");
-        } finally {
-            setUploading(false);
-        }
-    };
-
-    const handleDeleteDoc = async (docId: string) => {
-        if (!confirm("Delete this document?")) return;
-        setLoading(true);
-        const res = await deleteDocumentAction(docId);
         setLoading(false);
         if (res.error) alert(res.error);
     };
@@ -172,11 +123,6 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
                                                 >
                                                     VIEW
                                                 </button>
-                                                {!procedure.isLocked && (
-                                                    <button onClick={() => handleDeleteDoc(doc.id)} className="text-red-400 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 transition-all border border-transparent hover:border-red-100">
-                                                        <Trash className="h-4 w-4" />
-                                                    </button>
-                                                )}
                                             </div>
                                         </div>
                                     ))}
@@ -185,118 +131,24 @@ export default function ProcedureDetails({ procedure }: ProcedureDetailsProps) {
                                         <div className="text-center py-16 bg-gray-50/50 rounded-[40px] border-2 border-dashed border-gray-100">
                                             <Upload className="h-12 w-12 text-gray-200 mx-auto mb-4" />
                                             <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest">Digital Vault Empty</h4>
-                                            <p className="text-[10px] text-gray-300 font-bold uppercase tracking-widest mt-2">Upload your first document to begin tracking</p>
+                                            <p className="text-[10px] text-gray-300 font-bold uppercase tracking-widest mt-2">Your agent will upload documents here as your case progresses</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Upload & Action Section */}
+                            {/* Action Section */}
                             <div className="space-y-8">
                                 {!procedure.isLocked && (
                                     <>
-                                        <form onSubmit={handleUpload} className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-2xl space-y-6 relative overflow-hidden group/form">
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 transition-transform duration-700 group-hover/form:scale-150 opacity-20" />
-                                            
-                                            <div className="relative z-10 space-y-6">
-                                                <div className="space-y-2">
-                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Select Document Type</label>
-                                                    <select
-                                                        name="type"
-                                                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 h-14 text-sm font-black text-gray-900 outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all appearance-none cursor-pointer"
-                                                        required
-                                                        onChange={(e) => {
-                                                            const input = e.target.form?.elements.namedItem("name") as HTMLInputElement;
-                                                            if (input) input.value = e.target.value.replace("_", " ");
-                                                        }}
-                                                    >
-                                                        <option value="">-- CHOOSE FROM DEVICE --</option>
-                                                        <optgroup label="Identity Documents">
-                                                            <option value="PASSPORT">Passport</option>
-                                                            <option value="PASSPORT_PHOTO">Passport Photo</option>
-                                                            <option value="BIRTH_CERTIFICATE">Birth Certificate</option>
-                                                            <option value="ID_CARD">National ID Card</option>
-                                                        </optgroup>
-                                                        <optgroup label="Education Documents">
-                                                            <option value="DIPLOMA">Diploma / Degree</option>
-                                                            <option value="TRANSCRIPT">Academic Transcript</option>
-                                                        </optgroup>
-                                                        <optgroup label="Professional Documents">
-                                                            <option value="CV">CV / Resume</option>
-                                                            <option value="WORK_CERTIFICATE">Work Certificate</option>
-                                                        </optgroup>
-                                                        <optgroup label="Language Test Documents">
-                                                            <option value="LANGUAGE_REGISTRATION">Language Test Registration</option>
-                                                            <option value="LANGUAGE_RESULT">Language Test Result (IELTS/TEF)</option>
-                                                        </optgroup>
-                                                        <optgroup label="Immigration Documents">
-                                                            <option value="MEDICAL">Medical Examination</option>
-                                                            <option value="POLICE_CLEARANCE">Police Clearance</option>
-                                                            <option value="VISA_APPROVAL">Visa Approval</option>
-                                                        </optgroup>
-                                                        <option value="OTHER">Other Document</option>
-                                                    </select>
-                                                    <input type="hidden" name="name" />
-                                                </div>
-
-                                                <div className="relative group/zone">
-                                                    <div className="absolute inset-0 z-20 w-full h-full opacity-0">
-                                                        <UploadButton
-                                                            endpoint="documentUploader"
-                                                            appearance={{
-                                                                button: "w-full h-full cursor-pointer",
-                                                                container: "w-full h-full",
-                                                                allowedContent: "hidden",
-                                                            }}
-                                                            onUploadBegin={() => setUploading(true)}
-                                                            onClientUploadComplete={(res) => {
-                                                                const file = res[0];
-                                                                setUploadedFile(file);
-                                                                setUploading(false);
-                                                            }}
-                                                            onUploadError={(error: Error) => {
-                                                                setUploading(false);
-                                                                alert(`ERROR! ${error.message}`);
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <div className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-blue-100 rounded-3xl bg-blue-50/20 group-hover/zone:bg-blue-50/50 group-hover/zone:border-blue-400 transition-all duration-500">
-                                                        <div className="bg-white p-4 rounded-2xl shadow-lg shadow-blue-100 transition-transform duration-500 group-hover/zone:rotate-12">
-                                                            {uploadedFile ? <FileText className="h-7 w-7 text-green-600" /> : <Upload className="h-7 w-7 text-blue-600" />}
-                                                        </div>
-                                                        <div className="text-center">
-                                                            {uploadedFile ? (
-                                                                <>
-                                                                    <p className="text-xs font-black text-green-700 uppercase tracking-tight line-clamp-1 max-w-[200px]">{uploadedFile.name}</p>
-                                                                    <p className="text-[9px] text-green-500 font-bold uppercase tracking-widest mt-1">File Ready for Submission</p>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <p className="text-sm font-black text-gray-900 uppercase tracking-tight">Select file from device</p>
-                                                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">PDF, JPG, PNG (MAX. 5MB)</p>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <input type="hidden" name="procedureId" value={procedure.id} />
-                                                <Button
-                                                    disabled={uploading}
-                                                    className="w-full bg-[#1E3A8A] hover:bg-blue-900 text-white rounded-2xl h-16 font-black text-sm tracking-[0.1em] shadow-2xl shadow-blue-200 transition-all hover:translate-y-[-4px] active:scale-95 group/btn overflow-hidden relative"
-                                                >
-                                                    <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
-                                                    {uploading ? (
-                                                        <Loader2 className="animate-spin h-6 w-6" />
-                                                    ) : (
-                                                        <div className="flex items-center justify-center gap-3">
-                                                            <Plus className="h-5 w-5" />
-                                                            <span>CONFIRM & SUBMIT DOCUMENT</span>
-                                                        </div>
-                                                    )}
-                                                </Button>
+                                        <div className="p-6 bg-blue-50/50 border border-blue-100 rounded-3xl flex items-start gap-4">
+                                            <div className="bg-white p-2.5 rounded-xl shadow-sm border border-blue-100 shrink-0">
+                                                <Paperclip className="h-5 w-5 text-blue-600" />
                                             </div>
-                                        </form>
+                                            <p className="text-xs font-semibold text-blue-800/80 leading-relaxed">
+                                                Documents for this step are uploaded by your agent or the agency's admin team — you don't need to upload anything yourself. You can review and download each file above as it's added.
+                                            </p>
+                                        </div>
 
                                         {/* Final Submission Card */}
                                         <div className="p-8 bg-white rounded-[40px] shadow-2xl relative overflow-hidden group">

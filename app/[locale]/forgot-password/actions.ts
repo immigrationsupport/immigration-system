@@ -67,10 +67,7 @@ export async function requestPasswordResetAction(email: string, locale: string =
         const subject = isFr ? `Réinitialisation de mot de passe - ${agencyName}` : `Password Reset - ${agencyName}`;
 
         const html = `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
-                <div style="background-color: #1E3A8A; padding: 20px; text-align: center;">
-                    <h1 style="color: white; margin: 0; font-size: 20px;">${agencyName}</h1>
-                </div>  
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">  
                 <div style="padding: 30px;">
                     <p style="font-size: 16px; color: #374151;">
                         ${isFr ? "Bonjour" : "Hello"} <strong>${user.name}</strong>,
@@ -90,14 +87,12 @@ export async function requestPasswordResetAction(email: string, locale: string =
                             ? "Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité — votre mot de passe restera inchangé."
                             : "If you didn't request this, you can safely ignore this email — your password will remain unchanged."}
                     </p>
-                    <p style="font-size: 11px; color: #d1d5db; word-break: break-all; margin-top: 20px;">
-                        ${resetUrl}
-                    </p>
+
                 </div>
             </div>
         `;
 
-        const emailResult = await sendEmail({ to: user.email, subject, html });
+        const emailResult = await sendEmail({ to: user.email, subject, html, fromName: agencyName });
         if (emailResult.error) {
             console.error("Password reset email failed to send:", emailResult.error);
             return { error: isFr ? "Impossible d'envoyer l'e-mail pour le moment. Réessayez plus tard." : "Couldn't send the email right now. Please try again later." };

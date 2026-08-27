@@ -41,6 +41,8 @@ export interface StepDefinition {
     description: string | null;
     order: number;
     subSteps: SubStepDefinition[];
+    // Default document checklist for this step (e.g. ["Passport", "CV"]).
+    requiredDocuments: string[];
 }
 
 /** Every possible step an agency could enable, with its built-in default label — used to seed the admin's customization screen. */

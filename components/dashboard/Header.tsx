@@ -4,6 +4,8 @@ import { Bell, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
+import { useLocale } from "next-intl";
 
 interface HeaderProps {
     title: string;
@@ -14,6 +16,8 @@ interface HeaderProps {
 export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) {
     const router = useRouter();
     const { data: session } = useSession();
+    const pathname = usePathname();
+    const locale = useLocale();
 
     const handleLogout = async () => {
         const userRole = session?.user?.role?.toUpperCase();
@@ -44,7 +48,22 @@ export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) 
             </div>
 
             <div className="flex items-center gap-4">
-                
+                <div className="flex items-center rounded-full border border-gray-200 p-0.5 text-xs font-bold mr-2">
+                    <Link
+                        href={pathname}
+                        locale="en"
+                        className={`px-2.5 py-1 rounded-full transition-colors ${locale === "en" ? "bg-[#1E3A8A] text-white" : "text-gray-500 hover:text-gray-700"}`}
+                    >
+                        EN
+                    </Link>
+                    <Link
+                        href={pathname}
+                        locale="fr"
+                        className={`px-2.5 py-1 rounded-full transition-colors ${locale === "fr" ? "bg-[#1E3A8A] text-white" : "text-gray-500 hover:text-gray-700"}`}
+                    >
+                        FR
+                    </Link>
+                </div>
 
                 {showLogout && (
                     <Button

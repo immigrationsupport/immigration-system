@@ -15,7 +15,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { getMyAgencyName } from "@/lib/agency-actions";
-
+import AiSearchBar from "@/app/[locale]/admin/dashboard/search/ai-search-bar";
 export default function AdminDashboardLayout({
     children,
 }: {
@@ -69,6 +69,7 @@ const adminSidebarItems = [
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
             />
+            
 
             {/* Main Content wrapper */}
             <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative max-w-full">
@@ -77,7 +78,9 @@ const adminSidebarItems = [
                     showLogout={true} 
                     onMenuClick={() => setIsSidebarOpen(true)}
                 />
-
+             <div className="px-4 md:px-8 pt-6 bg-white border-b border-gray-100">
+                    <AiSearchBar />
+                </div>
                 <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full mx-auto" style={{ backgroundColor: "#F9FAFB" }}>
                     {children}
                 </main>

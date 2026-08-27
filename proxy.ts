@@ -14,15 +14,10 @@ export default async function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // The /admin section lives outside the [locale] route tree (app/admin/...,
-    // not app/[locale]/admin/...), so it must never be handed off to the
-    // next-intl middleware — that middleware defaults to localePrefix "always"
-    // and would redirect e.g. /admin/login -> /en/admin/login, a route that
-    // doesn't exist, which is why every /admin route was unreachable.
-    const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
-    // /super-admin is also outside the [locale] tree, same reasoning as /admin above.
+    // /super-admin is outside the [locale] tree, so it must never be handed off to the
+    // next-intl middleware.
     const isSuperAdminRoute = pathname === "/super-admin" || pathname.startsWith("/super-admin/");
-    const isOutsideLocaleTree = isAdminRoute || isSuperAdminRoute;
+    const isOutsideLocaleTree = isSuperAdminRoute;
 
     // Strip leading locale prefix to get the "bare" pathname for auth checks
     // e.g. /en/dashboard/client -> /dashboard/client
@@ -63,9 +58,12 @@ export default async function proxy(request: NextRequest) {
 
         if (needsAuth) {
             if (publicAdminRoutes.includes(barePathname)) {
-                // /admin and /super-admin aren't part of the [locale] tree — don't
-                // let next-intl redirect them to a locale-prefixed URL that doesn't exist.
-                return NextResponse.next();
+                if (barePathname.startsWith("/super-admin")) {
+                    // /super-admin isn't part of the [locale] tree
+                    return NextResponse.next();
+                }
+                // For /admin/login etc, let next-intl handle the routing
+                return intlMiddleware(request);
             }
             url.pathname = `/sign-in`;
             return NextResponse.redirect(url);

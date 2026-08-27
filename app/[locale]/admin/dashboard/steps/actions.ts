@@ -46,7 +46,8 @@ export async function createTemplateAction(name: string, description: string) {
                   label,
                   description: null as string | null,
                   order: index,
-                  subSteps: [] as { label: string; description: string | null; order: number }[]
+                  subSteps: [] as { label: string; description: string | null; order: number }[],
+                  requiredDocuments: [] as string[]
               }));
 
         const template = await prisma.applicationTemplate.create({
@@ -60,6 +61,7 @@ export async function createTemplateAction(name: string, description: string) {
                         label: s.label,
                         description: s.description,
                         order: index,
+                        requiredDocuments: s.requiredDocuments,
                         subSteps: {
                             create: s.subSteps.map((sub, subIndex) => ({
                                 label: sub.label,
@@ -130,6 +132,7 @@ export interface StepInput {
     description: string;
     isActive: boolean;
     subSteps: { label: string; description: string }[];
+    requiredDocuments: string[];
 }
 
 export async function saveTemplateStepsAction(templateId: string, steps: StepInput[]) {
@@ -163,6 +166,7 @@ export async function saveTemplateStepsAction(templateId: string, steps: StepInp
                         description: s.description?.trim() || null,
                         order: i,
                         isActive: s.isActive,
+                        requiredDocuments: (s.requiredDocuments || []).map((d) => d.trim()).filter(Boolean),
                         subSteps: {
                             create: s.subSteps
                                 .filter((sub) => sub.label && sub.label.trim())

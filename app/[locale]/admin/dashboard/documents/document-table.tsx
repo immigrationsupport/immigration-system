@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { updateDocumentStatusAction } from "@/app/admin/dashboard/documents/actions";
+import { updateDocumentStatusAction } from "@/app/[locale]/admin/dashboard/documents/actions";
 import { TruncatedText } from "@/components/ui/truncated-text";
 import {
     Dialog,

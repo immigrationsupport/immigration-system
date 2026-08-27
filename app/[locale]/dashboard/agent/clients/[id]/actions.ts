@@ -159,6 +159,7 @@ export async function createApplicationForClientAction(
                             status: isFirstThree ? "APPROVED" : (isStep4 ? "IN_PROGRESS" : "PENDING"),
                             isLocked: isFirstThree ? false : (isStep4 ? false : true),
                             description: isFirstThree ? "Automatically verified." : (def.description || data.description || null),
+                            requiredDocuments: def.requiredDocuments,
                             subSteps: {
                                 create: def.subSteps.map((sub, subIndex) => ({
                                     label: sub.label,

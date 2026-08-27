@@ -3,7 +3,7 @@ import React from "react";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import DocumentTable from "@/app/admin/dashboard/documents/document-table";
+import DocumentTable from "@/app/[locale]/admin/dashboard/documents/document-table";
 
 export const dynamic = "force-dynamic";
 

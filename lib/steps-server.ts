@@ -77,7 +77,8 @@ export async function getTemplateSteps(templateId: string): Promise<StepDefiniti
             label: sub.label,
             description: sub.description,
             order: sub.order
-        }))
+        })),
+        requiredDocuments: s.requiredDocuments
     }));
 }
 
@@ -103,6 +104,7 @@ export async function getAgencyStepDefinitions(agencyId?: string | null): Promis
         label: STEP_LABELS[type],
         description: null,
         order: index,
-        subSteps: []
+        subSteps: [],
+        requiredDocuments: []
     }));
 }

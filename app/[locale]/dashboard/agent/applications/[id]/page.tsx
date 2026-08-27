@@ -47,7 +47,8 @@ export default async function AgentApplicationManagementPage({ params }: { param
                         order: index,
                         status: isFirstThree ? "APPROVED" : (isStep4 ? "IN_PROGRESS" : "PENDING"),
                         isLocked: isFirstThree ? false : (isStep4 ? false : true),
-                        description: isFirstThree ? "Automatically verified." : (def.description || null)
+                        description: isFirstThree ? "Automatically verified." : (def.description || null),
+                        requiredDocuments: def.requiredDocuments
                     };
                 })
             });

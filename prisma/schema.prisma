@@ -297,6 +297,11 @@ model ApplicationStep {
   // the template afterwards.
   order         Int             @default(0)
   label         String?
+  // Checklist of document names the admin expects for this step (e.g.
+  // "Passport", "Birth Certificate"). Purely informational for the agent —
+  // materialized from the StepTemplate when the step is created, and can
+  // still be edited independently per application afterwards.
+  requiredDocuments String[]    @default([])
   Document      Document[]
   Message       Message[]
   application   Application     @relation(fields: [applicationId], references: [id])
@@ -349,11 +354,13 @@ enum DocumentType {
   BIRTH_CERTIFICATE
   ID_CARD
   DIPLOMA
+  TRANSCRIPT          
   CV
   WORK_CERTIFICATE
   LANGUAGE_REGISTRATION
   LANGUAGE_RESULT
   MEDICAL
+  POLICE_CLEARANCE   
   VISA_APPROVAL
   OTHER
 }
@@ -433,6 +440,10 @@ model StepTemplate {
   referenceFileUrl       String?
   referenceFileName      String?
   isActive               Boolean       @default(true)
+  // Default document checklist for this step — set by the admin, copied
+  // onto each ApplicationStep created from this template, and editable
+  // any time independently of the step's type.
+  requiredDocuments      String[]      @default([])
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
 

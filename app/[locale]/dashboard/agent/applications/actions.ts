@@ -7,7 +7,16 @@ import { revalidatePath } from "next/cache";
 import { ApplicationStatus, ProcedureStatus } from "@prisma/client";
 import { STEP_LABELS } from "@/lib/steps";
 import { getAgencyTemplates, getTemplateSteps } from "@/lib/steps-server";
-import { getMyAgencyName } from "@/lib/agency-actions";
+
+// Looks up the agency name that actually owns an application — used for
+// client-facing emails so the brand shown is always the client's own
+// agency, regardless of which agent/admin performed the action.
+async function getApplicationAgencyName(agencyId: string | null): Promise<string | null> {
+    if (!agencyId) return null;
+    const agency = await prisma.agency.findUnique({ where: { id: agencyId }, select: { name: true } });
+    return agency?.name || null;
+}
+
 export async function updateApplicationStatusAction(
     applicationId: string,
     newStatus: string,
@@ -93,7 +102,8 @@ export async function updateStepAction(
         status?: ProcedureStatus;
         isLocked?: boolean;
         description?: string;
-        organization?: string; // New field for Step 5
+        organization?: string; // New field for Step 5 (Diploma Equivalence)
+        languageTest?: string; // Test type for Language Test Registration step (TCF, TEF, IELTS...)
     }
 ) {
     const session = await auth.api.getSession({
@@ -135,11 +145,24 @@ export async function updateStepAction(
             }
 
             if (step.type === "DOCUMENT_COLLECTION") {
-                const requiredDocs = ["Passport", "Birth Certificate", "National ID", "CV", "Diploma", "Transcripts", "Passport Photo"];
-                const uploadedNames = step.Document.map(d => d.name);
-                const missing = requiredDocs.filter(d => !uploadedNames.includes(d));
+                // Match by the document's `type` (a fixed enum set from the
+                // upload dropdown), never by its free-text `name` — the name
+                // is just a display label and can be worded differently
+                // ("National ID Card" vs "National ID"), which made this
+                // check reject documents that were actually uploaded.
+                const requiredTypes: { type: string; label: string }[] = [
+                    { type: "PASSPORT", label: "Passport" },
+                    { type: "BIRTH_CERTIFICATE", label: "Birth Certificate" },
+                    { type: "ID_CARD", label: "National ID" },
+                    { type: "CV", label: "CV" },
+                    { type: "DIPLOMA", label: "Diploma" },
+                    { type: "TRANSCRIPT", label: "Transcripts" },
+                    { type: "PASSPORT_PHOTO", label: "Passport Photo" }
+                ];
+                const uploadedTypes = step.Document.map((d) => d.type);
+                const missing = requiredTypes.filter((d) => !uploadedTypes.includes(d.type as any));
                 if (missing.length > 0) {
-                    return { error: `Cannot complete step. Missing documents: ${missing.join(", ")}` };
+                    return { error: `Cannot complete step. Missing documents: ${missing.map((d) => d.label).join(", ")}` };
                 }
             }
 
@@ -156,6 +179,12 @@ export async function updateStepAction(
         if (step.type === "DIPLOMA_EQUIVALENCE" && data.organization) {
             updateData.description = `Org: ${data.organization}${data.description ? ` | ${data.description}` : ""}`;
             delete updateData.organization;
+        }
+
+        // Store the chosen language test (TCF, TEF, IELTS...) in description for the Language Test Registration step
+        if (step.type === "LANGUAGE_TEST_REGISTRATION" && data.languageTest) {
+            updateData.description = `Test: ${data.languageTest}${data.description ? ` | ${data.description}` : ""}`;
+            delete updateData.languageTest;
         }
 
         const updatedStep = await prisma.applicationStep.update({
@@ -182,10 +211,16 @@ export async function updateStepAction(
 
             // 2. Send email notification via Resend
             if (step.application.client.email) {
-                const agencyName = await getMyAgencyName();
+                // Always use the application's OWN agency — not the acting
+                // user's agency. getMyAgencyName() looked up whoever is
+                // currently logged in, so a Super Admin (who belongs to no
+                // agency) or any mismatch silently fell back to the default
+                // brand name instead of the client's real agency.
+                const agencyName = await getApplicationAgencyName(step.application.agencyId);
                 await sendEmail({
                     to: step.application.client.email,
                     subject: `Action Required - ${agencyName || "ATLE Immigration"}`,
+                    fromName: agencyName || undefined,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
                             <div style="background-color: #1E3A8A; padding: 20px; text-align: center;">
@@ -210,6 +245,35 @@ export async function updateStepAction(
                     `
                 });
             }
+        }
+
+        // Send an email notification to the client whenever an agent/admin validates (approves) a step
+        if (data.status === "APPROVED" && step.status !== "APPROVED" && step.application.client.email) {
+            const stepLabel = step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS] || step.type;
+            const agencyName = await getApplicationAgencyName(step.application.agencyId);
+
+            await sendEmail({
+                to: step.application.client.email,
+                subject: `Step Validated - ${agencyName || "ATLE Immigration"}`,
+                fromName: agencyName || undefined,
+                html: `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                        <div style="background-color: #059669; padding: 20px; text-align: center;">
+                            <h1 style="color: white; margin: 0; font-size: 20px;">Step Validated ✓</h1>
+                        </div>
+                        <div style="padding: 30px;">
+                            <p style="font-size: 16px; color: #374151;">Hello <strong>${step.application.client.name}</strong>,</p>
+                            <p style="font-size: 14px; color: #4b5563; line-height: 1.6;">
+                                Good news! Your ${agencyName ? `agency ${agencyName}` : "agency"} has just validated the following step of your application: <br/>
+                                <strong style="color: #059669;">${stepLabel}</strong>
+                            </p>
+                            <p style="font-size: 14px; color: #4b5563; line-height: 1.6;">
+                                Please log in to your dashboard to see the details and track the progress of the next step.
+                            </p>
+                        </div>
+                    </div>
+                `
+            });
         }
 
         // Auto-unlock next step ONLY IF status is APPROVED
@@ -471,6 +535,7 @@ export async function createApplicationAction(clientId: string, templateId: stri
                             status: isFirstThree ? "APPROVED" : isStep4 ? "IN_PROGRESS" : "PENDING",
                             isLocked: isFirstThree ? false : isStep4 ? false : true,
                             description: isFirstThree ? "Automatically verified." : def.description || null,
+                            requiredDocuments: def.requiredDocuments,
                             subSteps: {
                                 create: def.subSteps.map((sub, subIndex) => ({
                                     label: sub.label,
