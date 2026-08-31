@@ -5,10 +5,11 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function AgentDashboard() {
     const locale = await getLocale();
+    const t = await getTranslations("agentOverview");
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -56,12 +57,12 @@ export default async function AgentDashboard() {
         <div className="space-y-8 max-w-7xl mx-auto px-4 py-8">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 tracking-tight" style={{ color: "#1E3A8A" }}>{isAdmin ? "Procedures Overview" : "Agent Overview"}</h1>
-                    <p className="text-gray-500 font-medium">{isAdmin ? "All applications across your agency." : "Welcome back to your workspace."}</p>
+                    <h1 className="text-3xl font-black text-gray-900 tracking-tight" style={{ color: "#1E3A8A" }}>{isAdmin ? t("adminTitle") : t("agentTitle")}</h1>
+                    <p className="text-gray-500 font-medium">{isAdmin ? t("adminSubtitle") : t("agentSubtitle")}</p>
                 </div>
                 <Link href="/dashboard/agent/profile">
                     <Button variant="outline" className="rounded-xl border-gray-200 hover:bg-blue-50 hover:text-blue-700 font-bold gap-2">
-                        <User className="h-4 w-4" /> My Profile
+                        <User className="h-4 w-4" /> {t("myProfile")}
                     </Button>
                 </Link>
             </div>
@@ -76,7 +77,7 @@ export default async function AgentDashboard() {
                         <Briefcase size={26} color="black" />
                     </div>
                     <div>
-                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Total Procedures</p>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">{t("totalProcedures")}</p>
                         <h3 className="text-3xl font-black text-gray-900 mt-0.5">{assignedApps}</h3>
                     </div>
                 </div>
@@ -89,7 +90,7 @@ export default async function AgentDashboard() {
                         <Clock size={26} color="black" />
                     </div>
                     <div>
-                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">In Review</p>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">{t("inReview")}</p>
                         <h3 className="text-3xl font-black text-gray-900 mt-0.5">{inReviewApps}</h3>
                     </div>
                 </div>
@@ -102,7 +103,7 @@ export default async function AgentDashboard() {
                         <CheckCircle size={26} color="black" />
                     </div>
                     <div>
-                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Completed</p>
+                        <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">{t("completed")}</p>
                         <h3 className="text-3xl font-black text-gray-900 mt-0.5">{completedApps}</h3>
                     </div>
                 </div>
@@ -111,9 +112,9 @@ export default async function AgentDashboard() {
             <Card className="border-none shadow-xl shadow-gray-200/50 rounded-2xl overflow-hidden">
                 <CardHeader className="bg-white border-b border-gray-50 py-6">
                     <div className="flex justify-between items-center">
-                        <CardTitle className="text-lg font-black text-gray-800 uppercase tracking-tight">Recent Activity</CardTitle>
+                        <CardTitle className="text-lg font-black text-gray-800 uppercase tracking-tight">{t("recentActivity")}</CardTitle>
                         <Link href="/dashboard/agent/applications">
-                            <Button variant="ghost" className="text-xs font-bold text-blue-600 hover:bg-blue-50">View All</Button>
+                            <Button variant="ghost" className="text-xs font-bold text-blue-600 hover:bg-blue-50">{t("viewAll")}</Button>
                         </Link>
                     </div>
                 </CardHeader>
@@ -122,11 +123,11 @@ export default async function AgentDashboard() {
                         <table className="w-full text-sm text-left">
                             <thead className="bg-gray-50/50 text-gray-400 uppercase text-[10px] font-black tracking-widest">
                                 <tr>
-                                    <th className="px-6 py-4">Applicant</th>
-                                    <th className="px-6 py-4">Current Step</th>
-                                    <th className="px-6 py-4">Last Update</th>
-                                    <th className="px-6 py-4">Status</th>
-                                    <th className="px-6 py-4 text-right">Action</th>
+                                    <th className="px-6 py-4">{t("colApplicant")}</th>
+                                    <th className="px-6 py-4">{t("colCurrentStep")}</th>
+                                    <th className="px-6 py-4">{t("colLastUpdate")}</th>
+                                    <th className="px-6 py-4">{t("colStatus")}</th>
+                                    <th className="px-6 py-4 text-right">{t("colAction")}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 bg-white">
@@ -152,7 +153,7 @@ export default async function AgentDashboard() {
                                                     PASSPORT_SUBMISSION: "Passport & Visa"
                                                 };
                                                 const activeStep = (app as any).steps.find((s: any) => s.status === "IN_PROGRESS" || (s.status === "PENDING" && !s.isLocked));
-                                                const stepLabel = activeStep ? (activeStep.label || STEP_LABELS[activeStep.type] || activeStep.type) : "Document Collection";                                                return (
+                                                const stepLabel = activeStep ? (activeStep.label || STEP_LABELS[activeStep.type] || activeStep.type) : t("defaultStepLabel");                                                return (
                                                     <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[11px] font-bold">
                                                         {stepLabel}
                                                     </span>
@@ -177,7 +178,7 @@ export default async function AgentDashboard() {
                                                     variant="outline" 
                                                     size="sm" 
                                                     className="h-9 w-9 p-0 rounded-xl border-gray-100 text-[#1E3A8A] hover:bg-blue-50 hover:border-blue-200 shadow-sm transition-all"
-                                                    title="View Client Details"
+                                                    title={t("viewClientDetails")}
                                                 >
                                                     <ExternalLink className="h-4 w-4" />
                                                 </Button>
@@ -188,7 +189,7 @@ export default async function AgentDashboard() {
                                 {recentApplications.length === 0 && (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-20 text-center text-gray-500 font-bold">
-                                            No recent activity found.
+                                            {t("noRecentActivity")}
                                         </td>
                                     </tr>
                                 )}

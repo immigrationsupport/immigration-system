@@ -11,10 +11,10 @@ interface HeaderProps {
     title: string;
     onMenuClick?: () => void;
     showLogout?: boolean;
+    centerSlot?: React.ReactNode;
 }
 
-export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) {
-    const router = useRouter();
+export function Header({ title, onMenuClick, showLogout = false, centerSlot }: HeaderProps) {    const router = useRouter();
     const { data: session } = useSession();
     const pathname = usePathname();
     const locale = useLocale();
@@ -36,9 +36,9 @@ export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) 
         });
     };
 
-    return (
-        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 sticky top-0 z-20">
-            <div className="flex items-center gap-4">
+        return (
+        <header className="bg-white border-b border-gray-200 h-16 flex items-center gap-4 px-6 sticky top-0 z-20">
+            <div className="flex items-center gap-4 shrink-0">
                 {onMenuClick && (
                     <Button variant="outline" className="md:hidden" onClick={onMenuClick}>
                         <Menu className="h-6 w-6" />
@@ -47,7 +47,13 @@ export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) 
                 <h1 className="text-xl font-semibold text-gray-800 tracking-tight">{title}</h1>
             </div>
 
-            <div className="flex items-center gap-4">
+            {centerSlot && (
+                <div className="flex-1 min-w-0 hidden md:flex justify-center">
+                    {centerSlot}
+                </div>
+            )}
+
+            <div className="flex items-center gap-4 shrink-0 ml-auto">
                 <div className="flex items-center rounded-full border border-gray-200 p-0.5 text-xs font-bold mr-2">
                     <Link
                         href={pathname}
@@ -78,4 +84,5 @@ export function Header({ title, onMenuClick, showLogout = false }: HeaderProps) 
             </div>
         </header>
     );
+
 }

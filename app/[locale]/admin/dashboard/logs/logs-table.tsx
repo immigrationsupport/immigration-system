@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { TruncatedText } from "@/components/ui/truncated-text";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface Author {
     id: string;
@@ -42,6 +43,7 @@ export default function LogsTable({
 }: {
     initialLogs: LogItem[]
 }) {
+    const t = useTranslations("adminLogs");
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("ALL"); // ALL, AGENT, ANOMALY
     const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
@@ -108,7 +110,7 @@ export default function LogsTable({
                 <div className="relative w-full md:w-96">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#374151]" />
                     <Input
-                        placeholder="Search action, details, or user..."
+                        placeholder={t("searchPlaceholder")}
                         className="pl-12 h-12 text-[16px] bg-white border-gray-300 focus:ring-blue-100 placeholder-[#6B7280]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -120,19 +122,19 @@ export default function LogsTable({
                         onClick={() => setTypeFilter("ALL")}
                         className={`flex-1 md:flex-none px-6 py-2.5 text-[14px] lg:text-[16px] font-bold rounded-md transition-all ${typeFilter === "ALL" ? "bg-white text-gray-900 shadow-sm" : "text-[#4B5563] hover:text-[#111827]"}`}
                     >
-                        All Activity
+                        {t("filterAll")}
                     </button>
                     <button
                         onClick={() => setTypeFilter("AGENT")}
                         className={`flex-1 md:flex-none px-6 py-2.5 text-[14px] lg:text-[16px] font-bold rounded-md transition-all flex items-center justify-center gap-2 ${typeFilter === "AGENT" ? "bg-[#1E3A8A] text-white shadow-sm" : "text-[#4B5563] hover:text-[#111827]"}`}
                     >
-                        <UserCog size={18} /> Agent Actions
+                        <UserCog size={18} /> {t("filterAgent")}
                     </button>
                     <button
                         onClick={() => setTypeFilter("ANOMALY")}
                         className={`flex-1 md:flex-none px-6 py-2.5 text-[14px] lg:text-[16px] font-bold rounded-md transition-all flex items-center justify-center gap-2 ${typeFilter === "ANOMALY" ? "bg-red-600 text-white shadow-sm hover:bg-red-700" : "text-[#4B5563] hover:text-red-600"}`}
                     >
-                        <ShieldAlert size={18} /> Anomalies
+                        <ShieldAlert size={18} /> {t("filterAnomaly")}
                     </button>
                 </div>
             </div>
@@ -141,11 +143,11 @@ export default function LogsTable({
                 <table className="w-full text-left border-separate border-spacing-0">
                     <thead>
                         <tr className="bg-gray-100/80">
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">Ref #</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Action Event</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 w-1/3">Context / Target Details</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Author Profile</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 last:rounded-tr-xl">Timestamp</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">{t("colRef")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colAction")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 w-1/3">{t("colContext")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colAuthor")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 last:rounded-tr-xl">{t("colTimestamp")}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -175,7 +177,7 @@ export default function LogsTable({
                                                 <button 
                                                     onClick={() => toggleExpand(log.id)}
                                                     className="p-1 hover:bg-gray-100 rounded transition-colors text-gray-400 hover:text-blue-600"
-                                                    title="View Full Details"
+                                                    title={t("viewFullDetails")}
                                                 >
                                                     {expandedLogs.has(log.id) ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                                 </button>
@@ -215,7 +217,7 @@ export default function LogsTable({
                                         ) : (
                                             <div className="flex items-center gap-2 text-[#6B7280] bg-gray-100 w-fit px-3 py-1.5 rounded-lg border border-gray-200">
                                                 <Shield size={16} className="text-[#6B7280]" />
-                                                <span className="text-[12px] font-extrabold uppercase tracking-widest text-[#6B7280]">System Core</span>
+                                                <span className="text-[12px] font-extrabold uppercase tracking-widest text-[#6B7280]">{t("systemCore")}</span>
                                             </div>
                                         )}
                                     </td>
@@ -239,8 +241,8 @@ export default function LogsTable({
                 {filteredLogs.length === 0 && (
                     <div className="py-24 flex flex-col items-center justify-center text-[#6B7280]">
                         <ShieldAlert size={50} className="mb-4 opacity-30" />
-                        <p className="text-[18px] font-bold">No logs found</p>
-                        <p className="text-[16px] mt-2">Try adjusting your search or filters.</p>
+                        <p className="text-[18px] font-bold">{t("noLogsFound")}</p>
+                        <p className="text-[16px] mt-2">{t("adjustFilters")}</p>
                     </div>
                 )}
             </div>

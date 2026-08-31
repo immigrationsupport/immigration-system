@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { saveTemplateStepsAction } from "../actions";
 import type { StepDefinition } from "@/lib/steps";
 import type { ProcedureType } from "@prisma/client";
+import { useTranslations } from "next-intl";
 
 interface SubStepRow {
     key: string;
@@ -70,6 +71,7 @@ export default function StepEditor({
     initialSteps: StepDefinition[];
     builtInTypes: { type: ProcedureType; label: string }[];
 }) {
+    const t = useTranslations("adminSteps.editor");
     const [steps, setSteps] = useState<StepRow[]>(toStepRows(initialSteps));
     const [error, setError] = useState("");
     const [isSaving, startSaving] = useTransition();
@@ -171,7 +173,7 @@ export default function StepEditor({
             if (result?.error) {
                 setError(result.error);
             } else {
-                toast.success("Workflow saved");
+                toast.success(t("toastSaved"));
             }
         });
     }
@@ -192,11 +194,11 @@ export default function StepEditor({
                         className={`bg-white rounded-2xl border shadow-sm p-4 flex gap-3 ${step.isActive ? "border-gray-200" : "border-gray-100 opacity-60"}`}
                     >
                         <div className="flex flex-col items-center gap-1 pt-1 shrink-0">
-                            <button type="button" disabled={index === 0} onClick={() => moveStep(index, -1)} className="p-1 text-gray-400 hover:text-[#1E3A8A] disabled:opacity-20" title="Move up">
+                            <button type="button" disabled={index === 0} onClick={() => moveStep(index, -1)} className="p-1 text-gray-400 hover:text-[#1E3A8A] disabled:opacity-20" title={t("moveUp")}>
                                 <ArrowUp className="h-4 w-4" />
                             </button>
                             <span className="text-xs font-black text-gray-300">{index + 1}</span>
-                            <button type="button" disabled={index === steps.length - 1} onClick={() => moveStep(index, 1)} className="p-1 text-gray-400 hover:text-[#1E3A8A] disabled:opacity-20" title="Move down">
+                            <button type="button" disabled={index === steps.length - 1} onClick={() => moveStep(index, 1)} className="p-1 text-gray-400 hover:text-[#1E3A8A] disabled:opacity-20" title={t("moveDown")}>
                                 <ArrowDown className="h-4 w-4" />
                             </button>
                         </div>
@@ -207,21 +209,21 @@ export default function StepEditor({
                                     type="button"
                                     onClick={() => updateStep(index, { expanded: !step.expanded })}
                                     className="p-1 text-gray-400 hover:text-[#1E3A8A] shrink-0"
-                                    title="Sub-steps"
+                                    title={t("subStepsToggle")}
                                 >
                                     {step.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                                 </button>
                                 <Input
                                     value={step.label}
                                     onChange={(e) => updateStep(index, { label: e.target.value })}
-                                    placeholder="Step name"
+                                    placeholder={t("stepNamePlaceholder")}
                                     className="font-bold flex-1"
                                 />
                                 <label className="flex items-center gap-1.5 text-xs font-bold text-gray-500 shrink-0 whitespace-nowrap">
                                     <input type="checkbox" checked={step.isActive} onChange={(e) => updateStep(index, { isActive: e.target.checked })} />
-                                    Active
+                                    {t("active")}
                                 </label>
-                                <button type="button" onClick={() => removeStep(index)} className="p-1.5 text-gray-300 hover:text-red-600 shrink-0" title="Delete step">
+                                <button type="button" onClick={() => removeStep(index)} className="p-1.5 text-gray-300 hover:text-red-600 shrink-0" title={t("deleteStepTooltip")}>
                                     <Trash2 className="h-4 w-4" />
                                 </button>
                             </div>
@@ -232,9 +234,9 @@ export default function StepEditor({
                                     onChange={(e) => updateStep(index, { type: e.target.value as ProcedureType | "" })}
                                     className="text-xs font-bold border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-600"
                                 >
-                                    <option value="">Custom step (no special behavior)</option>
-                                    {builtInTypes.map((t) => (
-                                        <option key={t.type} value={t.type}>Behaves like: {t.label}</option>
+                                    <option value="">{t("customStepOption")}</option>
+                                    {builtInTypes.map((bt) => (
+                                        <option key={bt.type} value={bt.type}>{t("behavesLike", { label: bt.label })}</option>
                                     ))}
                                 </select>
                             </div>
@@ -242,13 +244,13 @@ export default function StepEditor({
                             <Textarea
                                 value={step.description}
                                 onChange={(e) => updateStep(index, { description: e.target.value })}
-                                placeholder="Instructions shown to agents/clients for this step (optional)"
+                                placeholder={t("instructionsPlaceholder")}
                                 className="ml-8 w-[calc(100%-2rem)] text-sm min-h-[50px]"
                             />
 
                             <div className="ml-8 w-[calc(100%-2rem)] pt-1">
                                 <p className="text-[11px] font-black uppercase tracking-wide text-gray-300 flex items-center gap-1.5 mb-1.5">
-                                    <FileCheck2 className="h-3.5 w-3.5" /> Required documents
+                                    <FileCheck2 className="h-3.5 w-3.5" /> {t("requiredDocumentsLabel")}
                                 </p>
                                 <div className="flex flex-wrap gap-1.5 mb-2">
                                     {step.requiredDocuments.map((doc, docIndex) => (
@@ -261,7 +263,7 @@ export default function StepEditor({
                                     ))}
                                 </div>
                                 <Input
-                                    placeholder="Type a document name and press Enter (e.g. Passport)"
+                                    placeholder={t("addDocumentPlaceholder")}
                                     className="text-sm h-9"
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") {
@@ -272,14 +274,14 @@ export default function StepEditor({
                                     }}
                                 />
                                 <p className="text-[10px] text-gray-400 mt-1">
-                                    Shown to the agent as a checklist reminder on this step — it doesn't block uploads of other document types.
+                                    {t("requiredDocumentsHint")}
                                 </p>
                             </div>
 
                             {step.expanded && (
                                 <div className="ml-8 pl-4 border-l-2 border-gray-100 space-y-2 pt-1">
                                     <p className="text-[11px] font-black uppercase tracking-wide text-gray-300 flex items-center gap-1.5">
-                                        <ListTree className="h-3.5 w-3.5" /> Sub-steps
+                                        <ListTree className="h-3.5 w-3.5" /> {t("subStepsLabel")}
                                     </p>
                                     {step.subSteps.map((sub, subIndex) => (
                                         <div key={sub.key} className="flex items-center gap-2">
@@ -294,7 +296,7 @@ export default function StepEditor({
                                             <Input
                                                 value={sub.label}
                                                 onChange={(e) => updateSubStep(index, subIndex, { label: e.target.value })}
-                                                placeholder="Sub-step name"
+                                                placeholder={t("subStepPlaceholder")}
                                                 className="text-sm flex-1"
                                             />
                                             <button type="button" onClick={() => removeSubStep(index, subIndex)} className="p-1 text-gray-300 hover:text-red-600 shrink-0">
@@ -309,7 +311,7 @@ export default function StepEditor({
                                         onClick={() => addSubStep(index)}
                                         className="gap-1.5 font-bold text-xs h-8 rounded-lg"
                                     >
-                                        <Plus className="h-3.5 w-3.5" /> Add sub-step
+                                        <Plus className="h-3.5 w-3.5" /> {t("addSubStep")}
                                     </Button>
                                 </div>
                             )}
@@ -320,16 +322,16 @@ export default function StepEditor({
 
             <div className="flex items-center gap-3 pt-2">
                 <Button variant="outline" onClick={addStep} className="font-bold rounded-xl gap-2">
-                    <Plus className="h-4 w-4" /> Add Step
+                    <Plus className="h-4 w-4" /> {t("addStep")}
                 </Button>
                 <Button onClick={handleSave} disabled={isSaving} className="bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold rounded-xl gap-2 ml-auto">
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    Save Workflow
+                    {t("saveWorkflow")}
                 </Button>
             </div>
 
             <p className="text-xs text-gray-400 pt-2">
-                Changes only apply to new applications created with this workflow from now on — applications already in progress keep the steps they were created with.
+                {t("footerNote")}
             </p>
         </div>
     );

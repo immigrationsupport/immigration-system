@@ -13,6 +13,7 @@ import {
 import { CheckCircle2, Loader2, AlertCircle, ArrowUpCircle, ArrowDownCircle, X, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { upgradeSubscriptionAction, cancelPendingDowngradeAction } from "./actions";
+import { useTranslations } from "next-intl";
 
 interface Plan {
     id: string;
@@ -32,6 +33,8 @@ export default function UpgradePlanSection({
     currentPlanId: string;
     pendingPlan: Plan | null;
 }) {
+    const t = useTranslations("adminBilling.upgrade");
+    const tBilling = useTranslations("adminBilling");
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
     const [error, setError] = useState("");
     const [isPending, startTransition] = useTransition();
@@ -59,7 +62,7 @@ export default function UpgradePlanSection({
                 return;
             }
 
-            toast.success(result?.downgrade ? "Downgrade scheduled for the end of your billing period" : "Subscription updated");
+            toast.success(result?.downgrade ? t("toastDowngradeScheduled") : t("toastUpdated"));
             setSelectedPlan(null);
             window.location.reload();
         });
@@ -71,7 +74,7 @@ export default function UpgradePlanSection({
             if (result?.error) {
                 toast.error(result.error);
             } else {
-                toast.success("Scheduled downgrade cancelled");
+                toast.success(t("toastDowngradeCancelled"));
                 window.location.reload();
             }
         });
@@ -84,7 +87,7 @@ export default function UpgradePlanSection({
                     <div className="flex items-center gap-3 text-amber-800 text-sm">
                         <ArrowDownCircle className="h-5 w-5 shrink-0" />
                         <span>
-                            A downgrade to <strong>{pendingPlan.name}</strong> is scheduled for the end of your current billing period.
+                            {t.rich("downgradeScheduled", { planName: pendingPlan.name, strong: (chunks) => <strong>{chunks}</strong> })}
                         </span>
                     </div>
                     <Button
@@ -95,7 +98,7 @@ export default function UpgradePlanSection({
                         className="gap-1.5 font-bold border-amber-300 text-amber-800 hover:bg-amber-100 shrink-0"
                     >
                         {isCancelPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
-                        Cancel
+                        {t("cancel")}
                     </Button>
                 </div>
             )}
@@ -112,16 +115,16 @@ export default function UpgradePlanSection({
                             <CardContent className="p-5 space-y-3">
                                 <p className="font-black text-gray-900">{plan.name}</p>
                                 <p className="text-lg font-black text-[#1E3A8A]">
-                                    {plan.priceFcfa.toLocaleString()} FCFA<span className="text-xs text-gray-400 font-bold">/year</span>
+                                    {plan.priceFcfa.toLocaleString()} FCFA<span className="text-xs text-gray-400 font-bold">{tBilling("perYear")}</span>
                                 </p>
                                 <div className="flex flex-wrap gap-2 text-xs font-bold text-gray-500">
-                                    <span className="px-2 py-1 bg-gray-100 rounded-lg">Agents: {plan.maxAgents ?? "∞"}</span>
-                                    <span className="px-2 py-1 bg-gray-100 rounded-lg">Clients: {plan.maxClients ?? "∞"}</span>
+                                    <span className="px-2 py-1 bg-gray-100 rounded-lg">{t("agentsShort")}: {plan.maxAgents ?? "∞"}</span>
+                                    <span className="px-2 py-1 bg-gray-100 rounded-lg">{t("clientsShort")}: {plan.maxClients ?? "∞"}</span>
                                 </div>
 
                                 {isCurrent ? (
                                     <div className="flex items-center gap-1.5 text-xs font-black text-[#1E3A8A] uppercase pt-2">
-                                        <CheckCircle2 className="h-4 w-4" /> Current Plan
+                                        <CheckCircle2 className="h-4 w-4" /> {t("currentPlan")}
                                     </div>
                                 ) : (
                                     <Button
@@ -129,7 +132,7 @@ export default function UpgradePlanSection({
                                         className="w-full font-bold rounded-xl gap-1.5 bg-[#1E3A8A] text-white hover:bg-blue-900"
                                     >
                                         {isUpgrade ? <ArrowUpCircle className="h-4 w-4" /> : <ArrowDownCircle className="h-4 w-4" />}
-                                        {isUpgrade ? "Upgrade" : "Switch"}
+                                        {isUpgrade ? t("upgradeButton") : t("switchButton")}
                                     </Button>
                                 )}
                             </CardContent>
@@ -142,12 +145,12 @@ export default function UpgradePlanSection({
                 <DialogContent className="sm:max-w-md rounded-2xl">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-black text-[#1E3A8A]">
-                            Switch to {selectedPlan?.name}
+                            {selectedPlan && t("switchTo", { planName: selectedPlan.name })}
                         </DialogTitle>
                         <DialogDescription>
                             {currentPlan && selectedPlan && (selectedPlan.priceFcfa < currentPlan.priceFcfa || selectedPlan.priceFcfa === 0)
-                                ? "This takes effect at the end of your current billing period — no payment needed now."
-                                : "You'll be redirected to Flutterwave's secure checkout to complete payment."}
+                                ? t("downgradeNote")
+                                : t("checkoutNote")}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -162,7 +165,7 @@ export default function UpgradePlanSection({
                         <div className="space-y-4">
                             {currentPlan && selectedPlan.priceFcfa >= currentPlan.priceFcfa && selectedPlan.priceFcfa > 0 && (
                                 <div className="p-3 bg-blue-50 rounded-xl text-sm font-bold text-[#1E3A8A] flex justify-between">
-                                    <span>Amount due</span>
+                                    <span>{t("amountDue")}</span>
                                     <span>{selectedPlan.priceFcfa.toLocaleString()} FCFA</span>
                                 </div>
                             )}
@@ -170,12 +173,12 @@ export default function UpgradePlanSection({
                             {selectedPlan.priceFcfa > 0 && (currentPlan ? selectedPlan.priceFcfa >= currentPlan.priceFcfa : true) && (
                                 <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
                                     <ShieldCheck className="h-4 w-4 shrink-0" />
-                                    Card and Mobile Money (MTN, Orange) payments are handled securely by Flutterwave.
+                                    {t("securityNote")}
                                 </div>
                             )}
 
                             <Button onClick={handleConfirm} disabled={isPending} className="w-full bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold h-11 rounded-xl">
-                                {isPending ? <Loader2 className="animate-spin w-4 h-4" /> : "Continue"}
+                                {isPending ? <Loader2 className="animate-spin w-4 h-4" /> : t("continue")}
                             </Button>
                         </div>
                     )}

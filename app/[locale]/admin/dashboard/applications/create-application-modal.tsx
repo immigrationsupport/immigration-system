@@ -16,6 +16,7 @@ import { Plus, Loader2, AlertCircle, ListOrdered } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { getClientsAndTemplates, createApplicationAction } from "./actions";
+import { useTranslations } from "next-intl";
 
 interface ClientOption {
     id: string;
@@ -31,6 +32,7 @@ interface TemplateOption {
 }
 
 export default function CreateApplicationModal({ onCreated }: { onCreated: (application: any) => void }) {
+    const t = useTranslations("adminApplications.create");
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [clients, setClients] = useState<ClientOption[]>([]);
@@ -72,7 +74,7 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
             if (result?.error) {
                 setError(result.error);
             } else {
-                toast.success("Procedure created");
+                toast.success(t("toastCreated"));
                 onCreated(result.application);
                 setOpen(false);
                 resetForm();
@@ -84,13 +86,13 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
             <DialogTrigger asChild>
                 <Button className="bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold rounded-xl gap-2 h-12 px-6">
-                    <Plus className="h-4 w-4" /> New Procedure
+                    <Plus className="h-4 w-4" /> {t("newProcedure")}
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md rounded-2xl">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-black text-[#1E3A8A]">New Procedure</DialogTitle>
-                    <DialogDescription>Create a procedure for a client using one of your workflows.</DialogDescription>
+                    <DialogTitle className="text-xl font-black text-[#1E3A8A]">{t("dialogTitle")}</DialogTitle>
+                    <DialogDescription>{t("dialogDescription")}</DialogDescription>
                 </DialogHeader>
 
                 {error && (
@@ -106,15 +108,15 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
                     </div>
                 ) : templates.length === 0 ? (
                     <div className="py-8 text-center space-y-3">
-                        <p className="text-sm text-gray-500">You don't have any workflows to build a procedure from yet.</p>
+                        <p className="text-sm text-gray-500">{t("noWorkflowsYet")}</p>
                         <Link href="/admin/dashboard/steps" className="inline-block px-5 py-2.5 rounded-xl bg-[#1E3A8A] text-white font-bold text-sm">
-                            Create a Workflow
+                            {t("createWorkflow")}
                         </Link>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-1.5">
-                            <Label>Client</Label>
+                            <Label>{t("clientLabel")}</Label>
                             <select
                                 value={clientId}
                                 onChange={(e) => setClientId(e.target.value)}
@@ -122,18 +124,18 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
                                 disabled={isPending}
                                 className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
                             >
-                                <option value="">Select a client...</option>
+                                <option value="">{t("selectClientPlaceholder")}</option>
                                 {clients.map((c) => (
                                     <option key={c.id} value={c.id}>{c.name} — {c.email}</option>
                                 ))}
                             </select>
                             {clients.length === 0 && (
-                                <p className="text-xs text-gray-400">No clients yet — create one under Manage Clients first.</p>
+                                <p className="text-xs text-gray-400">{t("noClientsYet")}</p>
                             )}
                         </div>
 
                         <div className="space-y-1.5">
-                            <Label>Workflow</Label>
+                            <Label>{t("workflowLabel")}</Label>
                             <select
                                 value={templateId}
                                 onChange={(e) => setTemplateId(e.target.value)}
@@ -141,22 +143,22 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
                                 disabled={isPending}
                                 className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
                             >
-                                {templates.map((t) => (
-                                    <option key={t.id} value={t.id}>{t.name} ({t.stepCount} steps)</option>
+                                {templates.map((tpl) => (
+                                    <option key={tpl.id} value={tpl.id}>{tpl.name} ({t("stepCount", { count: tpl.stepCount })})</option>
                                 ))}
                             </select>
                             <p className="text-xs text-gray-400 flex items-center gap-1.5">
                                 <ListOrdered className="h-3.5 w-3.5" />
-                                Manage these under Procedure Steps.
+                                {t("manageUnderSteps")}
                             </p>
                         </div>
 
                         <div className="space-y-1.5">
-                            <Label>Destination country</Label>
+                            <Label>{t("countryLabel")}</Label>
                             <Input
                                 value={country}
                                 onChange={(e) => setCountry(e.target.value)}
-                                placeholder="e.g. Canada"
+                                placeholder={t("countryPlaceholder")}
                                 required
                                 disabled={isPending}
                             />
@@ -167,7 +169,7 @@ export default function CreateApplicationModal({ onCreated }: { onCreated: (appl
                             disabled={isPending || clients.length === 0}
                             className="w-full bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold h-11 rounded-xl"
                         >
-                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Procedure"}
+                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("submit")}
                         </Button>
                     </form>
                 )}

@@ -7,6 +7,7 @@ import { assignAgentToClientAction, toggleSuspendClientAction, deleteClientActio
 import { Button } from "@/components/ui/button";
 import { TruncatedText } from "@/components/ui/truncated-text";
 import CreateClientModal from "./create-client-modal";
+import { useTranslations } from "next-intl";
 
 interface Client {
     id: string;
@@ -32,6 +33,7 @@ interface ClientListProps {
 }
 
 export default function ClientList({ initialClients, agents }: ClientListProps) {
+    const t = useTranslations("adminClients");
     const [search, setSearch] = useState("");
     const [clients, setClients] = useState(initialClients);
     const [isAssigning, setIsAssigning] = useState<string | null>(null); // clientId of client being reassigned
@@ -56,7 +58,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
     const action = isCurrentlySuspended ? "unsuspend" : "suspend";
 
 
-    const confirmed = window.confirm(`Are you sure you want to ${action} this client?`);
+    const confirmed = window.confirm(isCurrentlySuspended ? t("confirmUnsuspend") : t("confirmSuspend"));
 
     if (confirmed) {
         const res = await toggleSuspendClientAction(clientId, isCurrentlySuspended);
@@ -70,7 +72,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
 };
 
     const handleDelete = async (clientId: string) => {
-        if (!confirm("Are you sure you want to permanently delete this client? This action cannot be undone.")) return;
+        if (!confirm(t("confirmDelete"))) return;
         const res = await deleteClientAction(clientId);
         if (res.error) alert(res.error);
         else window.location.reload();
@@ -80,7 +82,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
         <div className="space-y-6">
             {/* Header row with title and Create Client button */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-2xl font-semibold" style={{ color: "#1E3A8A" }}>Manage Clients</h1>
+                <h1 className="text-2xl font-semibold" style={{ color: "#1E3A8A" }}>{t("pageTitle")}</h1>
                 <CreateClientModal
                     agents={agents}
                     onClientCreated={(newClient) => setClients(prev => [newClient, ...prev])}
@@ -92,7 +94,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                 <div className="relative flex-1 md:w-1/2">
                     <Search className="absolute left-4 top-3.5 h-5 w-5 text-[#374151]" />
                     <Input
-                        placeholder="Search clients..."
+                        placeholder={t("searchPlaceholder")}
                         className="pl-12 h-12 bg-white border-gray-300 text-[16px] placeholder-[#6B7280]"
                         style={{ borderRadius: "8px" }}
                         value={search}
@@ -105,11 +107,11 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                 <table className="w-full text-left border-separate border-spacing-0">
                     <thead>
                         <tr className="bg-gray-100/80">
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">Client Name</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Email</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Assigned Agent</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Status</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">Actions</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">{t("colClientName")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colEmail")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colAssignedAgent")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colStatus")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">{t("colActions")}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -136,7 +138,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                                 defaultValue={client.agentId || ""}
                                                 onChange={(e) => handleAssign(client.id, e.target.value)}
                                             >
-                                                <option value="" disabled>Select Agent</option>
+                                                <option value="" disabled>{t("selectAgent")}</option>
                                                 {agents.map(agent => (
                                                     <option key={agent.id} value={agent.id}>
                                                         {agent.name.length > 20 ? agent.name.substring(0, 20) + "..." : agent.name}
@@ -152,7 +154,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                             {client.agent ? (
                                                 <span className="font-bold text-[#374151] max-w-[150px] truncate block" title={client.agent.name}>{client.agent.name}</span>
                                             ) : (
-                                                <span className="text-[14px] font-bold uppercase tracking-tighter text-gray-400 italic">Unassigned</span>
+                                                <span className="text-[14px] font-bold uppercase tracking-tighter text-gray-400 italic">{t("unassigned")}</span>
                                             )}
                                         </div>
                                     )}
@@ -164,7 +166,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                             ? "bg-red-100 text-red-800 border-red-200"
                                             : "bg-emerald-100 text-emerald-800 border-emerald-200"
                                         }`}>
-                                            {client.isSuspended ? "Suspended" : "Active"}
+                                            {client.isSuspended ? t("statusSuspended") : t("statusActive")}
                                         </span>
                                     </div>
                                 </td>
@@ -172,7 +174,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                                     <div className="flex items-center justify-end gap-2 transition-all duration-300">
                                         <button
                                             className="p-2 text-[#374151] hover:text-[#1E3A8A] hover:bg-white rounded-lg transition-all disabled:opacity-50"
-                                            title={client.isSuspended ? "Cannot assign agent to suspended client" : "Assign/Reassign Agent"}
+                                            title={client.isSuspended ? t("assignTooltipDisabled") : t("assignTooltip")}
                                             disabled={client.isSuspended}
                                             onClick={() => setIsAssigning(client.id)}
                                         >
@@ -181,14 +183,14 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
 
                                         <button
                                             className={`p-2 rounded-lg transition-all bg-white ${client.isSuspended ? "text-emerald-600 hover:bg-emerald-50" : "text-red-500 hover:bg-red-50"}`}
-                                            title={client.isSuspended ? "Unsuspend Client" : "Suspend Client"}
+                                            title={client.isSuspended ? t("unsuspendTooltip") : t("suspendTooltip")}
                                             onClick={() => handleToggleSuspend(client.id, client.isSuspended)}
                                         >
                                             <Ban size={20} />
                                         </button>
                                         <button
                                             className="p-2 text-red-700 hover:text-red-900 hover:bg-red-100 rounded-lg transition-all bg-white"
-                                            title="Delete Client"
+                                            title={t("deleteTooltip")}
                                             onClick={() => handleDelete(client.id)}
                                         >
                                             <Trash2 size={20} />
@@ -200,7 +202,7 @@ export default function ClientList({ initialClients, agents }: ClientListProps) 
                         {filteredClients.length === 0 && (
                             <tr>
                                 <td colSpan={5} className="px-6 py-12 text-center text-[#374151] font-bold uppercase tracking-widest text-[16px]">
-                                    No clients found matching your search.
+                                    {t("noClientsFound")}
                                 </td>
                             </tr>
                         )}

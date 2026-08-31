@@ -10,10 +10,11 @@ import Link from "next/link";
 import SendMessageModal from "./send-message-modal";
 import NewApplicationModal from "./new-application-modal";
 import EditClientProfileModal from "./edit-client-profile-modal";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function ClientDetailPage({ params }: { params: { id: string } }) {
     const locale = await getLocale();
+    const t = await getTranslations("agentClientDetail");
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -68,7 +69,7 @@ const client = await prisma.user.findUnique({
                     <div>
                         <h1 className="text-3xl font-black text-gray-900 tracking-tight">{client.name}</h1>
                         <p className="text-gray-500 font-medium flex items-center gap-2">
-                           <Shield className="h-4 w-4 text-blue-500" /> Assigned Client
+                           <Shield className="h-4 w-4 text-blue-500" /> {t("assignedClient")}
                         </p>
                     </div>
                 </div>
@@ -83,33 +84,33 @@ const client = await prisma.user.findUnique({
                     <Card className="border-none shadow-xl shadow-gray-200/50 rounded-2xl overflow-hidden">
                         <CardHeader className="bg-white border-b border-gray-50 py-6 flex flex-row items-center justify-between">
                             <CardTitle className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                <User className="h-4 w-4 text-blue-500" /> Personal Profile
+                                <User className="h-4 w-4 text-blue-500" /> {t("personalProfile")}
                             </CardTitle>
                             <EditClientProfileModal clientId={id} client={client} />
                         </CardHeader>
                         <CardContent className="p-6 space-y-4">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Email Address</label>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{t("emailAddress")}</label>
                                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
                                     <Mail className="h-4 w-4 text-gray-400" /> {client.email}
                                 </div>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Phone Number</label>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{t("phoneNumber")}</label>
                                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                                    <Phone className="h-4 w-4 text-gray-400" /> {client.phoneNumber || "Not provided"}
+                                    <Phone className="h-4 w-4 text-gray-400" /> {client.phoneNumber || t("notProvided")}
                                 </div>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Nationality</label>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{t("nationality")}</label>
                                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                                    <MapPin className="h-4 w-4 text-gray-400" /> {client.nationality || "Not specified"}
+                                    <MapPin className="h-4 w-4 text-gray-400" /> {client.nationality || t("notSpecified")}
                                 </div>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Date of Birth</label>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{t("dateOfBirth")}</label>
                                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                                    <Calendar className="h-4 w-4 text-gray-400" /> {client.dateOfBirth ? new Date(client.dateOfBirth).toLocaleDateString(locale) : "Not provided"}
+                                    <Calendar className="h-4 w-4 text-gray-400" /> {client.dateOfBirth ? new Date(client.dateOfBirth).toLocaleDateString(locale) : t("notProvided")}
                                 </div>
                             </div>
                         </CardContent>
@@ -120,11 +121,11 @@ const client = await prisma.user.findUnique({
                         <CardContent className="p-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="text-[10px] font-black text-blue-200 uppercase tracking-wider mb-1">Procedures</div>
+                                    <div className="text-[10px] font-black text-blue-200 uppercase tracking-wider mb-1">{t("procedures")}</div>
                                     <div className="text-2xl font-black">{client.applications.length}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[10px] font-black text-blue-200 uppercase tracking-wider mb-1">Documents</div>
+                                    <div className="text-[10px] font-black text-blue-200 uppercase tracking-wider mb-1">{t("documents")}</div>
                                     <div className="text-2xl font-black">{documentsCount}</div>
                                 </div>
                             </div>
@@ -139,13 +140,13 @@ const client = await prisma.user.findUnique({
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
                              <div className="space-y-1">
                                 <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3 uppercase tracking-tighter">
-                                    <Globe className="h-6 w-6 text-blue-600" /> Journey Roadmaps
+                                    <Globe className="h-6 w-6 text-blue-600" /> {t("journeyRoadmaps")}
                                 </h2>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-9">Active Case Files & Submissions</p>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-9">{t("activeCaseFiles")}</p>
                              </div>
                              <Link href="/dashboard/agent/applications">
                                 <Button variant="outline" className="rounded-2xl text-[10px] font-black uppercase tracking-widest px-6 h-12 shadow-sm border-gray-100 hover:bg-blue-50 hover:text-blue-700 transition-all">
-                                    Full Roadmap Admin <ArrowRight className="ml-2 h-4 w-4" />
+                                    {t("fullRoadmapAdmin")} <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
                              </Link>
                         </div>
@@ -164,7 +165,7 @@ const client = await prisma.user.findUnique({
                                                     {app.country}
                                                 </CardTitle>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-[10px] font-black text-blue-100 uppercase tracking-widest bg-white/10 px-3 py-1 rounded-full">Active Case</span>
+                                                    <span className="text-[10px] font-black text-blue-100 uppercase tracking-widest bg-white/10 px-3 py-1 rounded-full">{t("activeCase")}</span>
                                                     <span className="h-1 w-1 bg-blue-300 rounded-full" />
                                                     <span className="text-[10px] font-mono text-blue-200">{app.id}</span>
                                                 </div>
@@ -203,7 +204,7 @@ const client = await prisma.user.findUnique({
                                                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8" title="Click Phase for Admin Dashboard Controls">
                                                                 <div>
                                                                     <div className="flex items-center gap-3 mb-1">
-                                                                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Phase 0{idx + 1}</span>
+                                                                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">{t("phasePrefix", { index: idx + 1 })}</span>
                                                                         <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${
                                                                             proc.status === "APPROVED" ? "bg-emerald-50 text-emerald-600" :
                                                                             "bg-blue-50 text-blue-600"
@@ -212,7 +213,7 @@ const client = await prisma.user.findUnique({
                                                            <h4 className="text-xl font-black text-gray-900 uppercase tracking-tight">{proc.label || STEP_LABELS[proc.type as keyof typeof STEP_LABELS] || proc.type}</h4>                                                                </div>
                                                                 <Link href={`/dashboard/agent/applications/${app.id}`}>
                                                                     <Button variant="ghost" className="rounded-xl h-10 px-5 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A] hover:bg-blue-50 border border-transparent hover:border-blue-100">
-                                                                        Manage Decision <ArrowRight className="ml-2 h-3 w-3" />
+                                                                        {t("manageDecision")} <ArrowRight className="ml-2 h-3 w-3" />
                                                                     </Button>
                                                                 </Link>
                                                             </div>
@@ -241,8 +242,8 @@ const client = await prisma.user.findUnique({
                                                                             <SendMessageModal 
                                                                                 clientId={id} 
                                                                                 clientName={client.name} 
-                                                                                defaultSubject={`Evidence Required: ${doc.name}`}
-                                                                                buttonText={<div className="flex items-center gap-1.5"><XCircle size={18} /> <span className="text-[10px] font-black uppercase tracking-widest">Reject evidence</span></div>}
+                                                                                defaultSubject={t("evidenceRequiredSubject", { docName: doc.name })}
+                                                                                buttonText={<div className="flex items-center gap-1.5"><XCircle size={18} /> <span className="text-[10px] font-black uppercase tracking-widest">{t("rejectEvidence")}</span></div>}
                                                                             />
                                                                         </div>
                                                                     </div>
@@ -250,7 +251,7 @@ const client = await prisma.user.findUnique({
                                                                 {proc.Document.length === 0 && idx >= 3 && (
                                                                     <div className="md:col-span-2 py-10 flex flex-col items-center justify-center bg-white/50 border border-gray-100 rounded-3xl italic">
                                                                         <Clock className="h-6 w-6 text-gray-200 mb-2" />
-                                                                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Awaiting client attachments...</p>
+                                                                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("awaitingAttachments")}</p>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -265,8 +266,8 @@ const client = await prisma.user.findUnique({
                         ) : (
                             <div className="p-24 text-center bg-white rounded-[48px] border-2 border-dashed border-gray-100 shadow-xl shadow-blue-50/20">
                                 <Globe className="h-16 w-16 text-gray-100 mx-auto mb-6" />
-                                <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight mb-2">No Active Journeys</h3>
-                                <p className="text-gray-400 font-medium max-w-xs mx-auto text-sm leading-relaxed">This client hasn't started any immigration applications yet.</p>
+                                <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight mb-2">{t("noActiveJourneys")}</h3>
+                                <p className="text-gray-400 font-medium max-w-xs mx-auto text-sm leading-relaxed">{t("noActiveJourneysDescription")}</p>
                             </div>
                         )}
                     </div>

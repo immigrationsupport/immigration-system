@@ -15,8 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Edit2, Loader2, UserCog, Eye, EyeOff } from "lucide-react";
 import { updateAgentAction } from "./actions";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export default function EditAgentModal({ agentId, currentName, currentEmail }: { agentId: string, currentName: string, currentEmail: string }) {
+    const t = useTranslations("adminAgents.edit");
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState(currentName);
@@ -32,11 +34,11 @@ export default function EditAgentModal({ agentId, currentName, currentEmail }: {
 
         setLoading(false);
         if (result.success) {
-            toast.success("Agent updated successfully");
+            toast.success(t("toastSuccess"));
             setPassword("");
             setOpen(false);
         } else {
-            toast.error(result.error || "Failed to update agent");
+            toast.error(result.error || t("toastError"));
         }
     };
 
@@ -45,7 +47,7 @@ export default function EditAgentModal({ agentId, currentName, currentEmail }: {
             <DialogTrigger asChild>
                 <button 
                     className="p-2 text-gray-400 hover:text-blue-800 hover:bg-blue-50 transition-all rounded-lg" 
-                    title="Edit Agent"
+                    title={t("tooltip")}
                 >
                     <Edit2 size={16} />
                 </button>
@@ -55,26 +57,26 @@ export default function EditAgentModal({ agentId, currentName, currentEmail }: {
                     <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
                         <UserCog className="h-6 w-6 text-blue-600" />
                     </div>
-                    <DialogTitle className="text-2xl font-black text-gray-900">Edit Agent Account</DialogTitle>
+                    <DialogTitle className="text-2xl font-black text-gray-900">{t("title")}</DialogTitle>
                     <DialogDescription className="text-gray-500 font-medium">
-                        Modify descriptions or reset password for <span className="text-blue-600 font-bold inline-block max-w-[200px] truncate align-bottom" title={currentName}>{currentName}</span>.
+                        {t("subtitlePrefix")} <span className="text-blue-600 font-bold inline-block max-w-[200px] truncate align-bottom" title={currentName}>{currentName}</span>.
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4 w-full overflow-hidden">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("fullName")}</label>
                         <Input 
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             className="h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-blue-100 font-bold"
-                            placeholder="Max 50 characters"
+                            placeholder={t("fullNamePlaceholder")}
                             maxLength={50}
                             required
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("email")}</label>
                         <Input 
                             type="email"
                             value={email}
@@ -85,14 +87,14 @@ export default function EditAgentModal({ agentId, currentName, currentEmail }: {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">New Password (Optional)</label>
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("newPassword")}</label>
                         <div className="relative">
                             <Input 
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-blue-100 font-bold pr-10"
-                                placeholder="Leave blank to keep current"
+                                placeholder={t("newPasswordPlaceholder")}
                             />
                             <button
                                 type="button"
@@ -111,14 +113,14 @@ export default function EditAgentModal({ agentId, currentName, currentEmail }: {
                             onClick={() => setOpen(false)}
                             className="font-bold text-gray-500 hover:bg-gray-50 rounded-xl"
                         >
-                            Cancel
+                            {t("cancel")}
                         </Button>
                         <Button 
                             type="submit" 
                             disabled={loading}
                             className="bg-[#1E3A8A] hover:bg-[#152a6a] text-white font-black rounded-xl px-8 shadow-lg shadow-blue-200"
                         >
-                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("save")}
                         </Button>
                     </DialogFooter>
                 </form>

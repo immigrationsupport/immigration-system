@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
+
 import {
     Plus, Loader2, Eye, EyeOff, RefreshCw, Copy, CheckCircle2, X, UserPlus, KeyRound, User, Mail, Users
 } from "lucide-react";
@@ -33,7 +35,9 @@ function generatePassword(): string {
     return pw.sort(() => Math.random() - 0.5).join("");
 }
 
-export default function CreateClientModal({ agents, onClientCreated }: CreateClientModalProps) {    const [isOpen, setIsOpen] = useState(false);
+export default function CreateClientModal({ agents, onClientCreated }: CreateClientModalProps) {    
+        const t = useTranslations("adminClients");
+const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(true);
@@ -110,7 +114,7 @@ export default function CreateClientModal({ agents, onClientCreated }: CreateCli
                 style={{ backgroundColor: "#1E3A8A", borderRadius: "12px" }}
             >
                 <UserPlus size={16} />
-                Create Client
+                {t("button")}
             </Button>
 
             {isOpen && (

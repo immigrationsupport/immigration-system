@@ -15,10 +15,12 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTranslations } from "next-intl";
 
 import EditAgentModal from "./edit-agent-modal";
 
 export default function AgentActionButtons({ agentId, agentName, agentEmail, isSuspended }: { agentId: string, agentName: string, agentEmail: string, isSuspended: boolean }) {
+    const t = useTranslations("adminAgents.actions");
     const [loading, setLoading] = useState(false);
 
     const handleToggleSuspend = async () => {
@@ -26,7 +28,7 @@ export default function AgentActionButtons({ agentId, agentName, agentEmail, isS
         const result = await toggleSuspendAgentAction(agentId, isSuspended);
         setLoading(false);
         if (result.success) {
-            toast.success(isSuspended ? "Agent unsuspended" : "Agent suspended");
+            toast.success(isSuspended ? t("toastUnsuspended") : t("toastSuspended"));
         } else {
             toast.error(result.error);
         }
@@ -37,7 +39,7 @@ export default function AgentActionButtons({ agentId, agentName, agentEmail, isS
         const result = await deleteAgentAction(agentId);
         setLoading(false);
         if (result.success) {
-            toast.success("Agent deleted successfully");
+            toast.success(t("toastDeleteSuccess"));
         } else {
             toast.error(result.error);
         }
@@ -55,7 +57,7 @@ export default function AgentActionButtons({ agentId, agentName, agentEmail, isS
                     ? "text-green-600 hover:bg-green-50" 
                     : "text-gray-400 text-orange-500"
                 }`} 
-                title={isSuspended ? "Unsuspend Agent" : "Suspend Agent"}
+                title={isSuspended ? t("unsuspendTooltip") : t("suspendTooltip")}
             >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : (isSuspended ? <CheckCircle2 size={16} /> : <Ban size={16} />)}
             </button>
@@ -64,25 +66,25 @@ export default function AgentActionButtons({ agentId, agentName, agentEmail, isS
                 <AlertDialogTrigger asChild>
                     <button 
                         className="p-2 text-gray-400 text-red-500 transition-all rounded-lg" 
-                        title="Delete Agent"
+                        title={t("deleteTooltip")}
                     >
                         <Trash2 size={16} />
                     </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="border-none shadow-2xl rounded-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-xl font-black text-gray-900">Confirm Deletion</AlertDialogTitle>
+                        <AlertDialogTitle className="text-xl font-black text-gray-900">{t("confirmTitle")}</AlertDialogTitle>
                         <AlertDialogDescription className="text-gray-500 font-medium pt-2">
-                            This action cannot be undone. This will permanently delete the agent's account. This may fail if the agent has assigned clients or active applications.
+                            {t("confirmDescription")}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="pt-4">
-                        <AlertDialogCancel className="font-bold border-none bg-gray-100 hover:bg-gray-200 rounded-xl">Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="font-bold border-none bg-gray-100 hover:bg-gray-200 rounded-xl">{t("cancel")}</AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={handleDelete}
                             className="bg-red-600 hover:bg-red-700 text-white font-black rounded-xl px-6"
                         >
-                            Delete Agent
+                            {t("confirmDelete")}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

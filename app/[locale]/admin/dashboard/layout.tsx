@@ -16,11 +16,13 @@ import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { getMyAgencyName } from "@/lib/agency-actions";
 import AiSearchBar from "@/app/[locale]/admin/dashboard/search/ai-search-bar";
+import { useTranslations } from "next-intl";
 export default function AdminDashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const t = useTranslations("adminLayout");
     const { data: session, isPending } = useSession();
     const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -43,28 +45,28 @@ export default function AdminDashboardLayout({
     }, [session]);
 
     if (isPending) {
-        return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+        return <div className="min-h-screen flex items-center justify-center">{t("loading")}</div>;
     }
 
     if (!session) return null; // Prevent flicker while redirecting
 const adminSidebarItems = [
-        { icon: "LayoutDashboard", label: "Overview", href: "/admin/dashboard" },
-        { icon: "Briefcase", label: "Manage Agents", href: "/admin/dashboard/agents" },
-        { icon: "Users", label: "Manage Clients", href: "/admin/dashboard/clients" },
-        { icon: "FileText", label: "All Procedures", href: "/admin/dashboard/applications" },
-        { icon: "ListOrdered", label: "Procedure Steps", href: "/admin/dashboard/steps" },
-        { icon: "FolderSearch", label: "Documents Monitoring", href: "/admin/dashboard/documents" },
-        { icon: "List", label: "System Logs", href: "/admin/dashboard/logs" },
-        { icon: "CreditCard", label: "Billing", href: "/admin/dashboard/billing" },
-        { icon: "Settings", label: "System Settings", href: "/admin/dashboard/settings" }
+        { icon: "LayoutDashboard", label: t("nav.overview"), href: "/admin/dashboard" },
+        { icon: "Briefcase", label: t("nav.manageAgents"), href: "/admin/dashboard/agents" },
+        { icon: "Users", label: t("nav.manageClients"), href: "/admin/dashboard/clients" },
+        { icon: "FileText", label: t("nav.allProcedures"), href: "/admin/dashboard/applications" },
+        { icon: "ListOrdered", label: t("nav.procedureSteps"), href: "/admin/dashboard/steps" },
+        { icon: "FolderSearch", label: t("nav.documentsMonitoring"), href: "/admin/dashboard/documents" },
+        { icon: "List", label: t("nav.systemLogs"), href: "/admin/dashboard/logs" },
+        { icon: "CreditCard", label: t("nav.billing"), href: "/admin/dashboard/billing" },
+        { icon: "Settings", label: t("nav.systemSettings"), href: "/admin/dashboard/settings" }
     ];
     return (
         <div className="flex bg-white min-h-screen" style={{ fontFamily: "var(--font-geist-sans)" }}>
             {/* Sidebar */}
             <Sidebar
                 items={adminSidebarItems}
-                userRole="Admin"
-                userName={session?.user?.name || "System Admin"}
+                userRole={t("userRole")}
+                userName={session?.user?.name || t("defaultUserName")}
                 agencyName={agencyName}
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
@@ -77,10 +79,9 @@ const adminSidebarItems = [
                     title="" 
                     showLogout={true} 
                     onMenuClick={() => setIsSidebarOpen(true)}
+                    centerSlot={<AiSearchBar />}
                 />
-             <div className="px-4 md:px-8 pt-6 bg-white border-b border-gray-100">
-                    <AiSearchBar />
-                </div>
+            
                 <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full mx-auto" style={{ backgroundColor: "#F9FAFB" }}>
                     {children}
                 </main>

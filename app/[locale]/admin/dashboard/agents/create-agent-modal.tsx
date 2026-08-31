@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Eye, EyeOff } from "lucide-react";
 import { createAgentAction } from "./actions";
+import { useTranslations } from "next-intl";
 
 export default function CreateAgentModal() {
+    const t = useTranslations("adminAgents.create");
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export default function CreateAgentModal() {
                 style={{ backgroundColor: "#1E3A8A", borderRadius: "12px" }}
             >
                 <Plus size={16} />
-                Create Agent
+                {t("button")}
             </Button>
 
             {isOpen && (
@@ -49,8 +51,8 @@ export default function CreateAgentModal() {
                             ✕
                         </button>
 
-                        <h2 className="text-2xl font-black mb-1 text-[#1E3A8A]">Create New Agent</h2>
-                        <p className="text-sm text-gray-500 mb-8 font-medium">Provision a new agent account.</p>
+                        <h2 className="text-2xl font-black mb-1 text-[#1E3A8A]">{t("title")}</h2>
+                        <p className="text-sm text-gray-500 mb-8 font-medium">{t("subtitle")}</p>
 
                         {error && (
                             <div className="mb-6 bg-red-50 text-red-600 p-4 rounded-xl text-xs font-bold border border-red-100 uppercase tracking-tight">
@@ -60,28 +62,28 @@ export default function CreateAgentModal() {
 
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div className="space-y-1.5">
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("fullName")}</label>
                                 <input
                                     name="name"
                                     type="text"
                                     required
                                     maxLength={50}
                                     className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-200 outline-none font-bold"
-                                    placeholder="e.g. John Agent (Max 50 chars)"
+                                    placeholder={t("fullNamePlaceholder")}
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email</label>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("email")}</label>
                                 <input
                                     name="email"
                                     type="email"
                                     required
                                     className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-200 outline-none font-bold"
-                                    placeholder="agent@example.com"
+                                    placeholder={t("emailPlaceholder")}
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Password</label>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("password")}</label>
                                 <div className="relative">
                                     <input
                                         name="password"
@@ -89,7 +91,7 @@ export default function CreateAgentModal() {
                                         required
                                         minLength={6}
                                         className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-200 outline-none font-bold pr-12"
-                                        placeholder="Min 6 characters"
+                                        placeholder={t("passwordPlaceholder")}
                                     />
                                     <button
                                         type="button"
@@ -109,7 +111,7 @@ export default function CreateAgentModal() {
                                     disabled={loading}
                                     className="font-bold text-gray-500 rounded-xl"
                                 >
-                                    Cancel
+                                    {t("cancel")}
                                 </Button>
                                 <Button
                                     type="submit"
@@ -118,7 +120,7 @@ export default function CreateAgentModal() {
                                     className="text-white font-black rounded-xl px-8 shadow-lg shadow-blue-100"
                                 >
                                     {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                    {loading ? "Creating..." : "Save Agent"}
+                                    {loading ? t("creating") : t("save")}
                                 </Button>
                             </div>
                         </form>

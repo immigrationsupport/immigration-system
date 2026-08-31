@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import { confirmFlutterwavePayment } from "@/lib/subscription-payments";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,7 @@ export default async function VerifyPaymentPage({
 }: {
     searchParams: Promise<{ status?: string; tx_ref?: string; transaction_id?: string }>;
 }) {
+    const t = await getTranslations("adminBilling.verify");
     const params = await searchParams;
     const { status, tx_ref, transaction_id } = params;
 
@@ -19,8 +21,9 @@ export default async function VerifyPaymentPage({
         return (
             <Result
                 icon={<XCircle className="h-10 w-10 text-gray-400" />}
-                title="Payment cancelled"
-                message="You cancelled the checkout before it completed. No changes were made to your subscription."
+                title={t("cancelledTitle")}
+                message={t("cancelledMessage")}
+                backLabel={t("backToBilling")}
             />
         );
     }
@@ -31,12 +34,13 @@ export default async function VerifyPaymentPage({
         return (
             <Result
                 icon={<CheckCircle2 className="h-10 w-10 text-green-600" />}
-                title="Payment successful"
+                title={t("successTitle")}
                 message={
                     result.outcome === "success"
-                        ? `Your agency is now on the ${result.planName} plan.`
-                        : "This payment has already been confirmed — your subscription is up to date."
+                        ? t("successMessage", { planName: result.planName })
+                        : t("alreadyProcessedMessage")
                 }
+                backLabel={t("backToBilling")}
             />
         );
     }
@@ -45,8 +49,9 @@ export default async function VerifyPaymentPage({
         return (
             <Result
                 icon={<Clock className="h-10 w-10 text-amber-500" />}
-                title="Still checking..."
-                message="We couldn't immediately match this payment. If money left your account, it will be reflected on your billing page shortly — refresh in a minute."
+                title={t("checkingTitle")}
+                message={t("checkingMessage")}
+                backLabel={t("backToBilling")}
             />
         );
     }
@@ -54,13 +59,14 @@ export default async function VerifyPaymentPage({
     return (
         <Result
             icon={<XCircle className="h-10 w-10 text-red-500" />}
-            title="Payment failed"
+            title={t("failedTitle")}
             message={result.reason}
+            backLabel={t("backToBilling")}
         />
     );
 }
 
-function Result({ icon, title, message }: { icon: React.ReactNode; title: string; message: string }) {
+function Result({ icon, title, message, backLabel }: { icon: React.ReactNode; title: string; message: string; backLabel: string }) {
     return (
         <div className="max-w-md mx-auto mt-16 text-center space-y-4">
             <div className="flex justify-center">{icon}</div>
@@ -70,7 +76,7 @@ function Result({ icon, title, message }: { icon: React.ReactNode; title: string
                 href="/admin/dashboard/billing"
                 className="inline-block mt-4 px-6 py-3 rounded-xl bg-[#1E3A8A] text-white font-bold hover:bg-blue-900 transition-colors"
             >
-                Back to Billing
+                {backLabel}
             </Link>
         </div>
     );

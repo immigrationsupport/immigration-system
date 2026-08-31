@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { signIn } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function AdminLoginPage() {
+    const t = useTranslations("adminAuth.login");
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -30,11 +32,11 @@ export default function AdminLoginPage() {
                     router.push("/admin/dashboard");
                 },
                 onError: (ctx) => {
-                    setError(ctx.error.message || "Invalid credentials");
+                    setError(ctx.error.message || t("errorInvalidCredentials"));
                 }
             });
         } catch (err: any) {
-            setError(err.message || "An unexpected error occurred");
+            setError(err.message || t("errorUnexpected"));
         } finally {
             setLoading(false);
         }
@@ -54,10 +56,10 @@ export default function AdminLoginPage() {
                         className="text-3xl font-bold mb-2"
                         style={{ color: "#1E3A8A" }}
                     >
-                        Admin Login
+                        {t("title")}
                     </h1>
                     <p className="text-gray-500 text-sm">
-                        Sign in to access the administration panel
+                        {t("subtitle")}
                     </p>
                 </div>
 
@@ -73,14 +75,14 @@ export default function AdminLoginPage() {
                             htmlFor="email"
                             className="block text-sm font-medium text-gray-700 mb-1"
                         >
-                            Email
+                            {t("email")}
                         </label>
                         <Input
                             id="email"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="admin@example.com"
+                            placeholder={t("emailPlaceholder")}
                             required
                             className="w-full"
                         />
@@ -91,7 +93,7 @@ export default function AdminLoginPage() {
                             htmlFor="password"
                             className="block text-sm font-medium text-gray-700 mb-1"
                         >
-                            Password
+                            {t("password")}
                         </label>
                         <div className="relative">
                             <Input
@@ -120,13 +122,13 @@ export default function AdminLoginPage() {
                         className="w-full text-white font-medium py-2.5 rounded hover:opacity-90 transition-opacity"
                         style={{ backgroundColor: "#1E3A8A", borderRadius: "8px" }}
                     >
-                        {loading ? "Signing in..." : "Sign In"}
+                        {loading ? t("signingIn") : t("signIn")}
                     </Button>
                 </form>
 
                 <div className="mt-6 text-center">
                     <p className="text-xs font-medium text-gray-400">
-                        Authorized access only
+                        {t("footerNote")}
                     </p>
                 </div>
             </div>

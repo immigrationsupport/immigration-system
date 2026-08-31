@@ -4,10 +4,12 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import DocumentTable from "@/app/[locale]/admin/dashboard/documents/document-table";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function DocumentMonitoringPage() {
+    const t = await getTranslations("adminDocuments");
     const session = await auth.api.getSession({ headers: await headers() });
     const agencyId = (session?.user as any)?.agencyId;
 
@@ -77,11 +79,11 @@ export default async function DocumentMonitoringPage() {
         <div className="space-y-6 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#1E3A8A" }}>Document Monitoring</h1>
-                    <p className="text-gray-500 text-sm mt-1">Global audit view for all uploaded system documentation.</p>
+                    <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#1E3A8A" }}>{t("pageTitle")}</h1>
+                    <p className="text-gray-500 text-sm mt-1">{t("pageSubtitle")}</p>
                 </div>
                 <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
-                    <span className="text-blue-700 text-sm font-semibold">{documents.length} Total Documents</span>
+                    <span className="text-blue-700 text-sm font-semibold">{t("totalDocuments", { count: documents.length })}</span>
                 </div>
             </div>
 

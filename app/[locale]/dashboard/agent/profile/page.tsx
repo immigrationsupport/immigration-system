@@ -5,8 +5,11 @@ import { User, Mail, Calendar, MapPin, Shield, Phone, CreditCard, Award } from "
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import prisma from "@/lib/prisma";
 import ChangePasswordButton from "@/components/ChangePasswordButton";
+import { getTranslations, getLocale } from "next-intl/server";
 
 export default async function AgentProfilePage() {
+    const t = await getTranslations("agentProfile");
+    const locale = await getLocale();
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -20,7 +23,7 @@ export default async function AgentProfilePage() {
         where: { id: session.user.id }
     });
 
-    if (!agent) return <div>Agent not found</div>;
+    if (!agent) return <div>{t("agentNotFound")}</div>;
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 px-4 py-10">
@@ -32,10 +35,10 @@ export default async function AgentProfilePage() {
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">{agent.name}</h1>
                     <div className="flex flex-wrap justify-center md:justify-start gap-4">
                         <span className="inline-flex items-center px-4 py-1.5 text-sm font-bold bg-white-100 text-[#1E3A8A] ">
-                            <Shield className="w-4 h-4 mr-2" /> Authorized Agent
+                            <Shield className="w-4 h-4 mr-2" /> {t("authorizedAgent")}
                         </span>
                         <span className="inline-flex items-center px-4 py-1.5  text-sm font-bold bg-white-100 text-green-700 ">
-                            <CheckCircle2 className="w-4 h-4 mr-2" /> Active Status
+                            <CheckCircle2 className="w-4 h-4 mr-2" /> {t("activeStatus")}
                         </span>
                     </div>
                 
@@ -47,7 +50,7 @@ export default async function AgentProfilePage() {
                 <Card className="border-none overflow-hidden">
                     <CardHeader className="bg-gray-50/50 border-b border-gray-100 py-6">
                         <CardTitle className="text-xl font-bold flex items-center gap-2">
-                            <User className="w-5 h-5 text-[#1E3A8A]" /> Personal Information
+                            <User className="w-5 h-5 text-[#1E3A8A]" /> {t("personalInformation")}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 space-y-6">
@@ -56,7 +59,7 @@ export default async function AgentProfilePage() {
                                 <Mail className="w-5 h-5" />
                             </div>
                             <div>
-                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Email Address</p>
+                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{t("emailAddress")}</p>
                                 <p className="text-base font-bold text-gray-800">{agent.email}</p>
                             </div>
                         </div>
@@ -66,8 +69,8 @@ export default async function AgentProfilePage() {
                                 <Phone className="w-5 h-5" />
                             </div>
                             <div>
-                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Phone Number</p>
-                                <p className="text-base font-bold text-gray-800">{agent.phoneNumber || "Not provided"}</p>
+                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{t("phoneNumber")}</p>
+                                <p className="text-base font-bold text-gray-800">{agent.phoneNumber || t("notProvided")}</p>
                             </div>
                         </div>
 
@@ -76,8 +79,8 @@ export default async function AgentProfilePage() {
                                 <MapPin className="w-5 h-5" />
                             </div>
                             <div>
-                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Location / Office</p>
-                                <p className="text-base font-bold text-gray-800">{agent.address || "Global HQ (Remote)"}</p>
+                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{t("locationOffice")}</p>
+                                <p className="text-base font-bold text-gray-800">{agent.address || t("globalHqRemote")}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -86,7 +89,7 @@ export default async function AgentProfilePage() {
                 <Card className="border-none   overflow-hidden">
                     <CardHeader className="bg-gray-50/50 border-b border-gray-100 py-6">
                         <CardTitle className="text-xl font-bold flex items-center gap-2">
-                            <Award className="w-5 h-5 text-[#1E3A8A]" /> Professional Details
+                            <Award className="w-5 h-5 text-[#1E3A8A]" /> {t("professionalDetails")}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 space-y-6 border-gray-100">
@@ -95,8 +98,8 @@ export default async function AgentProfilePage() {
                                 <Calendar className="w-5 h-5" />
                             </div>
                             <div>
-                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Joined On</p>
-                                <p className="text-base font-bold text-gray-800">{new Date(agent.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
+                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{t("joinedOn")}</p>
+                                <p className="text-base font-bold text-gray-800">{new Date(agent.createdAt).toLocaleDateString(locale, { dateStyle: 'long' })}</p>
                             </div>
                         </div>
 
@@ -105,14 +108,14 @@ export default async function AgentProfilePage() {
                                 <CreditCard className="w-5 h-5" />
                             </div>
                             <div>
-                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Professional ID</p>
+                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{t("professionalId")}</p>
                                 <p className="text-base font-bold text-gray-800">AGT-{agent.id.slice(0, 8).toUpperCase()}</p>
                             </div>
                         </div>
 
                         <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                            <p className="text-sm font-bold text-[#1E3A8A]">Profile Note</p>
-                            <p className="text-sm text-black-600/80 mt-1 italic">As an agent, you have permission to manage applications and update client records. Please ensure all data handling remains confidential.</p>
+                            <p className="text-sm font-bold text-[#1E3A8A]">{t("profileNote")}</p>
+                            <p className="text-sm text-black-600/80 mt-1 italic">{t("profileNoteText")}</p>
                         </div>
                     </CardContent>
                 </Card>

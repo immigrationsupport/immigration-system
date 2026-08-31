@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { getApplicationDetails, unlockApplication } from "./details-actions";
 import { toast } from "sonner";
 import StepManagement from "@/app/[locale]/dashboard/agent/applications/[id]/step-management";
+import { useTranslations } from "next-intl";
 
 interface DetailsModalProps {
     applicationId: string;
@@ -33,6 +34,8 @@ interface DetailsModalProps {
 }
 
 export default function ApplicationDetailsModal({ applicationId, onClose }: DetailsModalProps) {
+    const t = useTranslations("adminApplications.detailsModal");
+    const tShared = useTranslations("applicationManagement");
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null);
@@ -53,10 +56,10 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
         setActionLoading("unlock");
         const res = await unlockApplication(applicationId);
         if (res.success) {
-            toast.success("Procedure unlocked successfully.");
+            toast.success(t("toastUnlocked"));
             fetchDetails();
         } else {
-            toast.error(res.error || "Failed to unlock.");
+            toast.error(res.error || t("toastUnlockError"));
         }
         setActionLoading(null);
     };
@@ -74,7 +77,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-2xl animate-pulse">
                 <div className="h-12 w-12 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin" />
-                <p className="text-gray-500 font-medium">Retrieving Deep Details...</p>
+                <p className="text-gray-500 font-medium">{tShared("deepDetails")}</p>
             </div>
         </div>
     );
@@ -91,7 +94,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                             <FileText size={24} />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 leading-tight">Procedure: {data.id.substring(0, 8).toUpperCase()}</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 leading-tight">{t("procedurePrefix")} {data.id.substring(0, 8).toUpperCase()}</h2>
                             <p className="text-sm text-gray-500 flex items-center gap-2">
                                 <Globe size={14} /> {data.destination} <span className="text-gray-300">|</span> {data.type.replace('_', ' ')}
                             </p>
@@ -112,8 +115,8 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                 <Lock className="h-6 w-6 text-red-600" />
                             </div>
                             <div>
-                                <h4 className="font-extrabold text-[15px] uppercase tracking-wide">Procedure Locked by Submission</h4>
-                                <p className="text-sm font-medium opacity-90 mt-0.5">The client has submitted this  procedure. Their profile and procedures are now read-only to them. Unlock the procedure to grant edit access back to the client.</p>
+                                <h4 className="font-extrabold text-[15px] uppercase tracking-wide">{t("lockedTitle")}</h4>
+                                <p className="text-sm font-medium opacity-90 mt-0.5">{t("lockedDescription")}</p>
                             </div>
                         </div>
                     )}
@@ -124,7 +127,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                             {/* Client Section */}
                             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
                                 <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <User size={14} /> Client Information
+                                    <User size={14} /> {tShared("clientInformation")}
                                 </h3>
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3">
@@ -138,16 +141,16 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                     </div>
                                     <div className="space-y-2 pt-2 border-t border-gray-200/50">
                                         <div className="flex justify-between text-xs">
-                                            <span className="text-gray-500">Nationality</span>
-                                            <span className="font-bold text-gray-800">{data.client.nationality || "N/A"}</span>
+                                            <span className="text-gray-500">{t("nationality")}</span>
+                                            <span className="font-bold text-gray-800">{data.client.nationality || t("notAvailable")}</span>
                                         </div>
                                         <div className="flex justify-between text-xs">
-                                            <span className="text-gray-500">Phone</span>
-                                            <span className="font-bold text-gray-800">{data.client.phoneNumber || "N/A"}</span>
+                                            <span className="text-gray-500">{t("phone")}</span>
+                                            <span className="font-bold text-gray-800">{data.client.phoneNumber || t("notAvailable")}</span>
                                         </div>
                                         <div className="flex justify-between text-xs">
-                                            <span className="text-gray-500">Status</span>
-                                            <span className="font-bold text-gray-800 capitalize">{data.client.maritalStatus?.toLowerCase() || "N/A"}</span>
+                                            <span className="text-gray-500">{t("status")}</span>
+                                            <span className="font-bold text-gray-800 capitalize">{data.client.maritalStatus?.toLowerCase() || t("notAvailable")}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -156,7 +159,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                             {/* Agent Section */}
                             <div className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100/50">
                                 <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <Shield size={14} /> Assigned Agent
+                                    <Shield size={14} /> {tShared("agentInformation")}
                                 </h3>
                                 {data.agent ? (
                                     <div className="flex items-center gap-3">
@@ -169,7 +172,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className="text-sm italic text-gray-400 py-2">No agent assigned yet.</p>
+                                    <p className="text-sm italic text-gray-400 py-2">{t("noAgentAssigned")}</p>
                                 )}
                             </div>
                         </div>
@@ -207,7 +210,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                         download 
                                         className="h-10 px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center gap-2 text-sm font-bold transition-all"
                                     >
-                                        <Download size={16} /> Download
+                                        <Download size={16} /> {t("download")}
                                     </a>
                                     <Button 
                                         variant="ghost" 
@@ -230,7 +233,7 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                     <iframe 
                                         src={`${viewingDoc.url}#toolbar=1&navpanes=0&view=FitH`}
                                         className="w-full h-full border-none"
-                                        title="Document Viewer"
+                                        title={t("documentViewerTitle")}
                                     />
                                 )}
                             </div>
@@ -248,12 +251,12 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                                 disabled={actionLoading !== null}
                                 className="rounded-xl font-bold px-8 h-11 border-blue-200 text-blue-700 hover:bg-blue-50"
                             >
-                                {actionLoading === "unlock" ? "Unlocking..." : "Unlock Procedure"}
+                                {actionLoading === "unlock" ? t("unlocking") : t("unlockProcedure")}
                             </Button>
                         )}
                     </div>
                     <Button variant="outline" onClick={onClose} className="rounded-xl font-bold px-8 h-11 border-gray-200">
-                        Close Overview
+                        {t("closeOverview")}
                     </Button>
                 </div>
             </div>

@@ -3,10 +3,12 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import LogsTable from "./logs-table";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function SystemLogsPage() {
+    const t = await getTranslations("adminLogs");
     const session = await auth.api.getSession({ headers: await headers() });
     const agencyId = (session?.user as any)?.agencyId;
 
@@ -35,7 +37,7 @@ export default async function SystemLogsPage() {
         id: log.id,
         logNumber: log.logNumber,
         action: log.action,
-        details: log.details || "No details provided.",
+        details: log.details || t("noDetails"),
         createdAt: log.createdAt,
         author: log.userId && userMap[log.userId] ? userMap[log.userId] : null
     }));
@@ -44,12 +46,12 @@ export default async function SystemLogsPage() {
         <div className="space-y-6 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#1E3A8A" }}>System Logs & Activity</h1>
-                    <p className="text-gray-500 text-sm mt-1">Audit platform actions, agent productivity, and security events.</p>
+                    <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#1E3A8A" }}>{t("title")}</h1>
+                    <p className="text-gray-500 text-sm mt-1">{t("subtitle")}</p>
                 </div>
                 <div className="bg-slate-100 flex items-center gap-3 px-4 py-2 rounded-lg border border-slate-200">
                     <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-slate-700 text-sm font-bold tracking-widest uppercase">{formattedLogs.length} Total Logs Recored</span>
+                    <span className="text-slate-700 text-sm font-bold tracking-widest uppercase">{t("totalLogs", { count: formattedLogs.length })}</span>
                 </div>
             </div>
 

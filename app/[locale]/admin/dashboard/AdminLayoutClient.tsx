@@ -15,12 +15,14 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { getMyAgencyName } from "@/lib/agency-actions";
+import { useTranslations } from "next-intl";
 
 export default function AdminDashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const t = useTranslations("adminLayout");
     const { data: session, isPending } = useSession();
     const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -43,19 +45,19 @@ export default function AdminDashboardLayout({
     }, [session]);
 
     if (isPending) {
-        return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+        return <div className="min-h-screen flex items-center justify-center">{t("loading")}</div>;
     }
 
     if (!session) return null; // Prevent flicker while redirecting
 
     const adminSidebarItems = [
-        { icon: "LayoutDashboard", label: "Overview", href: "/admin/dashboard" },
-        { icon: "Briefcase", label: "Manage Agents", href: "/admin/dashboard/agents" },
-        { icon: "Users", label: "Manage Clients", href: "/admin/dashboard/clients" },
-        { icon: "FileText", label: "All Procedures", href: "/admin/dashboard/applications" },
-        { icon: "FolderSearch", label: "Documents Monitoring", href: "/admin/dashboard/documents" },
-        { icon: "List", label: "System Logs", href: "/admin/dashboard/logs" },
-        { icon: "Settings", label: "System Settings", href: "/admin/dashboard/settings" }
+        { icon: "LayoutDashboard", label: t("nav.overview"), href: "/admin/dashboard" },
+        { icon: "Briefcase", label: t("nav.manageAgents"), href: "/admin/dashboard/agents" },
+        { icon: "Users", label: t("nav.manageClients"), href: "/admin/dashboard/clients" },
+        { icon: "FileText", label: t("nav.allProcedures"), href: "/admin/dashboard/applications" },
+        { icon: "FolderSearch", label: t("nav.documentsMonitoring"), href: "/admin/dashboard/documents" },
+        { icon: "List", label: t("nav.systemLogs"), href: "/admin/dashboard/logs" },
+        { icon: "Settings", label: t("nav.systemSettings"), href: "/admin/dashboard/settings" }
     ];
 
     return (
@@ -63,8 +65,8 @@ export default function AdminDashboardLayout({
             {/* Sidebar */}
             <Sidebar
                 items={adminSidebarItems}
-                userRole="Admin"
-                userName={session?.user?.name || "System Admin"}
+                userRole={t("userRole")}
+                userName={session?.user?.name || t("defaultUserName")}
                 agencyName={agencyName}
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}

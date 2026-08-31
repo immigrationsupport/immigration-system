@@ -6,17 +6,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Briefcase, CreditCard } from "lucide-react";
 import { getAvailablePlans } from "./actions";
 import UpgradePlanSection from "./upgrade-plan-section";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function BillingPage() {
+    const t = await getTranslations("adminBilling");
     const session = await auth.api.getSession({ headers: await headers() });
     const agencyId = (session?.user as any)?.agencyId;
 
     if (!agencyId) {
         return (
             <div className="max-w-4xl mx-auto p-8 text-center text-gray-500">
-                Your account is not linked to an agency.
+                {t("noAgencyLinked")}
             </div>
         );
     }
@@ -38,7 +40,7 @@ export default async function BillingPage() {
     if (!subscription) {
         return (
             <div className="max-w-4xl mx-auto p-8 text-center text-gray-500">
-                No subscription found for your agency. Contact support.
+                {t("noSubscription")}
             </div>
         );
     }
@@ -50,39 +52,39 @@ export default async function BillingPage() {
     return (
         <div className="space-y-6 max-w-4xl mx-auto">
             <div>
-                <h1 className="text-2xl font-bold" style={{ color: "#2b62f8ff" }}>Billing & Subscription</h1>
-                <p className="text-gray-500 text-sm mt-1">Your agency's current plan and usage.</p>
+                <h1 className="text-2xl font-bold" style={{ color: "#2b62f8ff" }}>{t("title")}</h1>
+                <p className="text-gray-500 text-sm mt-1">{t("subtitle")}</p>
             </div>
 
             <Card className="border-none shadow-lg rounded-2xl overflow-hidden">
                 <CardHeader className="bg-[#2b62f8ff] text-white py-6">
                     <CardTitle className="flex items-center justify-between">
                         <span className="text-xl font-black flex items-center gap-2">
-                            <CreditCard className="h-5 w-5" /> {plan.name} Plan
+                            <CreditCard className="h-5 w-5" /> {plan.name} {t("planSuffix")}
                         </span>
-                        <span className="text-lg font-bold">{plan.priceFcfa.toLocaleString()} FCFA/year</span>
+                        <span className="text-lg font-bold">{plan.priceFcfa.toLocaleString()} FCFA{t("perYear")}</span>
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                     <div className="flex items-center justify-between text-sm">
-                        <span className="font-semibold text-gray-500">Status</span>
+                        <span className="font-semibold text-gray-500">{t("status")}</span>
                         <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${subscription.status === "ACTIVE" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                             {subscription.status}
                         </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                        <span className="font-semibold text-gray-500">Auto-renew</span>
-                        <span className="font-bold text-gray-800">{subscription.autoRenew ? "Enabled" : "Disabled"}</span>
+                        <span className="font-semibold text-gray-500">{t("autoRenew")}</span>
+                        <span className="font-bold text-gray-800">{subscription.autoRenew ? t("enabled") : t("disabled")}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                        <span className="font-semibold text-gray-500">Renews on</span>
+                        <span className="font-semibold text-gray-500">{t("renewsOn")}</span>
                         <span className="font-bold text-gray-800">{new Date(subscription.currentPeriodEnd).toLocaleDateString()}</span>
                     </div>
 
                     <div className="space-y-4 pt-4 border-t border-gray-100">
                         <div>
                             <div className="flex justify-between text-xs font-bold text-gray-600 mb-1.5">
-                                <span className="flex items-center gap-1.5"><Briefcase className="h-3.5 w-3.5" /> Agents</span>
+                                <span className="flex items-center gap-1.5"><Briefcase className="h-3.5 w-3.5" /> {t("agents")}</span>
                                 <span>{agentCount} / {plan.maxAgents ?? "∞"}</span>
                             </div>
                             {plan.maxAgents && (
@@ -93,7 +95,7 @@ export default async function BillingPage() {
                         </div>
                         <div>
                             <div className="flex justify-between text-xs font-bold text-gray-600 mb-1.5">
-                                <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Clients</span>
+                                <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {t("clients")}</span>
                                 <span>{clientCount} / {plan.maxClients ?? "∞"}</span>
                             </div>
                             {plan.maxClients && (
@@ -107,7 +109,7 @@ export default async function BillingPage() {
             </Card>
 
             <div className="space-y-3">
-                <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest">Change Plan</h2>
+                <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest">{t("changePlan")}</h2>
                 <UpgradePlanSection
                     plans={plans as any}
                     currentPlanId={plan.id}
@@ -117,11 +119,11 @@ export default async function BillingPage() {
 
             <Card className="border-none shadow-lg rounded-2xl overflow-hidden">
                 <CardHeader className="py-5 border-b border-gray-50">
-                    <CardTitle className="text-sm font-black text-gray-400 uppercase tracking-widest">Payment History</CardTitle>
+                    <CardTitle className="text-sm font-black text-gray-400 uppercase tracking-widest">{t("paymentHistory")}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                     {subscription.payments.length === 0 ? (
-                        <div className="p-8 text-center text-gray-400 text-sm">No payments yet.</div>
+                        <div className="p-8 text-center text-gray-400 text-sm">{t("noPayments")}</div>
                     ) : (
                         <div className="divide-y divide-gray-50">
                             {subscription.payments.map((p) => (

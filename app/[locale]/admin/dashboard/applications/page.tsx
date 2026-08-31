@@ -4,10 +4,12 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import ApplicationTable from "./application-table";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function AllApplicationsPage() {
+    const t = await getTranslations("applicationManagement");
     const session = await auth.api.getSession({ headers: await headers() });
     const agencyId = (session?.user as any)?.agencyId;
 
@@ -66,11 +68,11 @@ export default async function AllApplicationsPage() {
         <div className="space-y-6 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#1E3A8A" }}>Procedure Management</h1>
-                    <p className="text-gray-500 text-sm mt-1">Supervise and manage all client immigration processes.</p>
+                    <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#1E3A8A" }}>{t("title")}</h1>
+                    <p className="text-gray-500 text-sm mt-1">{t("subtitle")}</p>
                 </div>
                 <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
-                    <span className="text-blue-700 text-sm font-semibold">{applications.length} Total Procedures</span>
+                    <span className="text-blue-700 text-sm font-semibold">{applications.length} {t("totalApplications")}</span>
                 </div>
             </div>
 

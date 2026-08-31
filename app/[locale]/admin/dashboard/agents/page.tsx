@@ -8,17 +8,19 @@ import { headers } from "next/headers";
 import CreateAgentModal from "./create-agent-modal";
 import AgentActionButtons from "./agent-actions";
 import { TruncatedText } from "@/components/ui/truncated-text";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function ManageAgentsPage() {
+    const t = await getTranslations("adminAgents");
     const session = await auth.api.getSession({ headers: await headers() });
     const agencyId = (session?.user as any)?.agencyId;
 
     if (!agencyId) {
         return (
             <div className="max-w-7xl mx-auto p-8 text-center text-gray-500">
-                Your account is not linked to an agency.
+                {t("noAgencyLinked")}
             </div>
         );
     }
@@ -36,7 +38,7 @@ export default async function ManageAgentsPage() {
     return (
         <div className="space-y-6 max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-2xl font-semibold" style={{ color: "#1E3A8A" }}>Manage Agents</h1>
+                <h1 className="text-2xl font-semibold" style={{ color: "#1E3A8A" }}>{t("pageTitle")}</h1>
                 {/* Embedded the new Create Agent Modal Form here */}
                 <CreateAgentModal />
             </div>
@@ -44,18 +46,18 @@ export default async function ManageAgentsPage() {
             <div className="bg-[#F9FAFB] p-6 lg:p-8 shadow-sm border border-gray-200 rounded-xl">
                 <div className="flex gap-4 mb-6 relative w-full md:w-1/2">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#374151]" />
-                    <Input placeholder="Search agents..." className="pl-12 h-12 text-[16px] bg-white border-gray-300 placeholder-[#6B7280] rounded-xl" />
+                    <Input placeholder={t("searchPlaceholder")} className="pl-12 h-12 text-[16px] bg-white border-gray-300 placeholder-[#6B7280] rounded-xl" />
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-separate border-spacing-0">
                         <thead>
                             <tr className="bg-gray-100/80">
-                                <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl">Agent Name</th>
-                                <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">Email</th>
-                                <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-center">Assigned Clients</th>
-                                <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">Status</th>
-                                <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">Actions</th>
+                                <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl">{t("colAgentName")}</th>
+                                <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">{t("colEmail")}</th>
+                                <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-center">{t("colAssignedClients")}</th>
+                                <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">{t("colStatus")}</th>
+                                <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">{t("colActions")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -86,7 +88,7 @@ export default async function ManageAgentsPage() {
                                                 ? "bg-red-50 text-red-600 border border-red-200" 
                                                 : "bg-emerald-50 text-emerald-600 border border-emerald-200"
                                             }`}>
-                                                {agent.isSuspended ? "Suspended" : "Active"}
+                                                {agent.isSuspended ? t("statusSuspended") : t("statusActive")}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5 text-right">
@@ -102,7 +104,7 @@ export default async function ManageAgentsPage() {
                             ) : (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-16 text-center text-[#6B7280] font-extrabold uppercase tracking-widest text-[16px]">
-                                        No agents found. Click "Create Agent" to start.
+                                        {t("noAgentsFound")}
                                     </td>
                                 </tr>
                             )}

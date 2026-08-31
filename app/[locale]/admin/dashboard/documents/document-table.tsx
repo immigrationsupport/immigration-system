@@ -25,6 +25,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { useTranslations, useLocale } from "next-intl";
 
 interface DocumentItem {
     id: string;
@@ -59,6 +60,8 @@ export default function DocumentTable({
 }: {
     initialDocuments: DocumentItem[]
 }) {
+    const t = useTranslations("adminDocuments");
+    const locale = useLocale();
     const [documents, setDocuments] = useState<DocumentItem[]>(initialDocuments);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
@@ -105,7 +108,7 @@ export default function DocumentTable({
                 <div className="relative w-full md:w-96">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#374151]" />
                     <Input
-                        placeholder="Search doc name, client, or App ID..."
+                        placeholder={t("searchPlaceholder")}
                         className="pl-12 h-12 text-[16px] bg-white border-gray-300 focus:ring-blue-100 placeholder-[#6B7280]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -119,10 +122,10 @@ export default function DocumentTable({
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className="text-[16px] border border-gray-300 rounded-md bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100 min-w-[160px]"
                     >
-                        <option value="ALL">All Statuses</option>
-                        <option value="UPLOADED">Uploaded (Awaiting Review)</option>
-                        <option value="VERIFIED">Verified (Approved)</option>
-                        <option value="REJECTED">Rejected</option>
+                        <option value="ALL">{t("filterAll")}</option>
+                        <option value="UPLOADED">{t("filterUploaded")}</option>
+                        <option value="VERIFIED">{t("filterVerified")}</option>
+                        <option value="REJECTED">{t("filterRejected")}</option>
                     </select>
                 </div>
             </div>
@@ -131,12 +134,12 @@ export default function DocumentTable({
                 <table className="w-full text-left border-separate border-spacing-0">
                     <thead>
                         <tr className="bg-gray-100/80">
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">Document Details</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Client & Uploader</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Context Reference</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Review Status</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">Uploaded At</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">Preview</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">{t("colDocDetails")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colClientUploader")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colContextRef")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colReviewStatus")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colUploadedAt")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">{t("colPreview")}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -164,7 +167,7 @@ export default function DocumentTable({
                                 <td className="px-6 py-5">
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-center gap-2 text-[12px] lg:text-[14px] font-bold text-[#374151] bg-blue-50 w-fit px-3 py-1 uppercase tracking-tight rounded">
-                                            Step: {(doc.step.type || "GENERAL").replace('_', ' ')}
+                                            {t("stepPrefix")} {(doc.step.type || "GENERAL").replace('_', ' ')}
                                         </div>
                                     </div>
                                 </td>
@@ -182,9 +185,9 @@ export default function DocumentTable({
                                             `}
                                             disabled={loadingId === doc.id}
                                         >
-                                            <option value="UPLOADED">Under Review</option>
-                                            <option value="VERIFIED">Approved (Verified)</option>
-                                            <option value="REJECTED">Rejected</option>
+                                            <option value="UPLOADED">{t("statusUnderReview")}</option>
+                                            <option value="VERIFIED">{t("statusApprovedVerified")}</option>
+                                            <option value="REJECTED">{t("statusRejected")}</option>
                                         </select>
                                         {loadingId === doc.id && <Loader2 size={16} className="animate-spin text-blue-500" />}
                                     </div>
@@ -193,7 +196,7 @@ export default function DocumentTable({
                                 <td className="px-6 py-5 text-[#4B5563] text-[16px] lg:text-[18px] font-bold">
                                     <div className="flex items-center gap-2 whitespace-nowrap">
                                         <Calendar size={18} className="text-[#9CA3AF]" />
-                                        {new Date(doc.uploadedAt).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        {new Date(doc.uploadedAt).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </div>
                                 </td>
 
@@ -204,7 +207,7 @@ export default function DocumentTable({
                                         className="h-12 px-6 text-[14px] font-extrabold uppercase tracking-widest gap-2"
                                         onClick={() => setPreviewDoc(doc)}
                                     >
-                                        View <ExternalLink size={16} />
+                                        {t("view")} <ExternalLink size={16} />
                                     </Button>
                                 </td>
                             </tr>
@@ -214,7 +217,7 @@ export default function DocumentTable({
                 {filteredDocuments.length === 0 && (
                     <div className="py-24 flex flex-col items-center justify-center text-[#6B7280]">
                         <FileText size={50} className="mb-4 opacity-30" />
-                        <p className="text-[18px] font-bold">No documents match your filters.</p>
+                        <p className="text-[18px] font-bold">{t("noneMatch")}</p>
                     </div>
                 )}
             </div>
@@ -227,7 +230,7 @@ export default function DocumentTable({
                             {previewDoc?.name}
                         </DialogTitle>
                         <DialogDescription className="text-xs uppercase font-black tracking-widest text-gray-400">
-                            DOC-ID: {previewDoc?.id.substring(0, 8)} | Type: {previewDoc?.type}
+                            {t("docIdPrefix")} {previewDoc?.id.substring(0, 8)} | {t("typePrefix")} {previewDoc?.type}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -249,15 +252,15 @@ export default function DocumentTable({
                                 ) : (
                                     <div className="text-center p-12 bg-white rounded-2xl shadow-sm border border-gray-200">
                                         <AlertCircle size={48} className="mx-auto mb-4 text-amber-500" />
-                                        <p className="text-lg font-bold text-gray-800">Preview Not Available</p>
-                                        <p className="text-sm text-gray-500 mt-2">This file type cannot be previewed directly.</p>
+                                        <p className="text-lg font-bold text-gray-800">{t("previewNotAvailable")}</p>
+                                        <p className="text-sm text-gray-500 mt-2">{t("previewNotAvailableDescription")}</p>
                                         <a 
                                             href={previewDoc.fileUrl} 
                                             target="_blank" 
                                             rel="noopener noreferrer"
                                             className="mt-6 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-[#1E3A8A] text-white hover:bg-blue-800 h-10 px-4 py-2"
                                         >
-                                            Download Instead <Download className="ml-2 h-4 w-4" />
+                                            {t("downloadInstead")} <Download className="ml-2 h-4 w-4" />
                                         </a>
                                     </div>
                                 )}
