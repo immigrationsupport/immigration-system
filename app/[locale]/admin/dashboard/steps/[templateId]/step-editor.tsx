@@ -11,8 +11,6 @@ import {
     Save,
     Plus,
     Trash2,
-    ChevronDown,
-    ChevronRight,
     AlertCircle,
     ListTree,
     FileCheck2,
@@ -36,7 +34,6 @@ interface StepRow {
     label: string;
     description: string;
     isActive: boolean;
-    expanded: boolean;
     subSteps: SubStepRow[];
     requiredDocuments: string[];
 }
@@ -52,7 +49,6 @@ function toStepRows(steps: StepDefinition[]): StepRow[] {
         label: s.label,
         description: s.description || "",
         isActive: true,
-        expanded: false,
         subSteps: s.subSteps.map((sub) => ({
             key: makeKey(),
             label: sub.label,
@@ -91,7 +87,7 @@ export default function StepEditor({
     function addStep() {
         setSteps((prev) => [
             ...prev,
-            { key: makeKey(), type: "", label: "", description: "", isActive: true, expanded: true, subSteps: [], requiredDocuments: [] }
+            { key: makeKey(), type: "", label: "", description: "", isActive: true, subSteps: [], requiredDocuments: [] }
         ]);
     }
 
@@ -205,14 +201,6 @@ export default function StepEditor({
 
                         <div className="flex-1 space-y-2 min-w-0">
                             <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => updateStep(index, { expanded: !step.expanded })}
-                                    className="p-1 text-gray-400 hover:text-[#1E3A8A] shrink-0"
-                                    title={t("subStepsToggle")}
-                                >
-                                    {step.expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                                </button>
                                 <Input
                                     value={step.label}
                                     onChange={(e) => updateStep(index, { label: e.target.value })}
@@ -228,7 +216,7 @@ export default function StepEditor({
                                 </button>
                             </div>
 
-                            <div className="ml-8 flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                                 <select
                                     value={step.type}
                                     onChange={(e) => updateStep(index, { type: e.target.value as ProcedureType | "" })}
@@ -245,10 +233,10 @@ export default function StepEditor({
                                 value={step.description}
                                 onChange={(e) => updateStep(index, { description: e.target.value })}
                                 placeholder={t("instructionsPlaceholder")}
-                                className="ml-8 w-[calc(100%-2rem)] text-sm min-h-[50px]"
+                                className="w-full text-sm min-h-[50px]"
                             />
 
-                            <div className="ml-8 w-[calc(100%-2rem)] pt-1">
+                            <div className="w-full pt-1">
                                 <p className="text-[11px] font-black uppercase tracking-wide text-gray-300 flex items-center gap-1.5 mb-1.5">
                                     <FileCheck2 className="h-3.5 w-3.5" /> {t("requiredDocumentsLabel")}
                                 </p>
@@ -278,43 +266,41 @@ export default function StepEditor({
                                 </p>
                             </div>
 
-                            {step.expanded && (
-                                <div className="ml-8 pl-4 border-l-2 border-gray-100 space-y-2 pt-1">
-                                    <p className="text-[11px] font-black uppercase tracking-wide text-gray-300 flex items-center gap-1.5">
-                                        <ListTree className="h-3.5 w-3.5" /> {t("subStepsLabel")}
-                                    </p>
-                                    {step.subSteps.map((sub, subIndex) => (
-                                        <div key={sub.key} className="flex items-center gap-2">
-                                            <div className="flex flex-col shrink-0">
-                                                <button type="button" disabled={subIndex === 0} onClick={() => moveSubStep(index, subIndex, -1)} className="text-gray-300 hover:text-[#1E3A8A] disabled:opacity-20">
-                                                    <ArrowUp className="h-3 w-3" />
-                                                </button>
-                                                <button type="button" disabled={subIndex === step.subSteps.length - 1} onClick={() => moveSubStep(index, subIndex, 1)} className="text-gray-300 hover:text-[#1E3A8A] disabled:opacity-20">
-                                                    <ArrowDown className="h-3 w-3" />
-                                                </button>
-                                            </div>
-                                            <Input
-                                                value={sub.label}
-                                                onChange={(e) => updateSubStep(index, subIndex, { label: e.target.value })}
-                                                placeholder={t("subStepPlaceholder")}
-                                                className="text-sm flex-1"
-                                            />
-                                            <button type="button" onClick={() => removeSubStep(index, subIndex)} className="p-1 text-gray-300 hover:text-red-600 shrink-0">
-                                                <Trash2 className="h-3.5 w-3.5" />
+                            <div className="pl-4 border-l-2 border-gray-100 space-y-2 pt-1">
+                                <p className="text-[11px] font-black uppercase tracking-wide text-gray-300 flex items-center gap-1.5">
+                                    <ListTree className="h-3.5 w-3.5" /> {t("subStepsLabel")}
+                                </p>
+                                {step.subSteps.map((sub, subIndex) => (
+                                    <div key={sub.key} className="flex items-center gap-2">
+                                        <div className="flex flex-col shrink-0">
+                                            <button type="button" disabled={subIndex === 0} onClick={() => moveSubStep(index, subIndex, -1)} className="text-gray-300 hover:text-[#1E3A8A] disabled:opacity-20">
+                                                <ArrowUp className="h-3 w-3" />
+                                            </button>
+                                            <button type="button" disabled={subIndex === step.subSteps.length - 1} onClick={() => moveSubStep(index, subIndex, 1)} className="text-gray-300 hover:text-[#1E3A8A] disabled:opacity-20">
+                                                <ArrowDown className="h-3 w-3" />
                                             </button>
                                         </div>
-                                    ))}
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => addSubStep(index)}
-                                        className="gap-1.5 font-bold text-xs h-8 rounded-lg"
-                                    >
-                                        <Plus className="h-3.5 w-3.5" /> {t("addSubStep")}
-                                    </Button>
-                                </div>
-                            )}
+                                        <Input
+                                            value={sub.label}
+                                            onChange={(e) => updateSubStep(index, subIndex, { label: e.target.value })}
+                                            placeholder={t("subStepPlaceholder")}
+                                            className="text-sm flex-1"
+                                        />
+                                        <button type="button" onClick={() => removeSubStep(index, subIndex)} className="p-1 text-gray-300 hover:text-red-600 shrink-0">
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                ))}
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => addSubStep(index)}
+                                    className="gap-1.5 font-bold text-xs h-8 rounded-lg"
+                                >
+                                    <Plus className="h-3.5 w-3.5" /> {t("addSubStep")}
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 ))}
