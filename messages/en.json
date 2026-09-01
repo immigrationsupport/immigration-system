@@ -736,20 +736,20 @@
       "systemSettings": "System Settings"
     }
   },
-   "adminSearch": {
-    "placeholder": "Ask anything — e.g. 'find John Doe' or 'clients that are pending'",
-    "noAnswer": "No answer returned.",
+    "adminSearch": {
+    "placeholder": "Ask anything — e.g. \"find John Doe\" or \"clients who are pending\"",
+    "noAnswer": "I don't have an answer for that.",
+    "panelLabel": "AI Search",
+    "openInClients": "Open in Clients",
+    "openInAgents": "Open in Agents",
+    "openInApplications": "Open in Applications",
     "thread": {
-      "searching": "Searching...",
       "newSearchTooltip": "New search",
+      "searching": "Searching...",
       "agentPrefix": "Agent: ",
       "applicationsLabel": "Applications",
-      "clientsAssigned": "{count, plural, one {# client} other {# clients}} assigned",
-      "stepsCompleted": "{completed} of {total} steps completed",
-      "panelLabel": "AI Search",
-      "openInClients": "Open in Manage Clients",
-      "openInAgents": "Open in Manage Agents",
-      "openInApplications": "Open in All Procedures"
+      "clientsAssigned": "{count} client(s) assigned",
+      "stepsCompleted": "{completed}/{total} steps completed"
     }
   },
   "adminSettings": {

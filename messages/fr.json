@@ -738,18 +738,18 @@
   },
   "adminSearch": {
     "placeholder": "Demandez n'importe quoi — ex. « trouver John Doe » ou « clients qui sont en attente »",
-    "noAnswer": "Aucune réponse retournée.",
+    "noAnswer": "Je n'ai pas de réponse à cela.",
+    "panelLabel": "Recherche IA",
+    "openInClients": "Ouvrir dans Clients",
+    "openInAgents": "Ouvrir dans Agents",
+    "openInApplications": "Ouvrir dans Procédures",
     "thread": {
-      "searching": "Recherche en cours...",
       "newSearchTooltip": "Nouvelle recherche",
+      "searching": "Recherche en cours...",
       "agentPrefix": "Agent : ",
-      "applicationsLabel": "Demandes",
-      "clientsAssigned": "{count, plural, one {# client assigné} other {# clients assignés}}",
-      "stepsCompleted": "{completed} sur {total} étapes complétées",
-      "panelLabel": "Recherche IA",
-      "openInClients": "Ouvrir dans Gérer les clients",
-      "openInAgents": "Ouvrir dans Gérer les agents",
-      "openInApplications": "Ouvrir dans Toutes les procédures"
+      "applicationsLabel": "Procédures",
+      "clientsAssigned": "{count} client(s) assigné(s)",
+      "stepsCompleted": "{completed}/{total} étapes complétées"
     }
   },
   "adminSettings": {
