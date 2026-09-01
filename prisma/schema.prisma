@@ -7,151 +7,110 @@ datasource db {
 }
 
 model Agency {
-  id           String       @id @default(uuid())
-  name         String
-  email        String?
-  phone        String?
-  address      String?
-  status       AgencyStatus @default(ACTIVE)
-  // true only for the single "agence historique" created by the Phase 1
-  // migration to hold pre-existing data. Never assigned to a new signup.
-  isInternal   Boolean      @default(false)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-
-  users        User[]
-  applications Application[]
-  auditLogs    AuditLog[]
-  subscription Subscription?
+  id                   String                @id @default(uuid())
+  name                 String
+  email                String?
+  phone                String?
+  address              String?
+  status               AgencyStatus          @default(ACTIVE)
+  isInternal           Boolean               @default(false)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  applications         Application[]
+  auditLogs            AuditLog[]
   applicationTemplates ApplicationTemplate[]
+  subscription         Subscription?
+  users                User[]
 
   @@map("agency")
 }
 
-enum AgencyStatus {
-  ACTIVE
-  SUSPENDED
-}
-
 model Plan {
-  id            String         @id @default(uuid())
-  name          String
-  slug          String         @unique
-  priceFcfa     Int
-  // null = unlimited
-  maxAgents     Int?
-  maxClients    Int?
-  isPublic      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-
-  subscriptions       Subscription[] @relation("PlanSubscriptions")
-  pendingSubscriptions Subscription[] @relation("PendingPlanSubscriptions")
+  id                   String         @id @default(uuid())
+  name                 String
+  slug                 String         @unique
+  priceFcfa            Int
+  maxAgents            Int?
+  maxClients           Int?
+  isPublic             Boolean        @default(true)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
   targetPlanPayments   Payment[]      @relation("TargetPlanPayments")
+  pendingSubscriptions Subscription[] @relation("PendingPlanSubscriptions")
+  subscriptions        Subscription[] @relation("PlanSubscriptions")
 
   @@map("plan")
 }
 
 model Subscription {
-  id                String             @id @default(uuid())
-  agencyId          String             @unique
-  planId            String
-  // set when a plan change is scheduled to take effect at the end of the
-  // current billing period (e.g. a downgrade), instead of immediately.
-  pendingPlanId     String?
-  status            SubscriptionStatus @default(ACTIVE)
-  autoRenew         Boolean            @default(true)
-  currentPeriodEnd  DateTime
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  agency            Agency             @relation(fields: [agencyId], references: [id])
-  plan              Plan               @relation("PlanSubscriptions", fields: [planId], references: [id])
-  pendingPlan       Plan?              @relation("PendingPlanSubscriptions", fields: [pendingPlanId], references: [id])
-  payments          Payment[]
+  id               String             @id @default(uuid())
+  agencyId         String             @unique
+  planId           String
+  pendingPlanId    String?
+  status           SubscriptionStatus @default(ACTIVE)
+  autoRenew        Boolean            @default(true)
+  currentPeriodEnd DateTime
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  payments         Payment[]
+  agency           Agency             @relation(fields: [agencyId], references: [id])
+  pendingPlan      Plan?              @relation("PendingPlanSubscriptions", fields: [pendingPlanId], references: [id])
+  plan             Plan               @relation("PlanSubscriptions", fields: [planId], references: [id])
 
   @@map("subscription")
 }
 
-enum SubscriptionStatus {
-  ACTIVE
-  PAST_DUE
-  CANCELLED
-  EXPIRED
-}
-
 model Payment {
-  id                String         @id @default(uuid())
-  subscriptionId    String
-  amountFcfa        Int
-  method            PaymentMethod?
-  status            PaymentStatus  @default(PENDING)
-  reference         String?        @unique
-  
-  // Change providerReference to gatewayTransactionId and make it unique
-  gatewayTransactionId String?     @unique
-
-  targetPlanId      String?
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-
-  subscription      Subscription   @relation(fields: [subscriptionId], references: [id])
-  targetPlan        Plan?          @relation("TargetPlanPayments", fields: [targetPlanId], references: [id])
+  id                   String         @id @default(uuid())
+  subscriptionId       String
+  amountFcfa           Int
+  method               PaymentMethod?
+  status               PaymentStatus  @default(PENDING)
+  reference            String?        @unique
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  targetPlanId         String?
+  gatewayTransactionId String?        @unique
+  subscription         Subscription   @relation(fields: [subscriptionId], references: [id])
+  targetPlan           Plan?          @relation("TargetPlanPayments", fields: [targetPlanId], references: [id])
 
   @@map("payment")
 }
 
-enum PaymentMethod {
-  MTN_MOBILE_MONEY
-  ORANGE_MONEY
-  CARD
-}
-
-enum PaymentStatus {
-  PENDING
-  SUCCESS
-  FAILED
-}
-
 model User {
-  id               String            @id @default(uuid())
-  name             String
-  email            String            @unique
-  emailVerified    Boolean           @default(false)
-  image            String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  agentId          String?
-  // Nullable for now: existing rows get backfilled by the Phase 1 migration
-  // script into the "agence historique" before this is ever made required.
-  agencyId         String?
-  password         String?
-   // True right after an admin/agent creates the account with a temporary
-  // password. Forces a password change on first login, so the admin/agent
-  // who created the account never knows the client's/agent's real password.
-  mustChangePassword Boolean         @default(false)
-  isSuspended      Boolean           @default(false)
-  address          String?
-  dateOfBirth      DateTime?
-  maritalStatus    MaritalStatus?
-  nationality      String?
-  numberOfChildren Int               @default(0)
-  phoneNumber      String?
-  profileCompleted Boolean           @default(false)
-  role             Role              @default(CLIENT)
-  status           UserStatus        @default(ACTIVE)
-  assignedApps     Application[]     @relation("AgentApplications")
-  applications     Application[]     @relation("ClientApplications")
-  authoredLogs     AuditLog[]        @relation("AuthorLogs")
-  documents        Document[]
-  messages         Message[]
-  receivedMessages OfficialMessage[] @relation("ReceivedMessages")
-  sentMessages     OfficialMessage[] @relation("SentMessages")
-  accounts         Account[]
-  sessions         Session[]
-  agent            User?             @relation("AgentClients", fields: [agentId], references: [id])
-  assignedClients  User[]            @relation("AgentClients")
-  agency           Agency?           @relation(fields: [agencyId], references: [id])
+  id                 String            @id @default(uuid())
+  name               String
+  email              String            @unique
+  emailVerified      Boolean           @default(false)
+  image              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  agentId            String?
+  password           String?
+  isSuspended        Boolean           @default(false)
+  address            String?
+  dateOfBirth        DateTime?
+  maritalStatus      MaritalStatus?
+  nationality        String?
+  numberOfChildren   Int               @default(0)
+  phoneNumber        String?
+  profileCompleted   Boolean           @default(false)
+  role               Role              @default(CLIENT)
+  status             UserStatus        @default(ACTIVE)
+  agencyId           String?
+  mustChangePassword Boolean           @default(false)
+  assignedApps       Application[]     @relation("AgentApplications")
+  applications       Application[]     @relation("ClientApplications")
+  authoredLogs       AuditLog[]        @relation("AuthorLogs")
+  documents          Document[]
+  messages           Message[]
+  receivedMessages   OfficialMessage[] @relation("ReceivedMessages")
+  sentMessages       OfficialMessage[] @relation("SentMessages")
+  accounts           Account[]
+  sessions           Session[]
+  agency             Agency?           @relation(fields: [agencyId], references: [id])
+  agent              User?             @relation("AgentClients", fields: [agentId], references: [id])
+  assignedClients    User[]            @relation("AgentClients")
 
   @@index([agencyId])
   @@map("user")
@@ -205,23 +164,21 @@ model Verification {
 }
 
 model Application {
-  id        String            @id @default(uuid())
-  country   String
-  status    ApplicationStatus @default(PENDING)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  clientId  String
-  agentId   String?
-  agencyId  String?
-  type      ApplicationType   @default(PR)
-  // The named template this application's steps were built from (e.g.
-  // "PR - Canada"). Nullable: legacy applications predate templates.
+  id                    String               @id @default(uuid())
+  country               String
+  status                ApplicationStatus    @default(PENDING)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  clientId              String
+  agentId               String?
+  type                  ApplicationType      @default(PR)
+  agencyId              String?
   applicationTemplateId String?
-  agent     User?             @relation("AgentApplications", fields: [agentId], references: [id])
-  client    User              @relation("ClientApplications", fields: [clientId], references: [id])
-  agency    Agency?           @relation(fields: [agencyId], references: [id])
-  template  ApplicationTemplate? @relation(fields: [applicationTemplateId], references: [id])
-  steps     ApplicationStep[]
+  agency                Agency?              @relation(fields: [agencyId], references: [id])
+  agent                 User?                @relation("AgentApplications", fields: [agentId], references: [id])
+  template              ApplicationTemplate? @relation(fields: [applicationTemplateId], references: [id])
+  client                User                 @relation("ClientApplications", fields: [clientId], references: [id])
+  steps                 ApplicationStep[]
 
   @@index([agencyId])
 }
@@ -265,42 +222,32 @@ model AuditLog {
   action    String
   details   String?
   userId    String?
-  agencyId  String?
   createdAt DateTime @default(now())
   logNumber Int      @unique @default(autoincrement())
   targetId  String?
-  author    User?    @relation("AuthorLogs", fields: [userId], references: [id])
+  agencyId  String?
   agency    Agency?  @relation(fields: [agencyId], references: [id])
+  author    User?    @relation("AuthorLogs", fields: [userId], references: [id])
 
   @@index([agencyId])
 }
 
 model ApplicationStep {
-  id            String          @id @default(uuid())
-  description   String?
-  status        ProcedureStatus @default(PENDING)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  applicationId String
-  isLocked      Boolean         @default(false)
-  // Null for a fully custom step the admin invented — set only when this
-  // step maps to one of the built-in types that carries real behavior
-  // elsewhere (e.g. DOCUMENT_COLLECTION's document checks).
-  type          ProcedureType?
-  // Materialized from the template at the time this step was created, so
-  // an in-progress application never shifts under it if the admin edits
-  // the template afterwards.
-  order         Int             @default(0)
-  label         String?
-  // Checklist of document names the admin expects for this step (e.g.
-  // "Passport", "Birth Certificate"). Purely informational for the agent —
-  // materialized from the StepTemplate when the step is created, and can
-  // still be edited independently per application afterwards.
-  requiredDocuments String[]    @default([])
-  Document      Document[]
-  Message       Message[]
-  application   Application     @relation(fields: [applicationId], references: [id])
-  subSteps      ApplicationSubStep[]
+  id                String               @id @default(uuid())
+  description       String?
+  status            ProcedureStatus      @default(PENDING)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  applicationId     String
+  isLocked          Boolean              @default(false)
+  type              ProcedureType?
+  label             String?
+  order             Int                  @default(0)
+  requiredDocuments String[]             @default([])
+  Document          Document[]
+  Message           Message[]
+  application       Application          @relation(fields: [applicationId], references: [id])
+  subSteps          ApplicationSubStep[]
 
   @@map("Procedure")
 }
@@ -310,24 +257,97 @@ model ApplicationSubStep {
   applicationStepId String
   label             String
   description       String?
-  referenceFileUrl  String?
-  referenceFileName String?
   order             Int
   isCompleted       Boolean         @default(false)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
-
+  referenceFileName String?
+  referenceFileUrl  String?
   applicationStep   ApplicationStep @relation(fields: [applicationStepId], references: [id], onDelete: Cascade)
 
   @@index([applicationStepId])
   @@map("application_sub_step")
 }
 
+model ApplicationTemplate {
+  id           String         @id @default(uuid())
+  agencyId     String
+  name         String
+  description  String?
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  applications Application[]
+  agency       Agency         @relation(fields: [agencyId], references: [id])
+  steps        StepTemplate[]
+
+  @@index([agencyId])
+  @@map("application_template")
+}
+
+model StepTemplate {
+  id                    String              @id @default(uuid())
+  type                  ProcedureType?
+  label                 String
+  description           String?
+  order                 Int
+  isActive              Boolean             @default(true)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  applicationTemplateId String
+  referenceFileName     String?
+  referenceFileUrl      String?
+  requiredDocuments     String[]            @default([])
+  applicationTemplate   ApplicationTemplate @relation(fields: [applicationTemplateId], references: [id], onDelete: Cascade)
+  subSteps              SubStepTemplate[]
+
+  @@index([applicationTemplateId])
+  @@map("step_template")
+}
+
+model SubStepTemplate {
+  id             String       @id @default(uuid())
+  stepTemplateId String
+  label          String
+  description    String?
+  order          Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  stepTemplate   StepTemplate @relation(fields: [stepTemplateId], references: [id], onDelete: Cascade)
+
+  @@index([stepTemplateId])
+  @@map("sub_step_template")
+}
+
+enum AgencyStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentMethod {
+  MTN_MOBILE_MONEY
+  ORANGE_MONEY
+  CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
 enum Role {
-  SUPER_ADMIN
   ADMIN
   AGENT
   CLIENT
+  SUPER_ADMIN
 }
 
 enum UserStatus {
@@ -349,15 +369,15 @@ enum DocumentType {
   BIRTH_CERTIFICATE
   ID_CARD
   DIPLOMA
-  TRANSCRIPT          
   CV
   WORK_CERTIFICATE
   LANGUAGE_REGISTRATION
   LANGUAGE_RESULT
   MEDICAL
-  POLICE_CLEARANCE   
   VISA_APPROVAL
   OTHER
+  TRANSCRIPT
+  POLICE_CLEARANCE
 }
 
 enum DocumentStatus {
@@ -399,69 +419,6 @@ enum ProcedureType {
   APPLICATION_SUBMISSION
   MEDICAL_EXAMINATION
   PASSPORT_SUBMISSION
-}
-
-// A named, reusable set of steps an agency builds once and reuses whenever
-// they start a new application (e.g. "PR - Canada", "Study - France").
-// Admins can invent steps freely — a step only keeps its `type` when it
-// should carry one of the built-in behaviors (see StepTemplate below).
-model ApplicationTemplate {
-  id          String   @id @default(uuid())
-  agencyId    String
-  name        String
-  description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  agency       Agency         @relation(fields: [agencyId], references: [id])
-  steps        StepTemplate[]
-  applications Application[]
-
-  @@index([agencyId])
-  @@map("application_template")
-}
-
-model StepTemplate {
-  id                     String        @id @default(uuid())
-  applicationTemplateId  String
-  // Set only when this step should keep one of the built-in behaviors
-  // (e.g. DOCUMENT_COLLECTION's document checks, PROFILE_CREATION's
-  // confirmation upload). Null for a step the admin invented from scratch.
-  type                   ProcedureType?
-  label                  String
-  description            String?
-  order                  Int
-  referenceFileUrl       String?
-  referenceFileName      String?
-  isActive               Boolean       @default(true)
-  // Default document checklist for this step — set by the admin, copied
-  // onto each ApplicationStep created from this template, and editable
-  // any time independently of the step's type.
-  requiredDocuments      String[]      @default([])
-  createdAt              DateTime      @default(now())
-  updatedAt              DateTime      @updatedAt
-
-  applicationTemplate ApplicationTemplate @relation(fields: [applicationTemplateId], references: [id], onDelete: Cascade)
-  subSteps            SubStepTemplate[]
-
-  @@index([applicationTemplateId])
-  @@map("step_template")
-}
-
-model SubStepTemplate {
-  id             String   @id @default(uuid())
-  stepTemplateId String
-  label          String
-  description    String?
-  order          Int
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  stepTemplate StepTemplate @relation(fields: [stepTemplateId], references: [id], onDelete: Cascade)
-
-  @@index([stepTemplateId])
-  @@map("sub_step_template")
 }
 
 enum ApplicationType {
