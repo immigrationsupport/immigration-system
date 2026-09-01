@@ -6,6 +6,7 @@ import { STEP_LABELS } from "@/lib/steps";
 import { updateStepAction, updateApplicationStatusAction, addDocumentAction, deleteDocumentAction, toggleSubStepAction } from "../actions";
 import { useParams, useRouter } from "next/navigation";
 import { UploadButton } from "@/src/utils/uploadthing";
+import { useTranslations } from "next-intl";
 
 // Same document types the client picks from when uploading — kept here so
 // the agent/admin can label an upload the same way the client would.
@@ -63,6 +64,7 @@ interface StepManagementProps {
 }
 
 export default function StepManagement({ applicationId, currentStatus, steps, country, onRefresh }: StepManagementProps) {
+    const t = useTranslations("agentStepManagement");
     const router = useRouter();
     const params = useParams();
     const locale = (params?.locale as string) || "en-US";
@@ -105,14 +107,14 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
             if (res.error) alert(res.error);
             else refreshAll();
         } catch (e) {
-            alert("Upload failed. Please try again.");
+            alert(t("uploadFailed"));
         } finally {
             setUploadingStepId(null);
         }
     };
 
     const handleDeleteDocument = async (documentId: string) => {
-        if (!confirm("Remove this document?")) return;
+        if (!confirm(t("removeDocumentConfirm"))) return;
         const res = await deleteDocumentAction(documentId);
         if (res.error) alert(res.error);
         else refreshAll();
@@ -147,12 +149,17 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
             {/* Global Status Control */}
             <div className="bg-white p-6 border border-gray-200 shadow-sm flex flex-col md:flex-row items-center gap-6 justify-between">
                 <div>
-                    <h3 className="text-lg font-bold text-gray-900">Update Procedure Status</h3>
-                    <p className="text-sm text-gray-500">Global status control</p>
+                    <h3 className="text-lg font-bold text-gray-900">{t("updateProcedureStatus")}</h3>
+                    <p className="text-sm text-gray-500">{t("globalStatusControl")}</p>
                 </div>
 
                 <div className="flex gap-2 items-center flex-wrap">
-                    {["PENDING", "IN_REVIEW", "APPROVED", "REJECTED"].map((status) => (
+                    {[
+                        { value: "PENDING", label: t("statusPending") },
+                        { value: "IN_REVIEW", label: t("statusInReview") },
+                        { value: "APPROVED", label: t("statusApproved") },
+                        { value: "REJECTED", label: t("statusRejected") }
+                    ].map(({ value: status, label }) => (
                         <button
                             key={status}
                             onClick={() => handleUpdateAppStatus(status)}
@@ -163,7 +170,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                 : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
                             }`}
                         >
-                            {status.replace("_", " ")}
+                            {label}
                         </button>
                     ))}
                     {loadingAppStatus && <Loader2 className="animate-spin h-5 w-5 text-blue-500" />}
@@ -175,11 +182,11 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-gray-100 border-b border-gray-200 text-sm font-bold text-gray-700">
-                            <th className="p-4">Step Number</th>
-                            <th className="p-4">Step Name</th>
-                            <th className="p-4">Status</th>
-                            <th className="p-4">Last Updated Date</th>
-                            <th className="p-4">Action</th>
+                            <th className="p-4">{t("colStepNumber")}</th>
+                            <th className="p-4">{t("colStepName")}</th>
+                            <th className="p-4">{t("colStatus")}</th>
+                            <th className="p-4">{t("colLastUpdated")}</th>
+                            <th className="p-4">{t("colAction")}</th>
                         </tr>
                     </thead>
                     <tbody className="text-sm">
@@ -191,7 +198,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                     <td className="p-4 font-bold">{idx + 1}</td>
                                     <td className="p-4 font-semibold text-gray-800">
                                         {step.type === "PROFILE_CREATION"
-                                            ? (step.label || "Profile Creation (Express Entry / Arrima)")
+                                            ? (step.label || t("profileCreationDefaultLabel"))
                                             : (step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS])
                                         }
                                     </td>
@@ -204,10 +211,10 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                             disabled={!dbStep || loadingStepId === step.id}
                                             className="px-2 py-1 text-sm border border-gray-300 rounded cursor-pointer min-w-[120px]"
                                         >
-                                            <option value="PENDING">Pending</option>
-                                            <option value="IN_PROGRESS">In Progress</option>
-                                            <option value="APPROVED">Approved</option>
-                                            {idx >= 3 && <option value="ACTION_REQUIRED">Action Required</option>}
+                                            <option value="PENDING">{t("stepStatusPending")}</option>
+                                            <option value="IN_PROGRESS">{t("stepStatusInProgress")}</option>
+                                            <option value="APPROVED">{t("stepStatusApproved")}</option>
+                                            {idx >= 3 && <option value="ACTION_REQUIRED">{t("stepStatusActionRequired")}</option>}
                                         </select>
                                         {loadingStepId === step.id && <span className="ml-2 text-xs text-blue-500">...</span>}
                                     </td>
@@ -227,7 +234,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                                          step.isLocked ? "bg-red-100 text-red-700 hover:bg-red-200" : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
                                                      }`}
                                                  >
-                                                     {step.isLocked ? "Unlock Step" : "Lock Step"}
+                                                     {step.isLocked ? t("unlockStep") : t("lockStep")}
                                                  </button>
                                                  
                                                  {idx >= 3 && dbStep && (
@@ -236,24 +243,24 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                                          disabled={loadingStepId === step.id}
                                                          className="px-4 py-2 text-[10px] font-black uppercase tracking-widest bg-amber-500 text-white hover:bg-amber-600 rounded-xl transition-all shadow-lg shadow-amber-100 flex items-center gap-2"
                                                      >
-                                                         Request Modification
+                                                         {t("requestModification")}
                                                      </button>
                                                  )}
                                              </div>
                                          ) : (
-                                             <span className="text-xs text-gray-400 italic font-bold">Legacy Procedure</span>
+                                             <span className="text-xs text-gray-400 italic font-bold">{t("legacyProcedure")}</span>
                                          )}
 
                                          {/* Step 5 Specialized Input */}
                                          {step.type === "DIPLOMA_EQUIVALENCE" && dbStep && (
                                              <div className="mt-4 p-4 bg-blue-50/50 border border-blue-100 rounded-xl space-y-3">
-                                                 <p className="text-[10px] font-black text-blue-800 uppercase tracking-widest">Equivalence Details</p>
+                                                 <p className="text-[10px] font-black text-blue-800 uppercase tracking-widest">{t("equivalenceDetails")}</p>
                                                  <select 
                                                      onChange={(e) => handleUpdateStep(step.id, { organization: e.target.value })}
                                                      className="w-full text-xs font-bold p-2 border border-blue-200 rounded-lg bg-white"
                                                      defaultValue={step.description?.match(/Org: ([^|]+)/)?.[1]?.trim() || ""}
                                                  >
-                                                     <option value="">Select Organization</option>
+                                                     <option value="">{t("selectOrganization")}</option>
                                                      <option value="WES">WES</option>
                                                      <option value="ICAS">ICAS</option>
                                                      <option value="IQAS">IQAS</option>
@@ -266,13 +273,13 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                          {/* Language Test Registration - test type selector */}
                                          {step.type === "LANGUAGE_TEST_REGISTRATION" && dbStep && (
                                              <div className="mt-4 p-4 bg-blue-50/50 border border-blue-100 rounded-xl space-y-3">
-                                                 <p className="text-[10px] font-black text-blue-800 uppercase tracking-widest">Language Test</p>
+                                                 <p className="text-[10px] font-black text-blue-800 uppercase tracking-widest">{t("languageTest")}</p>
                                                  <select
                                                      onChange={(e) => handleUpdateStep(step.id, { languageTest: e.target.value })}
                                                      className="w-full text-xs font-bold p-2 border border-blue-200 rounded-lg bg-white"
                                                      defaultValue={step.description?.match(/Test: ([^|]+)/)?.[1]?.trim() || ""}
                                                  >
-                                                     <option value="">Select Test</option>
+                                                     <option value="">{t("selectTest")}</option>
                                                      <option value="TCF">TCF</option>
                                                      <option value="TEF">TEF</option>
                                                      <option value="IELTS">IELTS</option>
@@ -284,7 +291,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                          {step.requiredDocuments && step.requiredDocuments.length > 0 && (
                                              <div className="mt-4 p-4 bg-amber-50/60 border border-amber-100 rounded-xl space-y-2">
                                                  <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest flex items-center gap-1.5">
-                                                     <FileCheck2 className="h-3.5 w-3.5" /> Documents needed for this step
+                                                     <FileCheck2 className="h-3.5 w-3.5" /> {t("documentsNeeded")}
                                                  </span>
                                                  <div className="flex flex-wrap gap-1.5">
                                                      {step.requiredDocuments.map((docName: string, i: number) => {
@@ -311,7 +318,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                          {/* View Documents */}
                                          {step.Document && step.Document.length > 0 && (
                                              <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl space-y-2">
-                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Attachments</span>
+                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">{t("attachments")}</span>
                                                  <div className="flex flex-col gap-1.5">
                                                      {step.Document.map((doc: any) => (
                                                          <div key={doc.id} className="flex items-center justify-between gap-2">
@@ -337,7 +344,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                          {/* Sub-steps checklist */}
                                          {step.subSteps && step.subSteps.length > 0 && (
                                              <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl space-y-2">
-                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Checklist</span>
+                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">{t("checklist")}</span>
                                                  <div className="flex flex-col gap-1.5">
                                                      {step.subSteps.map((sub: any) => (
                                                          <label key={sub.id} className="flex items-center gap-2 text-xs font-semibold text-gray-700 cursor-pointer">
@@ -376,7 +383,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                                          ) : (
                                                              <>
                                                                  <Upload className="h-3.5 w-3.5" />
-                                                                 <span>Upload File</span>
+                                                                 <span>{t("uploadFile")}</span>
                                                              </>
                                                          )}
                                                      </div>
@@ -396,13 +403,13 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                                                  }}
                                                                  onUploadError={(error: Error) => {
                                                                      setUploadingStepId(null);
-                                                                     alert(`Upload error: ${error.message}`);
+                                                                     alert(`${t("uploadErrorPrefix")} ${error.message}`);
                                                                  }}
                                                              />
                                                          </div>
                                                      )}
                                                  </div>
-                                                 <span className="text-[10px] text-gray-400 font-semibold">PDF, JPG, PNG</span>
+                                                 <span className="text-[10px] text-gray-400 font-semibold">{t("fileTypesHint")}</span>
                                              </div>
                                          )}
 
@@ -423,18 +430,18 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                 <Loader2 size={24} className={isSubmittingRes ? "animate-spin" : ""} />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-black text-gray-900 tracking-tighter uppercase leading-none">Modification Request</h3>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">STEP: {requestModal?.stepName}</p>
+                                <h3 className="text-2xl font-black text-gray-900 tracking-tighter uppercase leading-none">{t("modificationRequestTitle")}</h3>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">{t("stepPrefix")} {requestModal?.stepName}</p>
                             </div>
                         </div>
                         
                         <div className="space-y-4">
-                            <p className="text-sm font-bold text-gray-500 leading-relaxed">Clearly describe what the client needs to change or provide:</p>
+                            <p className="text-sm font-bold text-gray-500 leading-relaxed">{t("describeChange")}</p>
                             <textarea 
                                 value={requestMsg}
                                 onChange={(e) => setRequestMsg(e.target.value)}
                                 className="w-full h-32 p-4 border-2 border-gray-100 rounded-2xl focus:ring-4 focus:ring-amber-50 focus:border-amber-500 transition-all outline-none text-sm font-medium"
-                                placeholder="Example: The passport scan is blurry. Please re-upload a clear high-resolution PDF..."
+                                placeholder={t("reasonPlaceholder")}
                             />
                         </div>
 
@@ -443,7 +450,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                 onClick={() => { setRequestModal(null); setRequestMsg(""); }}
                                 className="flex-1 bg-gray-100 text-gray-500 font-black py-4 rounded-2xl hover:bg-gray-200 transition-all uppercase tracking-widest text-xs"
                             >
-                                Cancel
+                                {t("cancel")}
                             </button>
                             <button 
                                 onClick={async () => {
@@ -464,7 +471,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                 disabled={isSubmittingRes}
                                 className="flex-1 bg-amber-500 text-white font-black py-4 rounded-2xl hover:bg-amber-600 transition-all uppercase tracking-widest text-xs shadow-lg shadow-amber-100 disabled:opacity-50"
                             >
-                                {isSubmittingRes ? "Sending..." : "Send Request Agent"}
+                                {isSubmittingRes ? t("sending") : t("sendRequestToClient")}
                             </button>
                         </div>
                     </div>
@@ -477,7 +484,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                     <div className="bg-white rounded-[40px] p-10 max-w-sm w-full text-center space-y-6">
                         <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto text-4xl">✓</div>
                         <h3 className="text-2xl font-black text-gray-900 tracking-tighter uppercase leading-none">{successModal}</h3>
-                        <button onClick={() => setSuccessModal(null)} className="w-full bg-[#1E3A8A] text-white font-black py-4 rounded-2xl hover:bg-blue-900 transition-all uppercase tracking-widest">Understood</button>
+                        <button onClick={() => setSuccessModal(null)} className="w-full bg-[#1E3A8A] text-white font-black py-4 rounded-2xl hover:bg-blue-900 transition-all uppercase tracking-widest">{t("understood")}</button>
                     </div>
                 </div>
             )}

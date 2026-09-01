@@ -341,7 +341,8 @@
       "stats": {
         "totalClients": "Total Clients",
         "totalAgents": "Total Agents",
-        "liveApplications": "Live Procedures"
+        "liveApplications": "Live Procedures",
+        "allProcedures": "All Procedures"
       },
       "statuses": {
         "pendingReview": "Pending Review",
@@ -573,11 +574,24 @@
     "noClientsAssigned": "No clients assigned yet",
     "files": "files",
     "viewProfile": "View Profile",
-    "assignedClient": "Assigned Client"
+    "assignedClient": "Assigned Client",
+    "allClients": "All Clients",
+    "manageAllAgency": "Manage every client across your agency.",
+    "myClients": "My Clients",
+    "colClientDetail": "Client Detail",
+    "colLatestProcedure": "Latest Procedure",
+    "colStatus": "Status",
+    "colDocuments": "Documents",
+    "colActions": "Actions",
+    "notAvailable": "N/A",
+    "noProcedure": "No Procedure",
+    "noClientsDescription": "When an administrator assigns clients to you, they will appear here."
   },
   "agents": {
     "agentWorkspace": "Agent Workspace",
     "manageUpdate": "Manage & Update Assigned Procedures",
+    "activeProcedures": "{count} Active Procedures",
+    "signInAsAgent": "Please sign in as an agent to view your applications.",
     "noAssignedApplications": "No assigned procedures found.",
     "submitDocuments": "Submit Documents",
     "updateStatus": "Update Status",
@@ -597,7 +611,14 @@
     "viewDocument": "View Document",
     "requestMod": "Request Mod",
     "waitingForDocuments": "Waiting for client to attach documents.",
-    "actionHistory": "Action History & Audit"
+    "actionHistory": "Action History & Audit",
+    "documentViewerTitle": "Document Viewer",
+    "journeyOverview": "Journey Overview",
+    "stepsProgress": "{completed}/{total} Steps",
+    "clientIdentity": "Client Identity",
+    "manageFullRoadmap": "Manage Full Roadmap & Decision",
+    "latestUploads": "LATEST UPLOADS",
+    "viewProfile": "View Profile"
   },
   "applicationManagement": {
     "title": "Procedure Management",
@@ -715,8 +736,8 @@
       "systemSettings": "System Settings"
     }
   },
-  "adminSearch": {
-    "placeholder": "Ask anything — e.g. 'find John Doe' or 'clients from Cameroon still pending'",
+   "adminSearch": {
+    "placeholder": "Ask anything — e.g. 'find John Doe' or 'clients that are pending'",
     "noAnswer": "No answer returned.",
     "thread": {
       "searching": "Searching...",
@@ -724,7 +745,11 @@
       "agentPrefix": "Agent: ",
       "applicationsLabel": "Applications",
       "clientsAssigned": "{count, plural, one {# client} other {# clients}} assigned",
-      "stepsCompleted": "{completed} of {total} steps completed"
+      "stepsCompleted": "{completed} of {total} steps completed",
+      "panelLabel": "AI Search",
+      "openInClients": "Open in Manage Clients",
+      "openInAgents": "Open in Manage Agents",
+      "openInApplications": "Open in All Procedures"
     }
   },
   "adminSettings": {
@@ -819,7 +844,6 @@
     "searchPlaceholder": "Search clients...",
     "colClientName": "Client Name",
     "colEmail": "Email",
-    "button":"Create Client",
     "colAssignedAgent": "Assigned Agent",
     "colStatus": "Status",
     "colActions": "Actions",
@@ -1080,5 +1104,137 @@
     "contentPlaceholder": "Type your official notification here...",
     "cancel": "Cancel",
     "transmitMessage": "Transmit Message"
+  },
+  "agentNewClient": {
+    "newClient": "New Client",
+    "assignedNote": "This client will be assigned to you automatically.",
+    "unassignedNote": "This client will be created unassigned — assign an agent from the client list afterward.",
+    "fullName": "Full name",
+    "email": "Email",
+    "temporaryPassword": "Temporary password",
+    "passwordHint": "Share this with the client so they can sign in.",
+    "createClient": "Create Client"
+  },
+  "agentStepManagement": {
+    "uploadFailed": "Upload failed. Please try again.",
+    "uploadErrorPrefix": "Upload error:",
+    "removeDocumentConfirm": "Remove this document?",
+    "updateProcedureStatus": "Update Procedure Status",
+    "globalStatusControl": "Global status control",
+    "statusPending": "PENDING",
+    "statusInReview": "IN REVIEW",
+    "statusApproved": "APPROVED",
+    "statusRejected": "REJECTED",
+    "colStepNumber": "Step Number",
+    "colStepName": "Step Name",
+    "colStatus": "Status",
+    "colLastUpdated": "Last Updated Date",
+    "colAction": "Action",
+    "profileCreationDefaultLabel": "Profile Creation (Express Entry / Arrima)",
+    "stepStatusPending": "Pending",
+    "stepStatusInProgress": "In Progress",
+    "stepStatusApproved": "Approved",
+    "stepStatusActionRequired": "Action Required",
+    "unlockStep": "Unlock Step",
+    "lockStep": "Lock Step",
+    "requestModification": "Request Modification",
+    "legacyProcedure": "Legacy Procedure",
+    "equivalenceDetails": "Equivalence Details",
+    "selectOrganization": "Select Organization",
+    "languageTest": "Language Test",
+    "selectTest": "Select Test",
+    "documentsNeeded": "Documents needed for this step",
+    "attachments": "Attachments",
+    "remove": "Remove",
+    "checklist": "Checklist",
+    "uploadFile": "Upload File",
+    "fileTypesHint": "PDF, JPG, PNG",
+    "modificationRequestTitle": "Modification Request",
+    "stepPrefix": "STEP:",
+    "describeChange": "Clearly describe what the client needs to change or provide:",
+    "reasonPlaceholder": "Example: The passport scan is blurry. Please re-upload a clear high-resolution PDF...",
+    "cancel": "Cancel",
+    "sending": "Sending...",
+    "sendRequestToClient": "Send Request to Client",
+    "understood": "Understood"
+  },
+  "agentApplicationDetail": {
+    "procedureNotFound": "Procedure Not Found",
+    "backToWorkspace": "Back to Workspace",
+    "procedureSuffix": "Procedure",
+    "idPrefix": "ID: #",
+    "subjectInformation": "Subject Information",
+    "overallCompletion": "Overall Completion",
+    "procedureProgress": "Procedure Progress",
+    "milestonesValidated": "{completed} of {total} Milestones Validated",
+    "liveIntegrityCheck": "Live Integrity Check"
+  },
+  "adminCreateClient": {
+    "createClient": "Create Client",
+    "dialogTitle": "Create New Client",
+    "dialogSubtitle": "Provision a client account with login credentials",
+    "clientCreated": "Client Created!",
+    "shareCredentials": "Share these credentials with the client securely.",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "copyPasswordTooltip": "Copy password",
+    "credentialsWarning": "⚠ Copy and share these credentials now. The password cannot be retrieved later.",
+    "done": "Done",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "e.g. Jean-Pierre Dupont",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "client@example.com",
+    "loginPassword": "Login Password",
+    "regenerate": "Regenerate",
+    "passwordHint": "Auto-generated. You can edit it or share as-is.",
+    "assignToAgent": "Assign to Agent",
+    "optional": "(optional)",
+    "unassignedOption": "— Unassigned (assign later) —",
+    "cancel": "Cancel",
+    "creating": "Creating..."
+  },
+  "agentMessagesPage": {
+    "title": "Messages",
+    "subtitle": "Communicate with assigned clients.",
+    "clients": "Clients",
+    "searchClientPlaceholder": "Search client...",
+    "onlineStatus": "Online",
+    "typeMessagePlaceholder": "Type your message..."
+  },
+  "agentLayout": {
+    "overview": "Overview",
+    "assignedClients": "Assigned Clients",
+    "assignedProcedures": "Assigned Procedures",
+    "profile": "Profile",
+    "agentRole": "Agent",
+    "defaultUserName": "Agent User",
+    "headerTitle": "Agent Dashboard"
+  },
+  "agentCreateApplication": {
+    "toastCreated": "Procedure created",
+    "newProcedure": "New Procedure",
+    "dialogDescription": "Create a procedure for one of your clients using an agency workflow.",
+    "noWorkflowsYet": "Your agency hasn't set up any workflows yet.",
+    "askAdmin": "Ask your admin to create one",
+    "noClientsYet": "You don't have any clients yet. Create or get assigned one first.",
+    "clientLabel": "Client",
+    "selectClientPlaceholder": "Select a client...",
+    "workflowLabel": "Workflow",
+    "stepCount": "{count, plural, one {# step} other {# steps}}",
+    "workflowsManagedByAdmin": "Workflows are managed by your admin.",
+    "destinationCountry": "Destination country",
+    "countryPlaceholder": "e.g. Canada",
+    "createProcedure": "Create Procedure"
+  },
+  "adminActivityItem": {
+    "justNow": "just now",
+    "minutesAgo": "{minutes}m ago",
+    "hoursAgo": "{hours}h ago",
+    "viewDetailsTooltip": "View Details",
+    "activityDetails": "Activity Details",
+    "noDetailsProvided": "No details provided.",
+    "authorPrefix": "Author:",
+    "system": "System"
   }
 }

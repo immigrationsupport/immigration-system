@@ -3,10 +3,12 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import ApplicationList from "./application-list";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function AssignedApplicationsPage() {
+    const t = await getTranslations("agents");
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -14,7 +16,7 @@ export default async function AssignedApplicationsPage() {
     if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <p className="text-gray-500 font-medium">Please sign in as an agent to view your applications.</p>
+                <p className="text-gray-500 font-medium">{t("signInAsAgent")}</p>
             </div>
         );
     }
@@ -52,12 +54,12 @@ export default async function AssignedApplicationsPage() {
         <div className="space-y-8 max-w-6xl mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row md:items-end justify-between border-b pb-4 border-gray-100">
                 <div className="space-y-1">
-                    <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: "#1E3A8A" }}>Agent Workspace</h1>
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest">Manage & Update Assigned Procedures</p>
+                    <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: "#1E3A8A" }}>{t("agentWorkspace")}</h1>
+                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest">{t("manageUpdate")}</p>
                 </div>
                 <div className="mt-4 md:mt-0 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-bold border border-blue-100 flex items-center gap-2">
                     <span className="h-2 w-2 bg-blue-500 rounded-full animate-pulse" />
-                    {applications.length} Active Procedures
+                    {t("activeProcedures", { count: applications.length })}
                 </div>
             </div>
 

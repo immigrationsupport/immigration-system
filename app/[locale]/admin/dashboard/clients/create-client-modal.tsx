@@ -2,12 +2,11 @@
 
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
-
 import {
     Plus, Loader2, Eye, EyeOff, RefreshCw, Copy, CheckCircle2, X, UserPlus, KeyRound, User, Mail, Users
 } from "lucide-react";
 import { createClientAction } from "./actions";
+import { useTranslations } from "next-intl";
 
 interface Agent {
     id: string;
@@ -35,9 +34,9 @@ function generatePassword(): string {
     return pw.sort(() => Math.random() - 0.5).join("");
 }
 
-export default function CreateClientModal({ agents, onClientCreated }: CreateClientModalProps) {    
-        const t = useTranslations("adminClients");
-const [isOpen, setIsOpen] = useState(false);
+export default function CreateClientModal({ agents, onClientCreated }: CreateClientModalProps) {
+    const t = useTranslations("adminCreateClient");
+    const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(true);
@@ -114,7 +113,7 @@ const [isOpen, setIsOpen] = useState(false);
                 style={{ backgroundColor: "#1E3A8A", borderRadius: "12px" }}
             >
                 <UserPlus size={16} />
-                {t("button")}
+                {t("createClient")}
             </Button>
 
             {isOpen && (
@@ -134,8 +133,8 @@ const [isOpen, setIsOpen] = useState(false);
                                     <UserPlus size={22} />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-black tracking-tight">Create New Client</h2>
-                                    <p className="text-blue-200 text-xs font-medium mt-0.5">Provision a client account with login credentials</p>
+                                    <h2 className="text-xl font-black tracking-tight">{t("dialogTitle")}</h2>
+                                    <p className="text-blue-200 text-xs font-medium mt-0.5">{t("dialogSubtitle")}</p>
                                 </div>
                             </div>
                         </div>
@@ -149,8 +148,8 @@ const [isOpen, setIsOpen] = useState(false);
                                             <CheckCircle2 size={32} />
                                         </div>
                                         <div className="text-center">
-                                            <h3 className="text-lg font-black text-gray-900">Client Created!</h3>
-                                            <p className="text-sm text-gray-500 font-medium">Share these credentials with the client securely.</p>
+                                            <h3 className="text-lg font-black text-gray-900">{t("clientCreated")}</h3>
+                                            <p className="text-sm text-gray-500 font-medium">{t("shareCredentials")}</p>
                                         </div>
                                     </div>
 
@@ -158,21 +157,21 @@ const [isOpen, setIsOpen] = useState(false);
                                         <div className="flex items-center gap-3 p-4">
                                             <User size={16} className="text-gray-400 shrink-0" />
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Name</p>
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t("name")}</p>
                                                 <p className="font-bold text-gray-800 truncate">{success.name}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3 p-4">
                                             <Mail size={16} className="text-gray-400 shrink-0" />
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email</p>
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t("email")}</p>
                                                 <p className="font-bold text-gray-800 truncate">{success.email}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3 p-4">
                                             <KeyRound size={16} className="text-gray-400 shrink-0" />
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Password</p>
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t("password")}</p>
                                                 <p className="font-bold text-gray-800 font-mono tracking-wider">{success.password}</p>
                                             </div>
                                             <button
@@ -182,7 +181,7 @@ const [isOpen, setIsOpen] = useState(false);
                                                     setTimeout(() => setCopied(false), 2000);
                                                 }}
                                                 className="text-gray-400 hover:text-blue-600 transition-colors shrink-0"
-                                                title="Copy password"
+                                                title={t("copyPasswordTooltip")}
                                             >
                                                 {copied ? <CheckCircle2 size={16} className="text-emerald-500" /> : <Copy size={16} />}
                                             </button>
@@ -190,7 +189,7 @@ const [isOpen, setIsOpen] = useState(false);
                                     </div>
 
                                     <p className="text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 font-bold">
-                                        ⚠ Copy and share these credentials now. The password cannot be retrieved later.
+                                        {t("credentialsWarning")}
                                     </p>
 
                                     <Button
@@ -198,7 +197,7 @@ const [isOpen, setIsOpen] = useState(false);
                                         className="w-full font-black rounded-xl h-11"
                                         style={{ backgroundColor: "#1E3A8A" }}
                                     >
-                                        Done
+                                        {t("done")}
                                     </Button>
                                 </div>
                             ) : (
@@ -213,7 +212,7 @@ const [isOpen, setIsOpen] = useState(false);
                                     {/* Full Name */}
                                     <div className="space-y-1.5">
                                         <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                            Full Name
+                                            {t("fullName")}
                                         </label>
                                         <div className="relative">
                                             <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -224,7 +223,7 @@ const [isOpen, setIsOpen] = useState(false);
                                                 value={name}
                                                 onChange={e => setName(e.target.value)}
                                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-100 focus:border-blue-300 outline-none"
-                                                placeholder="e.g. Jean-Pierre Dupont"
+                                                placeholder={t("fullNamePlaceholder")}
                                             />
                                         </div>
                                     </div>
@@ -232,7 +231,7 @@ const [isOpen, setIsOpen] = useState(false);
                                     {/* Email */}
                                     <div className="space-y-1.5">
                                         <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                            Email Address
+                                            {t("emailAddress")}
                                         </label>
                                         <div className="relative">
                                             <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -242,7 +241,7 @@ const [isOpen, setIsOpen] = useState(false);
                                                 value={email}
                                                 onChange={e => setEmail(e.target.value)}
                                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-100 focus:border-blue-300 outline-none"
-                                                placeholder="client@example.com"
+                                                placeholder={t("emailPlaceholder")}
                                             />
                                         </div>
                                     </div>
@@ -251,14 +250,14 @@ const [isOpen, setIsOpen] = useState(false);
                                     <div className="space-y-1.5">
                                         <div className="flex justify-between items-center">
                                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                                Login Password
+                                                {t("loginPassword")}
                                             </label>
                                             <button
                                                 type="button"
                                                 onClick={regeneratePassword}
                                                 className="text-[10px] font-black text-blue-600 hover:text-blue-800 flex items-center gap-1 uppercase tracking-widest"
                                             >
-                                                <RefreshCw size={11} /> Regenerate
+                                                <RefreshCw size={11} /> {t("regenerate")}
                                             </button>
                                         </div>
                                         <div className="relative">
@@ -276,7 +275,7 @@ const [isOpen, setIsOpen] = useState(false);
                                                     type="button"
                                                     onClick={copyPassword}
                                                     className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors"
-                                                    title="Copy password"
+                                                    title={t("copyPasswordTooltip")}
                                                 >
                                                     {copied ? <CheckCircle2 size={15} className="text-emerald-500" /> : <Copy size={15} />}
                                                 </button>
@@ -290,14 +289,14 @@ const [isOpen, setIsOpen] = useState(false);
                                             </div>
                                         </div>
                                         <p className="text-[10px] text-gray-400 font-medium pl-1">
-                                            Auto-generated. You can edit it or share as-is.
+                                            {t("passwordHint")}
                                         </p>
                                     </div>
 
                                     {/* Agent Assignment (optional) */}
                                     <div className="space-y-1.5">
                                         <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                            Assign to Agent <span className="text-gray-300 normal-case font-medium">(optional)</span>
+                                            {t("assignToAgent")} <span className="text-gray-300 normal-case font-medium">{t("optional")}</span>
                                         </label>
                                         <div className="relative">
                                             <Users size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -306,7 +305,7 @@ const [isOpen, setIsOpen] = useState(false);
                                                 onChange={e => setAgentId(e.target.value)}
                                                 className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-100 focus:border-blue-300 outline-none cursor-pointer"
                                             >
-                                                <option value="">— Unassigned (assign later) —</option>
+                                                <option value="">{t("unassignedOption")}</option>
                                                 {agents.map(a => (
                                                     <option key={a.id} value={a.id}>{a.name}</option>
                                                 ))}
@@ -323,7 +322,7 @@ const [isOpen, setIsOpen] = useState(false);
                                             disabled={loading}
                                             className="flex-1 font-bold text-gray-500 rounded-xl border border-gray-200 hover:bg-gray-50"
                                         >
-                                            Cancel
+                                            {t("cancel")}
                                         </Button>
                                         <Button
                                             type="submit"
@@ -332,9 +331,9 @@ const [isOpen, setIsOpen] = useState(false);
                                             style={{ backgroundColor: "#1E3A8A" }}
                                         >
                                             {loading ? (
-                                                <><Loader2 className="h-4 w-4 animate-spin" /> Creating...</>
+                                                <><Loader2 className="h-4 w-4 animate-spin" /> {t("creating")}</>
                                             ) : (
-                                                <><UserPlus size={16} /> Create Client</>
+                                                <><UserPlus size={16} /> {t("createClient")}</>
                                             )}
                                         </Button>
                                     </div>

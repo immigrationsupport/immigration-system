@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Link from "next/link";
 import CreateApplicationModal from "./create-application-modal";
+import { useTranslations } from "next-intl";
 
 interface ApplicationListProps {
     initialApplications: any[];
 }
 
 export default function ApplicationList({ initialApplications }: ApplicationListProps) {
+    const t = useTranslations("agents");
     const [applications, setApplications] = useState(initialApplications);
     const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null);
 
@@ -32,7 +34,7 @@ export default function ApplicationList({ initialApplications }: ApplicationList
             {applications.length === 0 && (
                 <Card className="flex flex-col items-center py-20 bg-gray-50 border-dashed rounded-[32px]">
                     <Info className="h-10 w-10 text-gray-300 mb-2" />
-                    <p className="text-gray-500 font-medium">No assigned applications found.</p>
+                    <p className="text-gray-500 font-medium">{t("noAssignedApplications")}</p>
                 </Card>
             )}
 
@@ -53,7 +55,7 @@ export default function ApplicationList({ initialApplications }: ApplicationList
                                     download 
                                     className="h-10 px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center gap-2 text-sm font-bold transition-all"
                                 >
-                                    <Download size={16} /> Download
+                                    <Download size={16} /> {t("download")}
                                 </a>
                                 <Button 
                                     variant="ghost" 
@@ -75,7 +77,7 @@ export default function ApplicationList({ initialApplications }: ApplicationList
                                 <iframe 
                                     src={`${viewingDoc.url}#toolbar=1&navpanes=0&view=FitH`}
                                     className="w-full h-full border-none"
-                                    title="Document Viewer"
+                                    title={t("documentViewerTitle")}
                                 />
                             )}
                         </div>
@@ -88,6 +90,7 @@ export default function ApplicationList({ initialApplications }: ApplicationList
 }
 
 function ApplicationCard({ app, onViewDoc }: { app: any, onViewDoc: (doc: any) => void }) {
+    const t = useTranslations("agents");
     const completedSteps = app.steps.filter((s:any) => s.status === "APPROVED").length;
     const totalSteps = app.steps.length || 11;
     const progress = Math.round((completedSteps / totalSteps) * 100);
@@ -128,10 +131,10 @@ function ApplicationCard({ app, onViewDoc }: { app: any, onViewDoc: (doc: any) =
                         <div className="relative z-10">
                             <div className="flex justify-between items-end mb-4">
                                 <div>
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-2">Journey Overview</p>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-2">{t("journeyOverview")}</p>
                                     <h4 className="text-4xl font-black text-[#1E3A8A] tracking-tighter">{progress}%</h4>
                                 </div>
-                                <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full">{completedSteps}/{totalSteps} Steps</span>
+                                <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full">{t("stepsProgress", { completed: completedSteps, total: totalSteps })}</span>
                             </div>
                             <div className="w-full h-3 bg-white rounded-full overflow-hidden shadow-inner ring-1 ring-gray-100">
                                 <div 
@@ -145,9 +148,9 @@ function ApplicationCard({ app, onViewDoc }: { app: any, onViewDoc: (doc: any) =
                     {/* Client Credentials */}
                     <div className="space-y-4 p-8 rounded-[32px] border border-gray-100 bg-white">
                         <div className="flex justify-between items-center mb-2">
-                           <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Client Identity</h4>
+                           <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t("clientIdentity")}</h4>
                            <Link href={`/dashboard/agent/clients/${app.clientId}`}>
-                             <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black text-blue-600 hover:bg-blue-50 px-4 rounded-xl">View Profile</Button>
+                             <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black text-blue-600 hover:bg-blue-50 px-4 rounded-xl">{t("viewProfile")}</Button>
                            </Link>
                         </div>
                         <div className="space-y-1">
@@ -160,7 +163,7 @@ function ApplicationCard({ app, onViewDoc }: { app: any, onViewDoc: (doc: any) =
                 <div className="pt-4 flex flex-col md:flex-row justify-end gap-4">
                     <Link href={`/dashboard/agent/applications/${app.id}`}>
                         <Button className="w-full md:w-fit bg-[#1E3A8A] hover:bg-blue-900 text-white font-black px-12 py-8 rounded-[24px] shadow-2xl shadow-blue-200 transition-all hover:scale-[1.02] active:scale-95 group">
-                            Manage Full Roadmap & Decision
+                            {t("manageFullRoadmap")}
                             <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
                         </Button>
                     </Link>
@@ -170,7 +173,7 @@ function ApplicationCard({ app, onViewDoc }: { app: any, onViewDoc: (doc: any) =
                 {app.steps?.some((p: any) => p.documents?.length > 0) && (
                     <div className="mt-8 pt-8 border-t border-gray-50">
                         <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 px-1">
-                            LATEST UPLOADS
+                            {t("latestUploads")}
                         </h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {app.steps.flatMap((p: any) => p.documents || []).slice(0, 3).map((doc: any) => (

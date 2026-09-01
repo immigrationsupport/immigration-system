@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,7 @@ import {
     X
 } from "lucide-react";
 import { aiSearchAction, type ToolResultPayload } from "./actions";
+
 interface ChatMessage {
     role: "user" | "assistant";
     content: string;
@@ -49,7 +51,7 @@ function StatusBadge({ status }: { status: string }) {
     );
 }
 
-function ClientCard({ client }: { client: any }) {
+function ClientCard({ client, t }: { client: any; t: ReturnType<typeof useTranslations> }) {
     return (
         <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3 mb-3">
@@ -59,7 +61,7 @@ function ClientCard({ client }: { client: any }) {
                     </div>
                     <div>
                         <p className="font-black text-gray-900 text-sm">{client.name}</p>
-                        {client.agent?.name && <p className="text-xs text-gray-400">Agent: {client.agent.name}</p>}
+                        {client.agent?.name && <p className="text-xs text-gray-400">{t("thread.agentPrefix")}{client.agent.name}</p>}
                     </div>
                 </div>
                 {client.isSuspended ? <StatusBadge status="SUSPENDED" /> : client.status && <StatusBadge status={client.status} />}
@@ -78,7 +80,7 @@ function ClientCard({ client }: { client: any }) {
             </div>
             {client.applications && client.applications.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-gray-50 space-y-1.5">
-                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Applications</p>
+                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("thread.applicationsLabel")}</p>
                     {client.applications.map((app: any) => (
                         <div key={app.id} className="flex items-center justify-between text-xs">
                             <span className="font-bold text-gray-700 flex items-center gap-1.5">
@@ -93,13 +95,13 @@ function ClientCard({ client }: { client: any }) {
                 href="/admin/dashboard/clients"
                 className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-1 text-xs font-bold text-[#1E3A8A] hover:underline"
             >
-                Open in Manage Clients <ArrowUpRight className="h-3 w-3" />
+                {t("openInClients")} <ArrowUpRight className="h-3 w-3" />
             </Link>
         </div>
     );
 }
 
-function AgentCard({ agent }: { agent: any }) {
+function AgentCard({ agent, t }: { agent: any; t: ReturnType<typeof useTranslations> }) {
     return (
         <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center justify-between gap-3">
@@ -115,19 +117,19 @@ function AgentCard({ agent }: { agent: any }) {
                 {agent.isSuspended && <StatusBadge status="SUSPENDED" />}
             </div>
             <p className="text-xs text-gray-500 mt-3 pt-3 border-t border-gray-50">
-                {agent.assignedClients?.length || 0} client{agent.assignedClients?.length === 1 ? "" : "s"} assigned
+                {t("thread.clientsAssigned", { count: agent.assignedClients?.length || 0 })}
             </p>
             <Link
                 href="/admin/dashboard/agents"
                 className="mt-2 flex items-center gap-1 text-xs font-bold text-[#1E3A8A] hover:underline"
             >
-                Open in Manage Agents <ArrowUpRight className="h-3 w-3" />
+                {t("openInAgents")} <ArrowUpRight className="h-3 w-3" />
             </Link>
         </div>
     );
 }
 
-function ApplicationCard({ app }: { app: any }) {
+function ApplicationCard({ app, t }: { app: any; t: ReturnType<typeof useTranslations> }) {
     return (
         <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3 mb-2">
@@ -144,23 +146,26 @@ function ApplicationCard({ app }: { app: any }) {
                 </div>
                 <StatusBadge status={app.status} />
             </div>
-            {app.agent?.name && <p className="text-xs text-gray-400 mt-2">Agent: {app.agent.name}</p>}
+            {app.agent?.name && <p className="text-xs text-gray-400 mt-2">{t("thread.agentPrefix")}{app.agent.name}</p>}
             {app.steps && app.steps.length > 0 && (
                 <p className="text-xs text-gray-400 mt-1">
-                    {app.steps.filter((s: any) => s.status === "APPROVED").length} of {app.steps.length} steps completed
+                    {t("thread.stepsCompleted", {
+                        completed: app.steps.filter((s: any) => s.status === "APPROVED").length,
+                        total: app.steps.length
+                    })}
                 </p>
             )}
             <Link
                 href="/admin/dashboard/applications"
                 className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-1 text-xs font-bold text-[#1E3A8A] hover:underline"
             >
-                Open in All Procedures <ArrowUpRight className="h-3 w-3" />
+                {t("openInApplications")} <ArrowUpRight className="h-3 w-3" />
             </Link>
         </div>
     );
 }
 
-function ResultCards({ results }: { results: ToolResultPayload[] }) {
+function ResultCards({ results, t }: { results: ToolResultPayload[]; t: ReturnType<typeof useTranslations> }) {
     return (
         <div className="mt-3 space-y-3">
             {results.map((r, i) => {
@@ -169,24 +174,24 @@ function ResultCards({ results }: { results: ToolResultPayload[] }) {
                 if (r.tool === "search_clients" && Array.isArray(r.result)) {
                     return (
                         <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {r.result.map((c: any) => <ClientCard key={c.id} client={c} />)}
+                            {r.result.map((c: any) => <ClientCard key={c.id} client={c} t={t} />)}
                         </div>
                     );
                 }
                 if (r.tool === "get_client_details" && r.result) {
-                    return <ClientCard key={i} client={r.result} />;
+                    return <ClientCard key={i} client={r.result} t={t} />;
                 }
                 if (r.tool === "search_agents" && Array.isArray(r.result)) {
                     return (
                         <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {r.result.map((a: any) => <AgentCard key={a.id} agent={a} />)}
+                            {r.result.map((a: any) => <AgentCard key={a.id} agent={a} t={t} />)}
                         </div>
                     );
                 }
                 if (r.tool === "search_applications" && Array.isArray(r.result)) {
                     return (
                         <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {r.result.map((a: any) => <ApplicationCard key={a.id} app={a} />)}
+                            {r.result.map((a: any) => <ApplicationCard key={a.id} app={a} t={t} />)}
                         </div>
                     );
                 }
@@ -197,6 +202,7 @@ function ResultCards({ results }: { results: ToolResultPayload[] }) {
 }
 
 export default function AiSearchBar() {
+    const t = useTranslations("adminSearch");
     const [query, setQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -220,7 +226,7 @@ export default function AiSearchBar() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [panelOpen]);
 
-       async function handleSearch(e: React.FormEvent) {
+    async function handleSearch(e: React.FormEvent) {
         e.preventDefault();
         const q = query.trim();
         if (!q || loading) return;
@@ -241,7 +247,7 @@ export default function AiSearchBar() {
         } else {
             setMessages((prev) => [
                 ...prev,
-                { role: "assistant", content: result.answer || "", results: result.results }
+                { role: "assistant", content: result.answer || t("noAnswer"), results: result.results }
             ]);
         }
     }
@@ -260,7 +266,7 @@ export default function AiSearchBar() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => messages.length > 0 && setPanelOpen(true)}
-                    placeholder="Ask anything — e.g. 'find John Doe' or 'clients from Cameroon still pending'"
+                    placeholder={t("placeholder")}
                     className="pl-11 pr-24 h-12 rounded-2xl"
                     disabled={loading}
                 />
@@ -269,7 +275,7 @@ export default function AiSearchBar() {
                         <button
                             type="button"
                             onClick={handleReset}
-                            title="New search"
+                            title={t("thread.newSearchTooltip")}
                             className="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
                         >
                             <RotateCcw className="h-4 w-4" />
@@ -285,7 +291,7 @@ export default function AiSearchBar() {
             {panelOpen && messages.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4">
                     <div className="flex justify-between items-center mb-2">
-                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">AI Search</span>
+                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("panelLabel")}</span>
                         <button
                             type="button"
                             onClick={() => setPanelOpen(false)}
@@ -319,7 +325,7 @@ export default function AiSearchBar() {
                                         </div>
                                         {m.results && m.results.length > 0 && (
                                             <div className="pl-9">
-                                                <ResultCards results={m.results} />
+                                                <ResultCards results={m.results} t={t} />
                                             </div>
                                         )}
                                     </div>
@@ -328,7 +334,7 @@ export default function AiSearchBar() {
                         ))}
                         {loading && (
                             <div className="flex items-center gap-2 pl-9 text-xs text-gray-400 font-semibold">
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Searching...
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("thread.searching")}
                             </div>
                         )}
                     </div>

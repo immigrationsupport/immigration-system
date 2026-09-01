@@ -5,20 +5,22 @@ import { MessageSquare, Send, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function AgentMessagesPage() {
+    const t = useTranslations("agentMessagesPage");
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold" style={{ color: "#1E3A8A" }}>Messages</h1>
-                <p className="text-sm text-gray-500">Communicate with assigned clients.</p>
+                <h1 className="text-2xl font-bold" style={{ color: "#1E3A8A" }}>{t("title")}</h1>
+                <p className="text-sm text-gray-500">{t("subtitle")}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 h-[600px]">
                 <Card className="col-span-1 border-r h-full flex flex-col">
                     <CardHeader className="pb-3 border-b">
-                        <CardTitle className="text-lg">Clients</CardTitle>
-                        <Input placeholder="Search client..." className="mt-2" />
+                        <CardTitle className="text-lg">{t("clients")}</CardTitle>
+                        <Input placeholder={t("searchClientPlaceholder")} className="mt-2" />
                     </CardHeader>
                     <CardContent className="flex-1 overflow-y-auto p-0">
                         <div className="divide-y divide-gray-100">
@@ -46,7 +48,7 @@ export default function AgentMessagesPage() {
                         </div>
                         <div>
                             <CardTitle className="text-lg">Sarah Johnson</CardTitle>
-                            <p className="text-xs text-green-600">Online</p>
+                            <p className="text-xs text-green-600">{t("onlineStatus")}</p>
                         </div>
                     </CardHeader>
                     <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
@@ -78,7 +80,7 @@ export default function AgentMessagesPage() {
                     </CardContent>
                     <CardFooter className="py-3 border-t bg-white">
                         <div className="flex w-full items-center space-x-2">
-                            <Input placeholder="Type your message..." className="flex-1" />
+                            <Input placeholder={t("typeMessagePlaceholder")} className="flex-1" />
                             <Button variant="outline" style={{ backgroundColor: "#1E3A8A" }}>
                                 <Send className="h-4 w-4" />
                             </Button>

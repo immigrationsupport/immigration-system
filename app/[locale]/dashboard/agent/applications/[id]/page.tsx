@@ -5,9 +5,11 @@ import Link from "next/link";
 import { ArrowLeft, User, Globe, Briefcase, GraduationCap, Users, Clock, CheckCircle2 } from "lucide-react";
 import StepManagement from "./step-management";
 import { getAgencyStepDefinitions } from "@/lib/steps-server";
+import { getTranslations } from "next-intl/server";
 
 export default async function AgentApplicationManagementPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
     const { id } = await (params as any);
+    const t = await getTranslations("agentApplicationDetail");
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -66,7 +68,7 @@ export default async function AgentApplicationManagementPage({ params }: { param
         }
     }
 
-    if (!application) return <div className="p-8 text-center font-black text-red-500 uppercase">Procedure Not Found</div>;
+    if (!application) return <div className="p-8 text-center font-black text-red-500 uppercase">{t("procedureNotFound")}</div>;
 
     const completedSteps = application.steps.filter(s => s.status === "APPROVED").length;
     const progress = Math.round((completedSteps / application.steps.length) * 100);
@@ -80,7 +82,7 @@ export default async function AgentApplicationManagementPage({ params }: { param
                 <div className="space-y-6 flex-1">
                     <Link href="/dashboard/agent/applications" className="inline-flex items-center gap-2 group text-gray-400 hover:text-[#1E3A8A] transition-all">
                         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                        <span className="text-[10px] font-black uppercase tracking-widest leading-none">Back to Workspace</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest leading-none">{t("backToWorkspace")}</span>
                     </Link>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8">
                         <div className="bg-gradient-to-br from-[#1E3A8A] to-blue-700 p-6 rounded-[32px] text-white shadow-2xl shadow-blue-100 ring-8 ring-blue-50">
@@ -88,9 +90,9 @@ export default async function AgentApplicationManagementPage({ params }: { param
                         </div>
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-3">
-                                <span className="bg-blue-50 text-[#1E3A8A] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{application.country} Procedure</span>
+                                <span className="bg-blue-50 text-[#1E3A8A] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{application.country} {t("procedureSuffix")}</span>
                                 <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{appType}</span>
-                                <span className="bg-gray-100 text-gray-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">ID: #{application.id.slice(-6)}</span>
+                                <span className="bg-gray-100 text-gray-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{t("idPrefix")}{application.id.slice(-6)}</span>
                             </div>
                             <h1 className="text-6xl font-black text-gray-900 tracking-tighter uppercase leading-none">{application.client.name}</h1>
                         </div>
@@ -103,7 +105,7 @@ export default async function AgentApplicationManagementPage({ params }: { param
                             <User className="h-10 w-10 text-[#1E3A8A]" />
                        </div>
                        <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-2">Subject Information</p>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-2">{t("subjectInformation")}</p>
                             <h4 className="text-2xl font-black text-gray-900 tracking-tight">{application.client.name}</h4>
                             <p className="text-sm font-bold text-[#1E3A8A] opacity-60">{application.client.email}</p>
                        </div>
@@ -118,16 +120,16 @@ export default async function AgentApplicationManagementPage({ params }: { param
                 </div>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-10">
                     <div className="space-y-2">
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">Overall Completion</p>
-                        <h3 className="text-4xl font-black text-gray-900 uppercase tracking-tighter">Procedure Progress</h3>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">{t("overallCompletion")}</p>
+                        <h3 className="text-4xl font-black text-gray-900 uppercase tracking-tighter">{t("procedureProgress")}</h3>
                         <p className="text-xs font-bold text-[#1E3A8A] opacity-60 uppercase tracking-widest">
-                            {completedSteps} of {application.steps.length} Milestones Validated
+                            {t("milestonesValidated", { completed: completedSteps, total: application.steps.length })}
                         </p>
                     </div>
                     <div className="text-left md:text-right">
                         <span className="text-7xl font-black text-[#1E3A8A] tracking-tighter leading-none">{progress}%</span>
                         <div className="flex items-center gap-2 md:justify-end mt-2 uppercase tracking-widest text-[10px] font-black text-emerald-500">
-                             <CheckCircle2 size={12} /> Live Integrity Check
+                             <CheckCircle2 size={12} /> {t("liveIntegrityCheck")}
                         </div>
                     </div>
                 </div>

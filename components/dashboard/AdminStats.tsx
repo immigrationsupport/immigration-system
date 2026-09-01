@@ -3,8 +3,10 @@ import { Users, Briefcase, FileText } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 
 export default async function AdminStats() {
+    const t = await getTranslations("dashboard.adminDashboard.stats");
     const session = await auth.api.getSession({ headers: await headers() });
     const agencyId = (session?.user as any)?.agencyId;
 
@@ -30,7 +32,7 @@ export default async function AdminStats() {
                     <Users size={26} color="black"/>
                 </div>
                 <div>
-                    <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Total Clients</p>
+                    <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">{t("totalClients")}</p>
                     <h3 className="text-3xl font-black text-gray-900 mt-0.5">{totalClients.toLocaleString()}</h3>
                 </div>
             </Link>
@@ -45,7 +47,7 @@ export default async function AdminStats() {
                     <Briefcase size={26} color="black"  />
                 </div>
                 <div>
-                    <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">Total Agents</p>
+                    <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">{t("totalAgents")}</p>
                     <h3 className="text-3xl font-black text-gray-900 mt-0.5">{totalAgents.toLocaleString()}</h3>
                 </div>
             </Link>
@@ -60,7 +62,7 @@ export default async function AdminStats() {
                     <FileText size={26} color="black"/>
                 </div>
                 <div>
-                    <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">All Procedures</p>
+                    <p className="text-[10px] text-black-400 font-black uppercase tracking-[0.2em]">{t("allProcedures")}</p>
                     <h3 className="text-3xl font-black text-gray-900 mt-0.5">{totalApplications.toLocaleString()}</h3>
                 </div>
             </Link>

@@ -5,17 +5,19 @@ import AdminStats from "@/components/dashboard/AdminStats";
 import { ActivityItem } from "@/components/dashboard/ActivityItem";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardOverview() {
+    const t = await getTranslations("dashboard.adminDashboard");
     const session = await auth.api.getSession({ headers: await headers() });
     const agencyId = (session?.user as any)?.agencyId;
 
     if (!agencyId) {
         return (
             <div className="max-w-7xl mx-auto p-8 text-center text-gray-500">
-                Your account is not linked to an agency.
+                {t("noAgencyLinked")}
             </div>
         );
     }
@@ -76,34 +78,34 @@ export default async function AdminDashboardOverview() {
                 <div className="bg-white shadow-sm border border-gray-100 p-6" style={{ borderRadius: "12px" }}>
                     <div className="flex items-center gap-2 mb-6 border-b border-gray-50 pb-4">
                         <Activity className="h-5 w-5 text-[#1E3A8A]" />
-                        <h2 className="text-lg font-bold text-gray-900">Procedures by Status</h2>
+                        <h2 className="text-lg font-bold text-gray-900">{t("statusHeading")}</h2>
                     </div>
                     <div className="space-y-4">
                         <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-100 transition-colors hover:bg-white">
                             <div className="flex items-center gap-3">
                                 <div className="h-2.5 w-2.5 rounded-full bg-slate-400"></div>
-                                <span className="text-sm font-semibold text-gray-600">Pending Review</span>
+                                <span className="text-sm font-semibold text-gray-600">{t("statuses.pendingReview")}</span>
                             </div>
                             <span className="px-3 py-1 rounded-full bg-white border border-gray-200 text-gray-900 text-xs font-black">{countsByStatus.PENDING}</span>
                         </div>
                         <div className="flex justify-between items-center p-4 bg-blue-50 bg-opacity-40 rounded-lg border border-blue-100 transition-colors hover:bg-white">
                             <div className="flex items-center gap-3">
                                 <div className="h-2.5 w-2.5 rounded-full bg-blue-500"></div>
-                                <span className="text-sm font-semibold text-blue-800">In Review</span>
+                                <span className="text-sm font-semibold text-blue-800">{t("statuses.inReview")}</span>
                             </div>
                             <span className="px-3 py-1 rounded-full bg-white border border-blue-200 text-blue-900 text-xs font-black">{countsByStatus.IN_REVIEW}</span>
                         </div>
                         <div className="flex justify-between items-center p-4 bg-emerald-50 bg-opacity-40 rounded-lg border border-emerald-100 transition-colors hover:bg-white">
                             <div className="flex items-center gap-3">
                                 <div className="h-2.5 w-2.5 rounded-full bg-emerald-500"></div>
-                                <span className="text-sm font-semibold text-emerald-800">Approved</span>
+                                <span className="text-sm font-semibold text-emerald-800">{t("statuses.approved")}</span>
                             </div>
                             <span className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-900 text-xs font-black">{countsByStatus.APPROVED}</span>
                         </div>
                         <div className="flex justify-between items-center p-4 bg-red-50 bg-opacity-40 rounded-lg border border-red-100 transition-colors hover:bg-white">
                             <div className="flex items-center gap-3">
                                 <div className="h-2.5 w-2.5 rounded-full bg-red-500"></div>
-                                <span className="text-sm font-semibold text-red-800">Rejected</span>
+                                <span className="text-sm font-semibold text-red-800">{t("statuses.rejected")}</span>
                             </div>
                             <span className="px-3 py-1 rounded-full bg-white border border-red-200 text-red-900 text-xs font-black">{countsByStatus.REJECTED}</span>
                         </div>
@@ -115,7 +117,7 @@ export default async function AdminDashboardOverview() {
                     <div className="flex items-center justify-between mb-6 border-b border-gray-50 pb-4">
                         <div className="flex items-center gap-2">
                             <Clock className="h-5 w-5 text-[#1E3A8A]" />
-                            <h2 className="text-lg font-bold text-gray-800">Recent Activity</h2>
+                            <h2 className="text-lg font-bold text-gray-800">{t("recentActivityHeading")}</h2>
                         </div>
                     </div>
 
@@ -130,7 +132,7 @@ export default async function AdminDashboardOverview() {
                         ) : (
                             <div className="text-center py-20 bg-slate-50 rounded-xl border-2 border-dashed border-slate-100">
                                 <Activity className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-                                <p className="text-sm text-gray-400 font-medium">No activity recorded yet.</p>
+                                <p className="text-sm text-gray-400 font-medium">{t("noActivity")}</p>
                             </div>
                         )}
                     </div>

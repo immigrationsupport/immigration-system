@@ -12,8 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import { UserPlus, AlertCircle, Loader2 } from "lucide-react";
 import { createClientAction } from "./actions";
+import { useTranslations } from "next-intl";
 
 export default function NewClientButton({ isAgent }: { isAgent: boolean }) {
+    const t = useTranslations("agentNewClient");
     const [open, setOpen] = useState(false);
     const [error, setError] = useState("");
     const [isPending, startTransition] = useTransition();
@@ -39,17 +41,15 @@ export default function NewClientButton({ isAgent }: { isAgent: boolean }) {
                 onClick={() => setOpen(true)}
                 className="h-12 px-6 gap-2 bg-[#1E3A8A] text-white hover:bg-blue-900 font-extrabold rounded-md"
             >
-                <UserPlus className="h-5 w-5" /> New Client
+                <UserPlus className="h-5 w-5" /> {t("newClient")}
             </Button>
 
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="sm:max-w-md rounded-2xl">
                     <DialogHeader>
-                        <DialogTitle className="text-xl font-black text-[#1E3A8A]">New Client</DialogTitle>
+                        <DialogTitle className="text-xl font-black text-[#1E3A8A]">{t("newClient")}</DialogTitle>
                         <DialogDescription>
-                            {isAgent
-                                ? "This client will be assigned to you automatically."
-                                : "This client will be created unassigned — assign an agent from the client list afterward."}
+                            {isAgent ? t("assignedNote") : t("unassignedNote")}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -62,17 +62,17 @@ export default function NewClientButton({ isAgent }: { isAgent: boolean }) {
 
                     <form ref={formRef} action={handleCreate} className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-gray-800">Full name</label>
+                            <label className="text-sm font-semibold text-gray-800">{t("fullName")}</label>
                             <Input name="name" required disabled={isPending} />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-gray-800">Email</label>
+                            <label className="text-sm font-semibold text-gray-800">{t("email")}</label>
                             <Input name="email" type="email" required disabled={isPending} />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-gray-800">Temporary password</label>
+                            <label className="text-sm font-semibold text-gray-800">{t("temporaryPassword")}</label>
                             <Input name="password" type="password" required minLength={8} disabled={isPending} />
-                            <p className="text-xs text-gray-400">Share this with the client so they can sign in.</p>
+                            <p className="text-xs text-gray-400">{t("passwordHint")}</p>
                         </div>
 
                         <Button
@@ -80,7 +80,7 @@ export default function NewClientButton({ isAgent }: { isAgent: boolean }) {
                             disabled={isPending}
                             className="w-full bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold h-11 rounded-xl"
                         >
-                            {isPending ? <Loader2 className="animate-spin w-4 h-4" /> : "Create Client"}
+                            {isPending ? <Loader2 className="animate-spin w-4 h-4" /> : t("createClient")}
                         </Button>
                     </form>
                 </DialogContent>
