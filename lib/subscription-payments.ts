@@ -1,32 +1,33 @@
 import prisma from "@/lib/prisma";
-import { verifyTransaction, mapPaymentType } from "@/lib/flutterwave";
+import { verifyTransaction, mapPaymentType } from "@/lib/campay";
 
 export type ConfirmResult =
     | { outcome: "success"; planName: string }
     | { outcome: "already_processed" }
+    | { outcome: "pending" }
     | { outcome: "failed"; reason: string }
     | { outcome: "not_found" };
 
 /**
- * Confirms a Flutterwave transaction and, if genuinely successful, applies
- * the plan upgrade it was paying for. Safe to call twice for the same
+ * Confirms a CamPay transaction and, if genuinely successful, applies the
+ * plan upgrade it was paying for. Safe to call twice for the same
  * transaction (webhook + redirect both call this) — the PENDING -> SUCCESS
  * transition only happens once thanks to the status guard inside the
  * transaction.
+ *
+ * `gatewayReference` is CamPay's own transaction reference (returned from
+ * initializePayment, stored on Payment.gatewayTransactionId) — NOT our
+ * own txRef. We always re-fetch status directly from CamPay here; we never
+ * trust a status value handed to us by a webhook body or redirect param.
  */
-export async function confirmFlutterwavePayment(transactionId: string, txRef?: string): Promise<ConfirmResult> {
-    const verification = await verifyTransaction(transactionId);
+export async function confirmCampayPayment(gatewayReference: string): Promise<ConfirmResult> {
+    const verification = await verifyTransaction(gatewayReference);
     if (!verification.ok) {
         return { outcome: "failed", reason: verification.error || "Could not verify the transaction." };
     }
 
-    const reference = verification.txRef || txRef;
-    if (!reference) {
-        return { outcome: "not_found" };
-    }
-
     const payment = await prisma.payment.findUnique({
-        where: { reference },
+        where: { gatewayTransactionId: gatewayReference },
         include: { subscription: true, targetPlan: true },
     });
 
@@ -39,10 +40,14 @@ export async function confirmFlutterwavePayment(transactionId: string, txRef?: s
         return payment.status === "SUCCESS" ? { outcome: "already_processed" } : { outcome: "failed", reason: "This payment already failed." };
     }
 
+    if (verification.pending) {
+        return { outcome: "pending" };
+    }
+
     if (!verification.successful) {
         await prisma.payment.update({
             where: { id: payment.id },
-            data: { status: "FAILED", flwTransactionId: verification.transactionId },
+            data: { status: "FAILED" },
         });
         return { outcome: "failed", reason: "The payment was not completed." };
     }
@@ -51,7 +56,7 @@ export async function confirmFlutterwavePayment(transactionId: string, txRef?: s
     if (!payment.targetPlan || (verification.amount ?? 0) < payment.amountFcfa) {
         await prisma.payment.update({
             where: { id: payment.id },
-            data: { status: "FAILED", flwTransactionId: verification.transactionId },
+            data: { status: "FAILED" },
         });
         return { outcome: "failed", reason: "The amount paid did not match the plan price." };
     }
@@ -67,7 +72,6 @@ export async function confirmFlutterwavePayment(transactionId: string, txRef?: s
             data: {
                 status: "SUCCESS",
                 method: mapPaymentType(verification.paymentType),
-                flwTransactionId: verification.transactionId,
             },
         });
 
@@ -84,7 +88,7 @@ export async function confirmFlutterwavePayment(transactionId: string, txRef?: s
         await tx.auditLog.create({
             data: {
                 action: "UPGRADE_SUBSCRIPTION",
-                details: `Agency upgraded to plan "${payment.targetPlan!.name}" (${payment.amountFcfa.toLocaleString()} FCFA) via Flutterwave.`,
+                details: `Agency upgraded to plan "${payment.targetPlan!.name}" (${payment.amountFcfa.toLocaleString()} FCFA) via CamPay.`,
                 agencyId: payment.subscription.agencyId,
                 targetId: payment.subscriptionId,
             },

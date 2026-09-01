@@ -5,7 +5,8 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "crypto";
-import { initializePayment } from "@/lib/flutterwave";
+import { initializePayment } from "@/lib/campay";
+import { getLocale } from "next-intl/server";
 
 const CURRENCY = "XAF";
 
@@ -25,9 +26,9 @@ export async function getAvailablePlans() {
 }
 
 /**
- * Free plans and downgrades never touch Flutterwave — they just change
+ * Free plans and downgrades never touch CamPay — they just change
  * the subscription directly. Paid upgrades create a PENDING Payment and
- * hand back a Flutterwave checkout link for the browser to redirect to;
+ * hand back a CamPay checkout link for the browser to redirect to;
  * the plan itself only changes once that payment is confirmed (see
  * lib/subscription-payments.ts, called from the webhook and the
  * redirect-back page).
@@ -89,7 +90,7 @@ export async function upgradeSubscriptionAction(formData: FormData) {
             return { success: true, downgrade: isDowngrade };
         }
 
-        // Paid upgrade: create a pending payment and start a Flutterwave checkout.
+        // Paid upgrade: create a pending payment and start a CamPay checkout.
         const txRef = `UPG-${agencyId.slice(0, 8)}-${Date.now()}-${randomUUID().slice(0, 8)}`;
 
         await prisma.payment.create({
@@ -103,12 +104,16 @@ export async function upgradeSubscriptionAction(formData: FormData) {
         });
 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "";
+        const locale = await getLocale();
 
         const init = await initializePayment({
             txRef,
             amount: newPlan.priceFcfa,
             currency: CURRENCY,
-            redirectUrl: `${appUrl}/admin/dashboard/billing/verify`,
+            // txRef lives in the path (not a query param) so it survives
+            // regardless of whatever query params CamPay appends on its
+            // own redirect back — see verify/[txRef]/page.tsx.
+            redirectUrl: `${appUrl}/${locale}/admin/dashboard/billing/verify/${txRef}`,
             customerEmail: session.user.email,
             customerName: session.user.name,
             title: `${newPlan.name} plan subscription`,
@@ -120,6 +125,13 @@ export async function upgradeSubscriptionAction(formData: FormData) {
             await prisma.payment.update({ where: { reference: txRef }, data: { status: "FAILED" } });
             return { error: init.error || "Could not start the payment. Please try again." };
         }
+
+        // Store CamPay's own transaction reference — distinct from our txRef
+        // — so the webhook and verify page can check status with CamPay later.
+        await prisma.payment.update({
+            where: { reference: txRef },
+            data: { gatewayTransactionId: init.gatewayReference },
+        });
 
         return { success: true, paymentUrl: init.paymentUrl };
     } catch (e: any) {

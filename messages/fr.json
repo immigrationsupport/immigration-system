@@ -800,10 +800,11 @@
       "switchButton": "Changer",
       "switchTo": "Passer à {planName}",
       "downgradeNote": "Cela prendra effet à la fin de votre période de facturation actuelle — aucun paiement requis maintenant.",
-      "checkoutNote": "Vous serez redirigé vers le paiement sécurisé de Flutterwave pour finaliser le paiement.",
+"checkoutNote": "Vous serez redirigé vers la page de paiement sécurisée de CamPay pour finaliser votre paiement.",
       "amountDue": "Montant dû",
-      "securityNote": "Les paiements par carte et Mobile Money (MTN, Orange) sont gérés en toute sécurité par Flutterwave.",
-      "continue": "Continuer"
+      "securityNote": "Votre paiement est traité en toute sécurité par CamPay en utilisant MTN ou Orange Mobile Money.",
+      "continue": "Continuer",
+      "failedMessage": "Le paiement n'a pas pu être complété. Veuillez réessayer."
     },
     "verify": {
       "cancelledTitle": "Paiement annulé",

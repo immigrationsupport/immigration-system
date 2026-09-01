@@ -81,28 +81,23 @@ enum SubscriptionStatus {
 }
 
 model Payment {
-  id               String        @id @default(uuid())
-  subscriptionId   String
-  amountFcfa       Int
-  // Null while the payment is still PENDING — Flutterwave tells us which
-  // method the payer actually used once the charge completes.
-  method           PaymentMethod?
-  status           PaymentStatus @default(PENDING)
-  // Flutterwave tx_ref. Unique so a webhook/redirect retry can never be
-  // applied twice.
-  reference        String?       @unique
-  // Flutterwave's own numeric transaction id, filled in once verified.
-  flwTransactionId String?
-  // Plan this payment is meant to unlock once it succeeds. Only set for
-  // upgrade payments awaiting confirmation.
-  targetPlanId     String?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  id                String         @id @default(uuid())
+  subscriptionId    String
+  amountFcfa        Int
+  method            PaymentMethod?
+  status            PaymentStatus  @default(PENDING)
+  reference         String?        @unique
+  
+  // Change providerReference to gatewayTransactionId and make it unique
+  gatewayTransactionId String?     @unique
 
-  subscription     Subscription  @relation(fields: [subscriptionId], references: [id])
-  targetPlan       Plan?         @relation("TargetPlanPayments", fields: [targetPlanId], references: [id])
+  targetPlanId      String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
-  @@index([subscriptionId])
+  subscription      Subscription   @relation(fields: [subscriptionId], references: [id])
+  targetPlan        Plan?          @relation("TargetPlanPayments", fields: [targetPlanId], references: [id])
+
   @@map("payment")
 }
 
