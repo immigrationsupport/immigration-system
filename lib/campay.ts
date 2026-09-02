@@ -71,10 +71,28 @@ export async function initializePayment(params: InitializePaymentParams): Promis
             }),
         });
 
-        const data = await res.json();
+        const rawText = await res.text();
+        let data: any;
+        try {
+            data = JSON.parse(rawText);
+        } catch {
+            console.error("CamPay get_payment_link: non-JSON response", res.status, rawText.slice(0, 500));
+            return { ok: false, error: "The payment provider returned an unexpected response." };
+        }
 
+        // Log the full response server-side (visible in Vercel Function
+        // Logs) whenever it's not a clean success, so we can see exactly
+        // what CamPay actually said instead of guessing.
         if (!res.ok || data.status !== "SUCCESSFUL" || !data.link) {
-            return { ok: false, error: data.message || data.detail || "Failed to start the payment." };
+            console.error("CamPay get_payment_link failed:", res.status, JSON.stringify(data));
+            const message =
+                data.message ||
+                data.detail ||
+                data.error ||
+                (Array.isArray(data.non_field_errors) ? data.non_field_errors.join(", ") : null) ||
+                (typeof data === "object" ? Object.values(data).flat().join(", ") : null) ||
+                "Failed to start the payment.";
+            return { ok: false, error: message };
         }
 
         return { ok: true, paymentUrl: data.link as string, gatewayReference: data.reference as string };
