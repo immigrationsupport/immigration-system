@@ -205,16 +205,18 @@ model OfficialMessage {
 }
 
 model Document {
-  id          String          @id @default(uuid())
+  id          String         @id @default(uuid())
   name        String
   fileUrl     String
-  status      DocumentStatus  @default(UPLOADED)
-  uploadedAt  DateTime        @default(now())
+  storageKey  String?
+  status      DocumentStatus @default(UPLOADED)
+  uploadedAt  DateTime       @default(now())
   procedureId String
   uploaderId  String
-  type        DocumentType    @default(OTHER)
-  Procedure   ApplicationStep @relation(fields: [procedureId], references: [id])
-  uploader    User            @relation(fields: [uploaderId], references: [id])
+  type        DocumentType   @default(OTHER)
+
+  Procedure ApplicationStep @relation(fields: [procedureId], references: [id])
+  uploader  User            @relation(fields: [uploaderId], references: [id])
 }
 
 model AuditLog {
@@ -258,6 +260,7 @@ model ApplicationSubStep {
   label             String
   description       String?
   order             Int
+  status            ProcedureStatus @default(PENDING)
   isCompleted       Boolean         @default(false)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt

@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { ApplicationStatus, ProcedureStatus } from "@prisma/client";
 import { getAgencyTemplates, getTemplateSteps } from "@/lib/steps-server";
 import { getTranslations } from "next-intl/server";
-
+import { createS3UploadUrl, deleteS3Object } from "@/lib/s3";
 // Looks up the agency name that actually owns an application — used for
 // client-facing emails so the brand shown is always the client's own
 // agency, regardless of which agent/admin performed the action.
@@ -124,7 +124,10 @@ export async function updateStepAction(
                         client: true 
                     }
                 },
-                Document: true
+                Document: true,
+                subSteps: {
+                    orderBy: { order: "asc" }
+                }
             }
         });
 
@@ -141,6 +144,16 @@ export async function updateStepAction(
                 const allPreviousApproved = previousSteps.every(s => s.status === "APPROVED");
                 if (!allPreviousApproved) {
                     return { error: "Must approve previous steps before completing this one." };
+                }
+            }
+
+            // A parent step can only be approved after every child sub-step
+            // has itself been approved. Sub-steps are real workflow items,
+            // not just a visual checklist.
+            if (step.subSteps.length > 0) {
+                const allSubStepsApproved = step.subSteps.every((sub) => sub.status === "APPROVED");
+                if (!allSubStepsApproved) {
+                    return { error: "All sub-steps must be approved before completing this step." };
                 }
             }
 
@@ -345,8 +358,94 @@ export async function addStepCommentAction(stepId: string, comment: string) {
         return { error: e.message || "Failed to add comment." };
     }
 }
+export async function createDocumentUploadAction(
+    stepId: string,
+    fileName: string,
+    contentType: string,
+    fileSize: number
+) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
 
-export async function addDocumentAction(stepId: string, name: string, fileUrl: string, type: string = "OTHER") {
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
+        return { error: "Unauthorized access." };
+    }
+
+    const agencyId = (session.user as any).agencyId;
+
+    try {
+        if (!fileName || !fileName.trim()) {
+            return { error: "File name is required." };
+        }
+
+        if (!contentType) {
+            return { error: "File type is required." };
+        }
+
+        // 20 MB maximum
+        const MAX_FILE_SIZE = 20 * 1024 * 1024;
+
+        if (fileSize > MAX_FILE_SIZE) {
+            return {
+                error: "File is too large. Maximum size is 20 MB."
+            };
+        }
+
+        const step = await prisma.applicationStep.findUnique({
+            where: { id: stepId },
+            include: {
+                application: true
+            }
+        });
+
+        if (!step) {
+            return { error: "Step not found." };
+        }
+
+        if (step.application.agencyId !== agencyId) {
+            return {
+                error: "This application does not belong to your agency."
+            };
+        }
+
+        const safeFileName = fileName
+            .trim()
+            .replace(/[^a-zA-Z0-9._-]/g, "_");
+
+        const key = [
+            "documents",
+            agencyId,
+            step.applicationId,
+            stepId,
+            `${crypto.randomUUID()}-${safeFileName}`
+        ].join("/");
+
+        const uploadUrl = await createS3UploadUrl(
+            key,
+            contentType
+        );
+
+        return {
+            success: true,
+            uploadUrl,
+            storageKey: key
+        };
+    } catch (e: any) {
+        console.error("S3 upload URL error:", e);
+
+        return {
+            error: e.message || "Failed to prepare document upload."
+        };
+    }
+}
+
+export async function addDocumentAction(
+    stepId: string,
+    name: string,
+    storageKey: string,
+    type: string = "OTHER"
+) {
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -360,20 +459,42 @@ export async function addDocumentAction(stepId: string, name: string, fileUrl: s
     try {
         const step = await prisma.applicationStep.findUnique({
             where: { id: stepId },
-            include: { application: { include: { client: true } } }
+            include: {
+                application: {
+                    include: {
+                        client: true
+                    }
+                }
+            }
         });
 
-        if (!step) return { error: "Step not found." };
-        if (step.application.agencyId !== agencyId) return { error: "This application does not belong to your agency." };
+        if (!step) {
+            return { error: "Step not found." };
+        }
+
+        if (step.application.agencyId !== agencyId) {
+            return {
+                error: "This application does not belong to your agency."
+            };
+        }
+
+        if (!storageKey || !storageKey.startsWith(`documents/${agencyId}/`)) {
+            return {
+                error: "Invalid document storage location."
+            };
+        }
 
         const document = await prisma.document.create({
             data: {
                 name,
-                fileUrl,
+                // Keep this field populated for compatibility.
+                // Downloads for new files will use storageKey.
+                fileUrl: "",
+                storageKey,
                 type: type as any,
                 status: "UPLOADED",
                 procedureId: stepId,
-                uploaderId: session.user.id,
+                uploaderId: session.user.id
             }
         });
 
@@ -387,11 +508,20 @@ export async function addDocumentAction(stepId: string, name: string, fileUrl: s
             }
         });
 
-        revalidatePath(`/dashboard/agent/applications/${step.applicationId}`);
-        return { success: true, document };
+        revalidatePath(
+            `/dashboard/agent/applications/${step.applicationId}`
+        );
+
+        return {
+            success: true,
+            document
+        };
     } catch (e: any) {
         console.error("Document upload error:", e);
-        return { error: e.message || "Failed to attach document." };
+
+        return {
+            error: e.message || "Failed to attach document."
+        };
     }
 }
 
@@ -409,13 +539,36 @@ export async function deleteDocumentAction(documentId: string) {
     try {
         const document = await prisma.document.findUnique({
             where: { id: documentId },
-            include: { Procedure: { include: { application: true } } }
+            include: {
+                Procedure: {
+                    include: {
+                        application: true
+                    }
+                }
+            }
         });
 
-        if (!document) return { error: "Document not found." };
-        if (document.Procedure.application.agencyId !== agencyId) return { error: "This document does not belong to your agency." };
+        if (!document) {
+            return { error: "Document not found." };
+        }
 
-        await prisma.document.delete({ where: { id: documentId } });
+        if (
+            document.Procedure.application.agencyId !== agencyId
+        ) {
+            return {
+                error: "This document does not belong to your agency."
+            };
+        }
+
+        // Delete from S3 only when this is an S3 document.
+        // Old UploadThing documents can remain untouched.
+        if (document.storageKey) {
+            await deleteS3Object(document.storageKey);
+        }
+
+        await prisma.document.delete({
+            where: { id: documentId }
+        });
 
         await prisma.auditLog.create({
             data: {
@@ -427,13 +580,20 @@ export async function deleteDocumentAction(documentId: string) {
             }
         });
 
-        revalidatePath(`/dashboard/agent/applications/${document.Procedure.applicationId}`);
+        revalidatePath(
+            `/dashboard/agent/applications/${document.Procedure.applicationId}`
+        );
+
         return { success: true };
     } catch (e: any) {
-        return { error: e.message || "Failed to delete document." };
+        console.error("Document delete error:", e);
+
+        return {
+            error: e.message || "Failed to delete document."
+        };
     }
 }
-export async function toggleSubStepAction(subStepId: string, isCompleted: boolean) {
+export async function toggleSubStepAction(subStepId: string, status: ProcedureStatus) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
         return { error: "Unauthorized access." };
@@ -443,7 +603,11 @@ export async function toggleSubStepAction(subStepId: string, isCompleted: boolea
     try {
         const subStep = await prisma.applicationSubStep.findUnique({
             where: { id: subStepId },
-            include: { applicationStep: { include: { application: true } } }
+            include: {
+                applicationStep: {
+                    include: { application: true }
+                }
+            }
         });
 
         if (!subStep) return { error: "Sub-step not found." };
@@ -451,13 +615,24 @@ export async function toggleSubStepAction(subStepId: string, isCompleted: boolea
             return { error: "This sub-step does not belong to your agency." };
         }
 
-        await prisma.applicationSubStep.update({
+        // Once the parent is approved, its children become part of the
+        // approved history and cannot be changed underneath it.
+        if (subStep.applicationStep.status === "APPROVED" && status !== "APPROVED") {
+            return { error: "You cannot change a sub-step after its parent step has been approved." };
+        }
+
+        const updatedSubStep = await prisma.applicationSubStep.update({
             where: { id: subStepId },
-            data: { isCompleted }
+            data: {
+                status,
+                // Keep the old boolean in sync for compatibility with the
+                // client-facing stepper that still reads isCompleted.
+                isCompleted: status === "APPROVED"
+            }
         });
 
         revalidatePath(`/dashboard/agent/applications/${subStep.applicationStep.applicationId}`);
-        return { success: true };
+        return { success: true, subStep: updatedSubStep };
     } catch (e: any) {
         return { error: e.message || "Failed to update sub-step." };
     }
