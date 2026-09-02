@@ -101,13 +101,16 @@ export async function createTemplateAction(name: string, description: string) {
     }
 }
 
-export async function deleteTemplateAction(templateId: string) {
+export async function deleteTemplateAction(templateId: string, confirmationName?: string) {
     const ctx = await requireAdmin();
     if (!ctx) return { error: "Unauthorized access." };
 
     try {
         const template = await prisma.applicationTemplate.findUnique({ where: { id: templateId } });
         if (!template || template.agencyId !== ctx.agencyId) return { error: "Workflow not found." };
+        if (confirmationName?.trim() !== template.name) {
+            return { error: "Type the workflow name exactly to confirm deletion." };
+        }
 
         const inUse = await prisma.application.count({ where: { applicationTemplateId: templateId } });
         if (inUse > 0) {

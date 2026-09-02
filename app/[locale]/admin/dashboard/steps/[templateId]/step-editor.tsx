@@ -46,7 +46,7 @@ function toStepRows(steps: StepDefinition[]): StepRow[] {
     return steps.map((s) => ({
         key: makeKey(),
         type: s.type || "",
-        label: s.label,
+        label: s.label || "",
         description: s.description || "",
         isActive: true,
         subSteps: s.subSteps.map((sub) => ({
@@ -71,6 +71,10 @@ export default function StepEditor({
     const [steps, setSteps] = useState<StepRow[]>(toStepRows(initialSteps));
     const [error, setError] = useState("");
     const [isSaving, startSaving] = useTransition();
+    const [deleteStepIndex, setDeleteStepIndex] = useState<number | null>(null);
+    const [deleteSubStep, setDeleteSubStep] = useState<{ stepIndex: number; subIndex: number } | null>(null);
+    const [deleteDocument, setDeleteDocument] = useState<{ stepIndex: number; docIndex: number } | null>(null);
+    const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
     function updateStep(index: number, patch: Partial<StepRow>) {
         setSteps((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
@@ -91,8 +95,16 @@ export default function StepEditor({
         ]);
     }
 
-    function removeStep(index: number) {
-        setSteps((prev) => prev.filter((_, i) => i !== index));
+    function requestRemoveStep(index: number) {
+        setDeleteConfirmText("");
+        setDeleteStepIndex(index);
+    }
+
+    function confirmRemoveStep() {
+        if (deleteStepIndex === null || deleteConfirmText !== "DELETE") return;
+        setSteps((prev) => prev.filter((_, i) => i !== deleteStepIndex));
+        setDeleteStepIndex(null);
+        setDeleteConfirmText("");
     }
 
     function addRequiredDocument(stepIndex: number, name: string) {
@@ -107,12 +119,17 @@ export default function StepEditor({
         );
     }
 
-    function removeRequiredDocument(stepIndex: number, docIndex: number) {
-        setSteps((prev) =>
-            prev.map((s, i) =>
-                i === stepIndex ? { ...s, requiredDocuments: s.requiredDocuments.filter((_, j) => j !== docIndex) } : s
-            )
-        );
+    function requestRemoveRequiredDocument(stepIndex: number, docIndex: number) {
+        setDeleteDocument({ stepIndex, docIndex });
+    }
+
+    function confirmRemoveRequiredDocument() {
+        if (!deleteDocument) return;
+        const { stepIndex, docIndex } = deleteDocument;
+        setSteps((prev) => prev.map((s, i) =>
+            i === stepIndex ? { ...s, requiredDocuments: s.requiredDocuments.filter((_, j) => j !== docIndex) } : s
+        ));
+        setDeleteDocument(null);
     }
 
     function addSubStep(stepIndex: number) {
@@ -121,6 +138,19 @@ export default function StepEditor({
                 i === stepIndex ? { ...s, subSteps: [...s.subSteps, { key: makeKey(), label: "", description: "" }] } : s
             )
         );
+    }
+
+    function commitSubStepOnEnter(stepIndex: number, subIndex: number) {
+        const current = steps[stepIndex]?.subSteps[subIndex];
+        if (!current?.label.trim()) return;
+        addSubStep(stepIndex);
+    }
+
+    function commitDocumentOnEnter(stepIndex: number, value: string, input: HTMLInputElement) {
+        const trimmed = value.trim();
+        if (!trimmed) return;
+        addRequiredDocument(stepIndex, trimmed);
+        input.value = "";
     }
 
     function updateSubStep(stepIndex: number, subIndex: number, patch: Partial<SubStepRow>) {
@@ -146,10 +176,17 @@ export default function StepEditor({
         );
     }
 
-    function removeSubStep(stepIndex: number, subIndex: number) {
-        setSteps((prev) =>
-            prev.map((s, i) => (i === stepIndex ? { ...s, subSteps: s.subSteps.filter((_, j) => j !== subIndex) } : s))
-        );
+    function requestRemoveSubStep(stepIndex: number, subIndex: number) {
+        setDeleteSubStep({ stepIndex, subIndex });
+    }
+
+    function confirmRemoveSubStep() {
+        if (!deleteSubStep) return;
+        const { stepIndex, subIndex } = deleteSubStep;
+        setSteps((prev) => prev.map((s, i) =>
+            i === stepIndex ? { ...s, subSteps: s.subSteps.filter((_, j) => j !== subIndex) } : s
+        ));
+        setDeleteSubStep(null);
     }
 
     function handleSave() {
@@ -159,7 +196,7 @@ export default function StepEditor({
                 templateId,
                 steps.map((s) => ({
                     type: s.type || null,
-                    label: s.label,
+                    label: s.label || "",
                     description: s.description,
                     isActive: s.isActive,
                     subSteps: s.subSteps.map((sub) => ({ label: sub.label, description: sub.description })),
@@ -211,7 +248,7 @@ export default function StepEditor({
                                     <input type="checkbox" checked={step.isActive} onChange={(e) => updateStep(index, { isActive: e.target.checked })} />
                                     {t("active")}
                                 </label>
-                                <button type="button" onClick={() => removeStep(index)} className="p-1.5 text-gray-300 hover:text-red-600 shrink-0" title={t("deleteStepTooltip")}>
+                                <button type="button" onClick={() => requestRemoveStep(index)} className="p-1.5 text-gray-300 hover:text-red-600 shrink-0" title={t("deleteStepTooltip")}>
                                     <Trash2 className="h-4 w-4" />
                                 </button>
                             </div>
@@ -244,23 +281,36 @@ export default function StepEditor({
                                     {step.requiredDocuments.map((doc, docIndex) => (
                                         <span key={docIndex} className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">
                                             {doc}
-                                            <button type="button" onClick={() => removeRequiredDocument(index, docIndex)} className="text-blue-300 hover:text-red-600">
+                                            <button type="button" onClick={() => requestRemoveRequiredDocument(index, docIndex)} className="text-blue-300 hover:text-red-600">
                                                 <X className="h-3 w-3" />
                                             </button>
                                         </span>
                                     ))}
                                 </div>
-                                <Input
-                                    placeholder={t("addDocumentPlaceholder")}
-                                    className="text-sm h-9"
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            e.preventDefault();
-                                            addRequiredDocument(index, e.currentTarget.value);
-                                            e.currentTarget.value = "";
-                                        }
-                                    }}
-                                />
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder={t("addDocumentPlaceholder")}
+                                        className="text-sm h-9 flex-1"
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                                e.preventDefault();
+                                                commitDocumentOnEnter(index, e.currentTarget.value, e.currentTarget);
+                                            }
+                                        }}
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 px-3 gap-1.5 font-bold shrink-0"
+                                        onClick={(e) => {
+                                            const input = e.currentTarget.parentElement?.querySelector("input") as HTMLInputElement | null;
+                                            if (input) commitDocumentOnEnter(index, input.value, input);
+                                        }}
+                                    >
+                                        <Plus className="h-3.5 w-3.5" /> {t("addDocument")}
+                                    </Button>
+                                </div>
                                 <p className="text-[10px] text-gray-400 mt-1">
                                     {t("requiredDocumentsHint")}
                                 </p>
@@ -283,10 +333,16 @@ export default function StepEditor({
                                         <Input
                                             value={sub.label}
                                             onChange={(e) => updateSubStep(index, subIndex, { label: e.target.value })}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                    e.preventDefault();
+                                                    commitSubStepOnEnter(index, subIndex);
+                                                }
+                                            }}
                                             placeholder={t("subStepPlaceholder")}
                                             className="text-sm flex-1"
                                         />
-                                        <button type="button" onClick={() => removeSubStep(index, subIndex)} className="p-1 text-gray-300 hover:text-red-600 shrink-0">
+                                        <button type="button" onClick={() => requestRemoveSubStep(index, subIndex)} className="p-1 text-gray-300 hover:text-red-600 shrink-0">
                                             <Trash2 className="h-3.5 w-3.5" />
                                         </button>
                                     </div>
@@ -306,19 +362,89 @@ export default function StepEditor({
                 ))}
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-2 pb-24">
                 <Button variant="outline" onClick={addStep} className="font-bold rounded-xl gap-2">
                     <Plus className="h-4 w-4" /> {t("addStep")}
                 </Button>
-                <Button onClick={handleSave} disabled={isSaving} className="bg-[#1E3A8A] text-white hover:bg-blue-900 font-bold rounded-xl gap-2 ml-auto">
-                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    {t("saveWorkflow")}
-                </Button>
             </div>
 
-            <p className="text-xs text-gray-400 pt-2">
+            <p className="text-xs text-gray-400 pt-2 pb-24">
                 {t("footerNote")}
             </p>
+
+            {/* Floating save bar */}
+            <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2">
+                <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-2xl backdrop-blur-md">
+                    <div className="hidden min-w-0 sm:block">
+                        <p className="text-sm font-black text-gray-900">{t("saveWorkflow")}</p>
+                        <p className="text-xs text-gray-500">
+                            {isSaving ? "..." : t("footerNote")}
+                        </p>
+                    </div>
+
+                    <Button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="ml-auto w-full rounded-xl bg-[#1E3A8A] px-5 py-2.5 font-bold text-white shadow-md hover:bg-blue-900 sm:w-auto"
+                    >
+                        {isSaving ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Save className="h-4 w-4" />
+                        )}
+                        {isSaving ? "..." : t("saveWorkflow")}
+                    </Button>
+                </div>
+            </div>
+
+            {deleteStepIndex !== null && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+                    <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl p-6">
+                        <h2 className="text-lg font-black text-gray-900">{t("deleteStepTitle")}</h2>
+                        <p className="text-sm text-gray-500 mt-2">{t("deleteStepDescription")}</p>
+                        <p className="text-sm font-bold text-gray-700 mt-4">{t("typeDeleteToConfirm")}</p>
+                        <Input
+                            autoFocus
+                            value={deleteConfirmText}
+                            onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
+                            placeholder="DELETE"
+                            className="mt-2 font-bold"
+                        />
+                        <div className="flex justify-end gap-2 mt-5">
+                            <Button variant="outline" onClick={() => setDeleteStepIndex(null)} className="rounded-xl">{t("cancel")}</Button>
+                            <Button disabled={deleteConfirmText !== "DELETE"} onClick={confirmRemoveStep} className="bg-red-600 hover:bg-red-700 text-white rounded-xl gap-2">
+                                <Trash2 className="h-4 w-4" /> {t("delete")}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {deleteSubStep && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+                    <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl p-6">
+                        <h2 className="text-lg font-black text-gray-900">{t("deleteSubStepTitle")}</h2>
+                        <p className="text-sm text-gray-500 mt-2">{t("deleteSubStepDescription")}</p>
+                        <div className="flex justify-end gap-2 mt-5">
+                            <Button variant="outline" onClick={() => setDeleteSubStep(null)} className="rounded-xl">{t("cancel")}</Button>
+                            <Button onClick={confirmRemoveSubStep} className="bg-red-600 hover:bg-red-700 text-white rounded-xl gap-2"><Trash2 className="h-4 w-4" /> {t("delete")}</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {deleteDocument && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+                    <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl p-6">
+                        <h2 className="text-lg font-black text-gray-900">{t("deleteDocumentTitle")}</h2>
+                        <p className="text-sm text-gray-500 mt-2">{t("deleteDocumentDescription")}</p>
+                        <div className="flex justify-end gap-2 mt-5">
+                            <Button variant="outline" onClick={() => setDeleteDocument(null)} className="rounded-xl">{t("cancel")}</Button>
+                            <Button onClick={confirmRemoveRequiredDocument} className="bg-red-600 hover:bg-red-700 text-white rounded-xl gap-2"><Trash2 className="h-4 w-4" /> {t("delete")}</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

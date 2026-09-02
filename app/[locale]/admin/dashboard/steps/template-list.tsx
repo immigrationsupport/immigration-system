@@ -14,17 +14,6 @@ import {
     DialogTitle,
     DialogDescription
 } from "@/components/ui/dialog";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger
-} from "@/components/ui/alert-dialog";
 import { Plus, ListOrdered, Loader2, Trash2, AlertCircle, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { createTemplateAction, deleteTemplateAction } from "./actions";
@@ -39,6 +28,8 @@ export default function TemplateList({ initialTemplates }: { initialTemplates: T
     const [description, setDescription] = useState("");
     const [error, setError] = useState("");
     const [isPending, startTransition] = useTransition();
+    const [deleteTemplate, setDeleteTemplate] = useState<TemplateSummary | null>(null);
+    const [deleteConfirmName, setDeleteConfirmName] = useState("");
 
     function handleCreate(e: React.FormEvent) {
         e.preventDefault();
@@ -53,9 +44,14 @@ export default function TemplateList({ initialTemplates }: { initialTemplates: T
         });
     }
 
-    function handleDelete(templateId: string) {
+    function requestDelete(tpl: TemplateSummary) {
+        setDeleteConfirmName("");
+        setDeleteTemplate(tpl);
+    }
+
+    function handleDelete(templateId: string, confirmationName: string) {
         startTransition(async () => {
-            const result = await deleteTemplateAction(templateId);
+            const result = await deleteTemplateAction(templateId, confirmationName);
             if (result?.error) {
                 toast.error(result.error);
             } else {
@@ -89,27 +85,14 @@ export default function TemplateList({ initialTemplates }: { initialTemplates: T
                                 {tpl.description && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{tpl.description}</p>}
                             </Link>
                             <div className="flex items-center gap-1 shrink-0">
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <button className="p-2 text-gray-300 hover:text-red-600 transition-colors rounded-lg" title={t("removeWorkflowTooltip")}>
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent className="rounded-2xl">
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>{t("removeConfirmTitle", { name: tpl.name })}</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                {t("removeConfirmDescription")}
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel className="rounded-xl">{t("cancel")}</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDelete(tpl.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">
-                                                {t("remove")}
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
+                                <button
+                                    type="button"
+                                    onClick={() => requestDelete(tpl)}
+                                    className="p-2 text-gray-300 hover:text-red-600 transition-colors rounded-lg"
+                                    title={t("removeWorkflowTooltip")}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
                                 <Link href={`/admin/dashboard/steps/${tpl.id}`}>
                                     <ChevronRight className="h-5 w-5 text-gray-300 group-hover:text-[#1E3A8A] transition-colors" />
                                 </Link>
@@ -118,6 +101,52 @@ export default function TemplateList({ initialTemplates }: { initialTemplates: T
                     </Card>
                 ))}
             </div>
+
+            {deleteTemplate && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+                    <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl p-6">
+                        <div className="flex items-start gap-3">
+                            <div className="h-10 w-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                                <Trash2 className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-black text-gray-900">{t("removeConfirmTitle", { name: deleteTemplate.name })}</h2>
+                                <p className="text-sm text-gray-500 mt-1">{t("removeConfirmDescription")}</p>
+                            </div>
+                        </div>
+                        <div className="mt-5 space-y-2">
+                            <Label>{t("confirmWorkflowNameLabel")}</Label>
+                            <p className="text-xs text-gray-400">{t("confirmWorkflowNameHint")}</p>
+                            <Input
+                                autoFocus
+                                value={deleteConfirmName}
+                                onChange={(e) => setDeleteConfirmName(e.target.value)}
+                                placeholder={deleteTemplate.name}
+                                disabled={isPending}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" && deleteConfirmName.trim() === deleteTemplate.name) {
+                                        e.preventDefault();
+                                        handleDelete(deleteTemplate.id, deleteConfirmName.trim());
+                                        setDeleteTemplate(null);
+                                        setDeleteConfirmName("");
+                                    }
+                                }}
+                            />
+                        </div>
+                        <div className="flex justify-end gap-2 mt-5">
+                            <Button variant="outline" onClick={() => { setDeleteTemplate(null); setDeleteConfirmName(""); }} disabled={isPending} className="rounded-xl">{t("cancel")}</Button>
+                            <Button
+                                disabled={isPending || deleteConfirmName.trim() !== deleteTemplate.name}
+                                onClick={() => { handleDelete(deleteTemplate.id, deleteConfirmName.trim()); setDeleteTemplate(null); setDeleteConfirmName(""); }}
+                                className="bg-red-600 hover:bg-red-700 text-white rounded-xl gap-2"
+                            >
+                                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                {t("remove")}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogContent className="sm:max-w-md rounded-2xl">
