@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { STEP_LABELS } from "@/lib/steps";
 import { CheckCircle2, Clock, Lock, FileText, Download, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -72,14 +71,10 @@ export default function ApplicationStepper({ steps, applicationId, country }: Ap
                             const isActive = (isNextActive || isUnlockedByAgent) && !isCompleted;
                             const isLocked = !isActive && !isCompleted;
 
-                            let label = step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS];
-                            if (!step.label) {
-                                try {
-                                    label = tStepLabels(step.type as any);
-                                } catch {
-                                    // fall back to the static label if no translation exists
-                                }
-                            }
+                            // step.label is only set when someone gave the step its own
+                            // literal text; built-in types are left null so they always
+                            // resolve through the translated catalog below.
+                            const label = step.label || tStepLabels(step.type as any);
 
                             return (
                                 <React.Fragment key={step.id}>

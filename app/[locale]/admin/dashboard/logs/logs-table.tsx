@@ -21,6 +21,7 @@ import { TruncatedText } from "@/components/ui/truncated-text";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { resolveAuditDetails } from "@/lib/audit-log-render";
 
 interface Author {
     id: string;
@@ -44,6 +45,8 @@ export default function LogsTable({
     initialLogs: LogItem[]
 }) {
     const t = useTranslations("adminLogs");
+    const tAudit = useTranslations("auditLog");
+    const tAction = useTranslations("auditActions");
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("ALL"); // ALL, AGENT, ANOMALY
     const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
@@ -154,6 +157,8 @@ export default function LogsTable({
                         {filteredLogs.map((log) => {
                             const styles = getActionStyles(log.action);
                             const anomalyDetected = isAnomaly(log.action, log.details);
+                            const actionLabel = tAction.has(log.action) ? tAction(log.action) : log.action.replace(/_/g, " ");
+                            const detailsText = resolveAuditDetails(log.details, tAudit, t("noDetails"));
 
                             return (
                                 <tr key={log.id} className={`hover:bg-blue-50/40 transition-all duration-200 group ${anomalyDetected && typeFilter === 'ANOMALY' ? 'bg-red-50/20' : ''}`}>
@@ -165,14 +170,14 @@ export default function LogsTable({
                                     <td className="px-6 py-5 align-top">
                                         <div className={`flex items-center gap-2 w-fit px-3 py-1 rounded ${styles.bg} ${styles.text}`}>
                                             {styles.icon}
-                                            <span className="text-[14px] font-extrabold uppercase tracking-widest leading-none">{log.action.replace(/_/g, " ")}</span>
+                                            <span className="text-[14px] font-extrabold uppercase tracking-widest leading-none">{actionLabel}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-5 align-top">
                                         <div className="space-y-1">
                                             <div className="flex items-start justify-between gap-2">
                                                 <p className="text-[16px] lg:text-[18px] font-medium text-[#374151] leading-snug">
-                                                    <TruncatedText text={log.details} maxLength={30} />
+                                                    <TruncatedText text={detailsText} maxLength={30} />
                                                 </p>
                                                 <button 
                                                     onClick={() => toggleExpand(log.id)}
@@ -184,7 +189,7 @@ export default function LogsTable({
                                             </div>
                                             {expandedLogs.has(log.id) && (
                                                 <div className="mt-3 p-4 bg-white rounded-lg border border-gray-200 text-[14px] text-[#4B5563] animate-in slide-in-from-top-1 duration-200 shadow-inner max-h-48 overflow-y-auto custom-scrollbar">
-                                                    <p className="whitespace-pre-wrap font-mono leading-relaxed">{log.details}</p>
+                                                    <p className="whitespace-pre-wrap font-mono leading-relaxed">{detailsText}</p>
                                                 </div>
                                             )}
                                         </div>

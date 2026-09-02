@@ -5,8 +5,9 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getAgencyTemplates, getTemplateSteps } from "@/lib/steps-server";
-import { STEP_LABELS, StepDefinition } from "@/lib/steps";
+import { StepDefinition, APP_STEP_SEQUENCE } from "@/lib/steps";
 import { ProcedureType } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 
 async function requireAdmin() {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -41,14 +42,22 @@ export async function createTemplateAction(name: string, description: string) {
 
         const seedSteps = defaultTemplate
             ? await getTemplateSteps(defaultTemplate.id)
-            : Object.entries(STEP_LABELS).map(([type, label], index) => ({
-                  type: type as ProcedureType,
-                  label,
-                  description: null as string | null,
-                  order: index,
-                  subSteps: [] as { label: string; description: string | null; order: number }[],
-                  requiredDocuments: [] as string[]
-              }));
+            : await (async () => {
+                  // No "Default" workflow to clone from (rare) — fall back to
+                  // the built-in 11-step catalog, pre-filled in the admin's
+                  // current language so they see readable text to start
+                  // editing from (this is just a starting value, still free
+                  // text they can rename).
+                  const t = await getTranslations("stepTypeLabels");
+                  return APP_STEP_SEQUENCE.map((type, index) => ({
+                      type: type as ProcedureType,
+                      label: t(type),
+                      description: null as string | null,
+                      order: index,
+                      subSteps: [] as { label: string; description: string | null; order: number }[],
+                      requiredDocuments: [] as string[]
+                  }));
+              })();
 
         const template = await prisma.applicationTemplate.create({
             data: {
@@ -201,5 +210,6 @@ export async function saveTemplateStepsAction(templateId: string, steps: StepInp
 
 /** Built-in step types an admin can optionally attach to a step, to keep that type's special behavior (document checks, etc.) */
 export async function getBuiltInTypeOptions() {
-    return Object.entries(STEP_LABELS).map(([type, label]) => ({ type: type as ProcedureType, label }));
+    const t = await getTranslations("stepTypeLabels");
+    return APP_STEP_SEQUENCE.map((type) => ({ type, label: t(type) }));
 }

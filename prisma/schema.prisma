@@ -288,7 +288,7 @@ model ApplicationTemplate {
 model StepTemplate {
   id                    String              @id @default(uuid())
   type                  ProcedureType?
-  label                 String
+  label                 String?
   description           String?
   order                 Int
   isActive              Boolean             @default(true)

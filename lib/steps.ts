@@ -37,7 +37,10 @@ export interface SubStepDefinition {
 export interface StepDefinition {
     // Null for a fully custom step with no built-in behavior attached.
     type: ProcedureType | null;
-    label: string;
+    // Null for a built-in type using its default translated name — only
+    // set when someone (admin or the seed data) gave the step its own
+    // literal text.
+    label: string | null;
     description: string | null;
     order: number;
     subSteps: SubStepDefinition[];

@@ -1,157 +1,177 @@
-// CamPay API — https://documenter.getpostman.com/view/2391374/T1LV8PVA
-//
-// Two base URLs: https://demo.campay.net for sandbox testing,
-// https://www.campay.net for production. Set CAMPAY_BASE_URL accordingly.
-//
-// NOTE ON WEBHOOK VERIFICATION: CamPay's public docs don't clearly document
-// a signature header for their webhook callback (unlike Flutterwave's
-// verif-hash). Rather than guess at a scheme and risk either rejecting
-// legitimate webhooks or — worse — trusting a forged one, we treat the
-// webhook purely as a "something changed, go check" ping: we take the
-// transaction reference out of it and re-fetch the authoritative status
-// directly from CamPay's own /transaction/ endpoint using our permanent
-// token, exactly like verifyTransaction() below. We never trust a status
-// field coming from the webhook body itself.
+// lib/campay.ts
+// CamPay integration for Mobile Money collections and hosted card checkout.
 
-const CAMPAY_BASE_URL = process.env.CAMPAY_BASE_URL || "https://demo.campay.net";
+const CAMPAY_BASE_URL = (process.env.CAMPAY_BASE_URL || "https://demo.campay.net").replace(/\/$/, "");
 
 function getToken(): string {
-    const token = process.env.CAMPAY_PERMANENT_TOKEN;
-    if (!token) throw new Error("CAMPAY_PERMANENT_TOKEN is not set.");
-    return token;
+  const token = process.env.CAMPAY_PERMANENT_TOKEN;
+  if (!token) throw new Error("CAMPAY_PERMANENT_TOKEN is not set.");
+  return token;
 }
 
-export interface InitializePaymentParams {
-    txRef: string;
-    amount: number;
-    currency: string;
-    redirectUrl: string;
-    customerEmail: string;
-    customerName: string;
-    title: string;
-    meta?: Record<string, string>;
+export interface CollectPaymentParams {
+  txRef: string;
+  amount: number;
+  phoneNumber: string;
+  description: string;
 }
 
-export interface InitializePaymentResult {
-    ok: boolean;
-    paymentUrl?: string;
-    // CamPay's own transaction reference — distinct from our txRef. Needed
-    // to check status later via GET /api/transaction/{reference}/.
-    gatewayReference?: string;
-    error?: string;
+export interface CollectPaymentResult {
+  ok: boolean;
+  gatewayReference?: string;
+  error?: string;
 }
 
-/**
- * Creates a CamPay hosted "Payment Link" checkout and returns the URL to
- * redirect the payer to. CamPay presents the payer with MTN/Orange mobile
- * money and card options on that page (payment_options: "MOMO,CARD").
- */
-export async function initializePayment(params: InitializePaymentParams): Promise<InitializePaymentResult> {
-    try {
-        const [firstName, ...rest] = params.customerName.trim().split(" ");
-        const lastName = rest.join(" ") || firstName;
+export async function collectMobileMoney(params: CollectPaymentParams): Promise<CollectPaymentResult> {
+  try {
+    const res = await fetch(`${CAMPAY_BASE_URL}/api/collect/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount: String(params.amount),
+        currency: "XAF",
+        from: params.phoneNumber,
+        description: params.description,
+        external_reference: params.txRef,
+      }),
+      cache: "no-store",
+    });
 
-        const res = await fetch(`${CAMPAY_BASE_URL}/api/get_payment_link/`, {
-            method: "POST",
-            headers: {
-                Authorization: `Token ${getToken()}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                amount: String(params.amount),
-                currency: params.currency,
-                description: params.title,
-                external_reference: params.txRef,
-                first_name: firstName,
-                last_name: lastName,
-                email: params.customerEmail,
-                redirect_url: params.redirectUrl,
-                failure_redirect_url: params.redirectUrl,
-                payment_options: "MOMO,CARD",
-            }),
-        });
+    const text = await res.text();
+    let data: any = {};
+    try { data = JSON.parse(text); } catch { /* handled below */ }
 
-        const rawText = await res.text();
-        let data: any;
-        try {
-            data = JSON.parse(rawText);
-        } catch {
-            console.error("CamPay get_payment_link: non-JSON response", res.status, rawText.slice(0, 500));
-            return { ok: false, error: "The payment provider returned an unexpected response." };
-        }
-
-        // Log the full response server-side (visible in Vercel Function
-        // Logs) whenever it's not a clean success, so we can see exactly
-        // what CamPay actually said instead of guessing.
-        if (!res.ok || !data.link) {
-            console.error("CamPay get_payment_link failed:", res.status, JSON.stringify(data));
-            const message =
-                data.message ||
-                data.detail ||
-                data.error ||
-                (Array.isArray(data.non_field_errors) ? data.non_field_errors.join(", ") : null) ||
-                (typeof data === "object" ? Object.values(data).flat().join(", ") : null) ||
-                "Failed to start the payment.";
-            return { ok: false, error: message };
-        }
-
-        return { ok: true, paymentUrl: data.link as string, gatewayReference: data.reference as string };
-    } catch (e: any) {
-        console.error("CamPay initializePayment error:", e);
-        return { ok: false, error: "Could not reach the payment provider." };
+    if (!res.ok) {
+      console.error("CamPay collect failed:", res.status, text.slice(0, 1000));
+      return { ok: false, error: data.message || data.detail || data.error || "CamPay could not start the payment." };
     }
+
+    const reference = data.reference || data.transaction_id || data.transactionId || Object.values(data)[0];
+    if (!reference) {
+      console.error("CamPay collect returned no reference:", data);
+      return { ok: false, error: "CamPay started no identifiable transaction." };
+    }
+
+    return { ok: true, gatewayReference: String(reference) };
+  } catch (error) {
+    console.error("CamPay collect error:", error);
+    return { ok: false, error: "Could not reach CamPay. Please try again." };
+  }
+}
+
+export interface HostedPaymentParams {
+  txRef: string;
+  amount: number;
+  redirectUrl: string;
+  customerEmail: string;
+  customerName: string;
+  title: string;
+}
+
+export interface HostedPaymentResult {
+  ok: boolean;
+  paymentUrl?: string;
+  gatewayReference?: string;
+  error?: string;
+}
+
+export async function initializePayment(params: HostedPaymentParams): Promise<HostedPaymentResult> {
+  try {
+    const [firstName, ...rest] = params.customerName.trim().split(/\s+/);
+    const lastName = rest.join(" ") || firstName || "Customer";
+
+    const res = await fetch(`${CAMPAY_BASE_URL}/api/get_payment_link/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount: String(params.amount),
+        currency: "XAF",
+        description: params.title,
+        external_reference: params.txRef,
+        first_name: firstName || "Customer",
+        last_name: lastName,
+        email: params.customerEmail,
+        redirect_url: params.redirectUrl,
+        failure_redirect_url: params.redirectUrl,
+        payment_options: "MOMO,CARD",
+      }),
+      cache: "no-store",
+    });
+
+    const text = await res.text();
+    let data: any = {};
+    try { data = JSON.parse(text); } catch { /* handled below */ }
+
+    if (!res.ok || !data.link) {
+      console.error("CamPay payment link failed:", res.status, text.slice(0, 1000));
+      return { ok: false, error: data.message || data.detail || data.error || "Could not create the card checkout." };
+    }
+
+    return {
+      ok: true,
+      paymentUrl: String(data.link),
+      gatewayReference: data.reference ? String(data.reference) : undefined,
+    };
+  } catch (error) {
+    console.error("CamPay payment link error:", error);
+    return { ok: false, error: "Could not reach CamPay. Please try again." };
+  }
 }
 
 export interface VerifyTransactionResult {
-    ok: boolean;
-    successful: boolean;
-    pending?: boolean;
-    amount?: number;
-    currency?: string;
-    txRef?: string;
-    transactionId?: string;
-    paymentType?: string;
-    error?: string;
+  ok: boolean;
+  successful: boolean;
+  pending?: boolean;
+  amount?: number;
+  currency?: string;
+  txRef?: string;
+  transactionId?: string;
+  paymentType?: string;
+  error?: string;
 }
 
-/**
- * Re-fetches a transaction directly from CamPay by ITS OWN reference (the
- * one returned from initializePayment, not our txRef). This is the call
- * that actually confirms a charge happened — never trust the webhook body
- * or a redirect query param alone.
- */
 export async function verifyTransaction(gatewayReference: string): Promise<VerifyTransactionResult> {
-    try {
-        const res = await fetch(`${CAMPAY_BASE_URL}/api/transaction/${gatewayReference}/`, {
-            headers: { Authorization: `Token ${getToken()}` },
-        });
+  try {
+    const res = await fetch(`${CAMPAY_BASE_URL}/api/transaction/${encodeURIComponent(gatewayReference)}/`, {
+      headers: { Authorization: `Token ${getToken()}` },
+      cache: "no-store",
+    });
 
-        const data = await res.json();
+    const text = await res.text();
+    let data: any = {};
+    try { data = JSON.parse(text); } catch { /* handled below */ }
 
-        if (!res.ok) {
-            return { ok: false, successful: false, error: data.message || data.detail || "Verification failed." };
-        }
-
-        return {
-            ok: true,
-            successful: data.status === "SUCCESSFUL",
-            pending: data.status === "PENDING",
-            amount: data.amount ? Number(data.amount) : undefined,
-            currency: data.currency,
-            txRef: data.external_reference,
-            transactionId: data.reference,
-            paymentType: data.operator,
-        };
-    } catch (e: any) {
-        console.error("CamPay verifyTransaction error:", e);
-        return { ok: false, successful: false, error: "Could not reach the payment provider." };
+    if (!res.ok) {
+      return { ok: false, successful: false, error: data.message || data.detail || "Verification failed." };
     }
+
+    const status = String(data.status || "").toUpperCase();
+
+    return {
+      ok: true,
+      successful: status === "SUCCESSFUL" || status === "SUCCESS",
+      pending: status === "PENDING" || status === "PROCESSING",
+      amount: data.amount != null ? Number(data.amount) : undefined,
+      currency: data.currency,
+      txRef: data.external_reference,
+      transactionId: data.reference || data.transaction_id,
+      paymentType: data.operator || data.payment_type,
+    };
+  } catch (error) {
+    console.error("CamPay verification error:", error);
+    return { ok: false, successful: false, error: "Could not reach CamPay." };
+  }
 }
 
-/** Best-effort mapping of CamPay's "operator" field to our own enum. */
 export function mapPaymentType(operator?: string): "MTN_MOBILE_MONEY" | "ORANGE_MONEY" | "CARD" {
-    const t = (operator || "").toLowerCase();
-    if (t.includes("mtn")) return "MTN_MOBILE_MONEY";
-    if (t.includes("orange")) return "ORANGE_MONEY";
-    return "CARD";
+  const value = (operator || "").toLowerCase();
+  if (value.includes("mtn")) return "MTN_MOBILE_MONEY";
+  if (value.includes("orange")) return "ORANGE_MONEY";
+  return "CARD";
 }

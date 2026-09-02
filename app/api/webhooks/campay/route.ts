@@ -1,55 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 import { confirmCampayPayment } from "@/lib/subscription-payments";
 
-// CamPay webhook / callback. Configure this exact URL — e.g.
-// https://<your-vercel-app>.vercel.app/api/webhooks/campay — in the
-// "Callback URL" field under your CamPay app's WEBHOOK section, with the
-// method set to POST (not the GET default shown in the dashboard).
-//
-// We do NOT trust the status in this payload — CamPay's docs don't clearly
-// document a signature scheme we could verify here, so instead we just use
-// this call as a trigger to re-fetch the authoritative status directly
-// from CamPay via confirmCampayPayment(). Worst case if this webhook were
-// spoofed: we make one extra read-only API call to CamPay for a reference
-// that either doesn't exist or isn't ours, and no state changes.
-export async function POST(req: NextRequest) {
-    let body: any;
-    try {
-        body = await req.json();
-    } catch {
-        return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
-    }
+async function processWebhook(payload: any) {
+  const gatewayReference = String(payload?.reference || payload?.transaction_id || payload?.transactionId || payload?.operator_reference || "");
+  const externalReference = String(payload?.external_reference || payload?.externalReference || payload?.tx_ref || "");
 
-    const reference = body?.reference;
-    if (!reference) {
-        return NextResponse.json({ received: true });
-    }
+  if (!gatewayReference && !externalReference) return;
 
-    try {
-        await confirmCampayPayment(String(reference));
-    } catch (e) {
-        console.error("CamPay webhook processing error:", e);
-        // Still return 200 so CamPay doesn't hammer us with retries for a
-        // transient error on our side after we've logged it; the
-        // redirect-back page acts as a fallback confirmation path either way.
-    }
+  let payment = gatewayReference
+    ? await prisma.payment.findUnique({ where: { gatewayTransactionId: gatewayReference } })
+    : null;
 
-    return NextResponse.json({ received: true });
+  if (!payment && externalReference) {
+    payment = await prisma.payment.findUnique({ where: { reference: externalReference } });
+  }
+
+  // Some CamPay callbacks expose only one reference. If it matches our own
+  // external reference, attach CamPay's gateway reference before verifying.
+  if (payment && gatewayReference && payment.gatewayTransactionId !== gatewayReference) {
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: { gatewayTransactionId: gatewayReference },
+    });
+  }
+
+  if (gatewayReference) await confirmCampayPayment(gatewayReference);
 }
 
-// Some CamPay dashboards default the callback method to GET — support it
-// too so it works regardless of which method ends up configured.
+export async function POST(req: NextRequest) {
+  try {
+    await processWebhook(await req.json());
+  } catch (error) {
+    console.error("CamPay webhook processing error:", error);
+  }
+  return NextResponse.json({ received: true });
+}
+
 export async function GET(req: NextRequest) {
-    const reference = req.nextUrl.searchParams.get("reference");
-    if (!reference) {
-        return NextResponse.json({ received: true });
-    }
-
-    try {
-        await confirmCampayPayment(reference);
-    } catch (e) {
-        console.error("CamPay webhook processing error:", e);
-    }
-
-    return NextResponse.json({ received: true });
+  try {
+    await processWebhook({
+      reference: req.nextUrl.searchParams.get("reference"),
+      external_reference: req.nextUrl.searchParams.get("external_reference"),
+      transaction_id: req.nextUrl.searchParams.get("transaction_id"),
+    });
+  } catch (error) {
+    console.error("CamPay webhook processing error:", error);
+  }
+  return NextResponse.json({ received: true });
 }

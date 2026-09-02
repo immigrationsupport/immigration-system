@@ -10,6 +10,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 export default async function AgentDashboard() {
     const locale = await getLocale();
     const t = await getTranslations("agentOverview");
+    const tStep = await getTranslations("stepTypeLabels");
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -139,21 +140,8 @@ export default async function AgentDashboard() {
                                         </td>
                                         <td className="px-6 py-5">
                                             {(() => {
-                                                const STEP_LABELS: Record<string, string> = {
-                                                    REGISTRATION: "Registration",
-                                                    CONTRACT_SIGNING: "Contract Signing",
-                                                    FEE_PAYMENT: "Fee Payment",
-                                                    DOCUMENT_COLLECTION: "Document Collection",
-                                                    DIPLOMA_EQUIVALENCE: "Diploma Equivalence",
-                                                    LANGUAGE_TEST_REGISTRATION: "Language Test Reg.",
-                                                    LANGUAGE_TEST_RESULTS: "Language Test Results",
-                                                    PROFILE_CREATION: "Profile Creation",
-                                                    APPLICATION_SUBMISSION: "Procedure Submission",
-                                                    MEDICAL_EXAMINATION: "Medical Examination",
-                                                    PASSPORT_SUBMISSION: "Passport & Visa"
-                                                };
                                                 const activeStep = (app as any).steps.find((s: any) => s.status === "IN_PROGRESS" || (s.status === "PENDING" && !s.isLocked));
-                                                const stepLabel = activeStep ? (activeStep.label || STEP_LABELS[activeStep.type] || activeStep.type) : t("defaultStepLabel");                                                return (
+                                                const stepLabel = activeStep ? (activeStep.label || tStep(activeStep.type) || activeStep.type) : t("defaultStepLabel");                                                return (
                                                     <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[11px] font-bold">
                                                         {stepLabel}
                                                     </span>

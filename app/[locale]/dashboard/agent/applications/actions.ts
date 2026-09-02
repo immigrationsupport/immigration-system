@@ -5,8 +5,8 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { ApplicationStatus, ProcedureStatus } from "@prisma/client";
-import { STEP_LABELS } from "@/lib/steps";
 import { getAgencyTemplates, getTemplateSteps } from "@/lib/steps-server";
+import { getTranslations } from "next-intl/server";
 
 // Looks up the agency name that actually owns an application — used for
 // client-facing emails so the brand shown is always the client's own
@@ -197,7 +197,8 @@ export async function updateStepAction(
 
         // Create an Official Message if this is a modification request (ACTION_REQUIRED)
         if (data.status === "ACTION_REQUIRED" && data.description) {
-            const stepLabel = step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS] || step.type;
+            const tStep = await getTranslations("stepTypeLabels");
+            const stepLabel = step.label || (step.type ? tStep(step.type) : step.type);
             
             // 1. Create database record
             await prisma.officialMessage.create({
@@ -249,7 +250,8 @@ export async function updateStepAction(
 
         // Send an email notification to the client whenever an agent/admin validates (approves) a step
         if (data.status === "APPROVED" && step.status !== "APPROVED" && step.application.client.email) {
-            const stepLabel = step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS] || step.type;
+            const tStep = await getTranslations("stepTypeLabels");
+            const stepLabel = step.label || (step.type ? tStep(step.type) : step.type);
             const agencyName = await getApplicationAgencyName(step.application.agencyId);
 
             await sendEmail({

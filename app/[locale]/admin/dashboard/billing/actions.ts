@@ -38,7 +38,10 @@ export async function upgradeSubscriptionAction(formData: FormData) {
     if (!ctx) return { error: "Unauthorized access." };
     const { session, agencyId } = ctx;
 
-    const planId = formData.get("planId") as string;
+    const planId = String(formData.get("planId") || "");
+    const paymentMethod = String(formData.get("paymentMethod") || "");
+    const phoneNumber = String(formData.get("phoneNumber") || "").replace(/\D/g, "");
+
     if (!planId) return { error: "Select a plan." };
 
     try {
@@ -53,7 +56,6 @@ export async function upgradeSubscriptionAction(formData: FormData) {
 
         const isDowngrade = newPlan.priceFcfa < subscription.plan.priceFcfa;
 
-        // Downgrade or switching to a free plan: no payment required.
         if (isDowngrade || newPlan.priceFcfa === 0) {
             await prisma.$transaction(async (tx) => {
                 if (isDowngrade) {
@@ -77,7 +79,7 @@ export async function upgradeSubscriptionAction(formData: FormData) {
                     data: {
                         action: isDowngrade ? "SCHEDULE_PLAN_DOWNGRADE" : "UPGRADE_SUBSCRIPTION",
                         details: isDowngrade
-                            ? `Agency scheduled a downgrade to plan "${newPlan.name}", effective ${subscription.currentPeriodEnd.toDateString()}.`
+                            ? `Agency scheduled a downgrade to plan "${newPlan.name}".`
                             : `Agency switched to the free plan "${newPlan.name}".`,
                         userId: session.user.id,
                         agencyId,
@@ -90,7 +92,14 @@ export async function upgradeSubscriptionAction(formData: FormData) {
             return { success: true, downgrade: isDowngrade };
         }
 
-        // Paid upgrade: create a pending payment and start a CamPay checkout.
+        if (paymentMethod !== "MTN_MOBILE_MONEY" && paymentMethod !== "ORANGE_MONEY" && paymentMethod !== "CARD") {
+            return { error: "Choose a payment method." };
+        }
+
+        if ((paymentMethod === "MTN_MOBILE_MONEY" || paymentMethod === "ORANGE_MONEY") && !/^2376\d{8}$/.test(phoneNumber)) {
+            return { error: "Enter a valid Cameroon mobile number, for example 2376XXXXXXXX." };
+        }
+
         const txRef = `UPG-${agencyId.slice(0, 8)}-${Date.now()}-${randomUUID().slice(0, 8)}`;
 
         await prisma.payment.create({
@@ -100,42 +109,66 @@ export async function upgradeSubscriptionAction(formData: FormData) {
                 status: "PENDING",
                 reference: txRef,
                 targetPlanId: newPlan.id,
+                method: paymentMethod === "MTN_MOBILE_MONEY"
+                    ? "MTN_MOBILE_MONEY"
+                    : paymentMethod === "ORANGE_MONEY"
+                    ? "ORANGE_MONEY"
+                    : "CARD",
             },
         });
 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "";
         const locale = await getLocale();
+        const verifyUrl = `${appUrl}/${locale}/admin/dashboard/billing/verify?ref=${encodeURIComponent(txRef)}`;
 
-        const init = await initializePayment({
-            txRef,
-            amount: newPlan.priceFcfa,
-            currency: CURRENCY,
-            // ref is passed as a query param since this route is static
-            // (no [txRef] dynamic segment). CamPay's docs don't confirm
-            // whether it appends its own query params on redirect — if it
-            // does, they should just add alongside ours rather than
-            // overwrite it, but this is worth confirming with a real test.
-            redirectUrl: `${appUrl}/${locale}/admin/dashboard/billing/verify?ref=${txRef}`,
-            customerEmail: session.user.email,
-            customerName: session.user.name,
-            title: `${newPlan.name} plan subscription`,
-            meta: { agencyId, subscriptionId: subscription.id, planId: newPlan.id },
-        });
+        if (paymentMethod === "CARD") {
+            const init = await initializePayment({
+                txRef,
+                amount: newPlan.priceFcfa,
+                redirectUrl: verifyUrl,
+                customerEmail: session.user.email,
+                customerName: session.user.name || "Customer",
+                title: `${newPlan.name} plan subscription`,
+            });
 
-        if (!init.ok || !init.paymentUrl) {
-            // Clean up the pending payment we just created so it doesn't linger.
-            await prisma.payment.update({ where: { reference: txRef }, data: { status: "FAILED" } });
-            return { error: init.error || "Could not start the payment. Please try again." };
+            if (!init.ok || !init.paymentUrl) {
+                await prisma.payment.update({ where: { reference: txRef }, data: { status: "FAILED" } });
+                return { error: init.error || "Could not start the card payment." };
+            }
+
+            if (init.gatewayReference) {
+                await prisma.payment.update({
+                    where: { reference: txRef },
+                    data: { gatewayTransactionId: init.gatewayReference },
+                });
+            }
+
+            return { success: true, paymentUrl: init.paymentUrl, txRef };
         }
 
-        // Store CamPay's own transaction reference — distinct from our txRef
-        // — so the webhook and verify page can check status with CamPay later.
-        await prisma.payment.update({
-            where: { reference: txRef },
-            data: { gatewayTransactionId: init.gatewayReference },
+        const { collectMobileMoney } = await import("@/lib/campay");
+        const collect = await collectMobileMoney({
+            txRef,
+            amount: newPlan.priceFcfa,
+            phoneNumber,
+            description: `${newPlan.name} subscription`,
         });
 
-        return { success: true, paymentUrl: init.paymentUrl };
+        if (!collect.ok || !collect.gatewayReference) {
+            await prisma.payment.update({ where: { reference: txRef }, data: { status: "FAILED" } });
+            return { error: collect.error || "Could not start the Mobile Money payment." };
+        }
+
+        await prisma.payment.update({
+            where: { reference: txRef },
+            data: { gatewayTransactionId: collect.gatewayReference },
+        });
+
+        return {
+            success: true,
+            txRef,
+            paymentReference: collect.gatewayReference,
+        };
     } catch (e: any) {
         console.error("Upgrade subscription error:", e);
         return { error: e.message || "Failed to update your subscription." };

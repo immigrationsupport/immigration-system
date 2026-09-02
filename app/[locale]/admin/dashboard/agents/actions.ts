@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import { hashPassword } from "better-auth/crypto"; // Use Better Auth utility
 import { revalidatePath } from "next/cache";
 import { checkAgentQuota } from "@/lib/subscription";
+import { auditDetails } from "@/lib/audit-log";
 export async function createAgentAction(formData: FormData) {
     const session = await auth.api.getSession({
         headers: await headers()
@@ -79,7 +80,7 @@ if (!quota.ok) {
         await prisma.auditLog.create({
             data: {
                 action: "CREATE_AGENT",
-                details: `Agent ${name} (${email}) created by Admin.`,
+                details: auditDetails("agentCreated", { name, email }),
                 userId: session.user.id,
                 agencyId: adminAgencyId,
                 targetId: newUser.id,
@@ -120,7 +121,7 @@ export async function toggleSuspendAgentAction(agentId: string, currentlySuspend
         await prisma.auditLog.create({
             data: {
                 action: currentlySuspended ? "UNSUSPEND_AGENT" : "SUSPEND_AGENT",
-                details: `Agent ${agent.name} (${agent.email}) ${currentlySuspended ? "unsuspended" : "suspended"} by Admin.`,
+                details: auditDetails(currentlySuspended ? "agentUnsuspended" : "agentSuspended", { name: agent.name, email: agent.email }),
                 userId: session.user.id,
                 agencyId: adminAgencyId,
                 targetId: agentId
@@ -159,7 +160,7 @@ export async function deleteAgentAction(agentId: string) {
         await prisma.auditLog.create({
             data: {
                 action: "DELETE_AGENT",
-                details: `Agent ${agent?.name} (${agent?.email}) deleted by Admin.`,
+                details: auditDetails("agentDeleted", { name: agent?.name || "", email: agent?.email || "" }),
                 userId: session.user.id,
                 agencyId: adminAgencyId,
                 targetId: agentId
@@ -237,7 +238,7 @@ export async function updateAgentAction(agentId: string, name: string, email: st
         await prisma.auditLog.create({
             data: {
                 action: "UPDATE_AGENT",
-                details: `Agent ${name} (${email}) details updated by Admin.${password ? " Password was also reset." : ""}`,
+                details: auditDetails(password ? "agentUpdatedWithPasswordReset" : "agentUpdated", { name, email }),
                 userId: session.user.id,
                 agencyId: adminAgencyId,
                 targetId: agentId

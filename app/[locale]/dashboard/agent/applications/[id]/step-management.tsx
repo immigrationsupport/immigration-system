@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Loader2, Upload, FileCheck2, ChevronDown } from "lucide-react";
-import { STEP_LABELS } from "@/lib/steps";
 import { updateStepAction, updateApplicationStatusAction, addDocumentAction, deleteDocumentAction, toggleSubStepAction } from "../actions";
 import { useParams, useRouter } from "next/navigation";
 import { UploadButton } from "@/src/utils/uploadthing";
@@ -65,6 +64,7 @@ interface StepManagementProps {
 
 export default function StepManagement({ applicationId, currentStatus, steps, country, onRefresh }: StepManagementProps) {
     const t = useTranslations("agentStepManagement");
+    const tStep = useTranslations("stepTypeLabels");
     const router = useRouter();
     const params = useParams();
     const locale = (params?.locale as string) || "en-US";
@@ -199,7 +199,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                     <td className="p-4 font-semibold text-gray-800">
                                         {step.type === "PROFILE_CREATION"
                                             ? (step.label || t("profileCreationDefaultLabel"))
-                                            : (step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS])
+                                            : (step.label || tStep(step.type as any))
                                         }
                                     </td>
                                     
@@ -239,7 +239,7 @@ export default function StepManagement({ applicationId, currentStatus, steps, co
                                                  
                                                  {idx >= 3 && dbStep && (
                                                      <button
-                                                         onClick={() => setRequestModal({ stepId: step.id, stepName: step.label || STEP_LABELS[step.type as keyof typeof STEP_LABELS] })}
+                                                         onClick={() => setRequestModal({ stepId: step.id, stepName: step.label || tStep(step.type as any) })}
                                                          disabled={loadingStepId === step.id}
                                                          className="px-4 py-2 text-[10px] font-black uppercase tracking-widest bg-amber-500 text-white hover:bg-amber-600 rounded-xl transition-all shadow-lg shadow-amber-100 flex items-center gap-2"
                                                      >

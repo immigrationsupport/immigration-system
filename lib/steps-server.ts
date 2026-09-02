@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { APP_STEP_SEQUENCE, STEP_LABELS, StepDefinition } from "@/lib/steps";
+import { APP_STEP_SEQUENCE, StepDefinition } from "@/lib/steps";
 
 /**
  * Server-only: touches Prisma directly. Only import this from server
@@ -26,7 +26,12 @@ export async function ensureDefaultTemplate(agencyId: string) {
             steps: {
                 create: APP_STEP_SEQUENCE.map((type, index) => ({
                     type,
-                    label: STEP_LABELS[type],
+                    // Leave label unset for built-in types — the display
+                    // layer translates by `type` via stepTypeLabels. Baking
+                    // the English STEP_LABELS text in here would make
+                    // step.label always win over the translation, so the
+                    // step name would never actually localize.
+                    label: null,
                     order: index
                 }))
             }
@@ -101,7 +106,7 @@ export async function getAgencyStepDefinitions(agencyId?: string | null): Promis
 
     return APP_STEP_SEQUENCE.map((type, index) => ({
         type,
-        label: STEP_LABELS[type],
+        label: null,
         description: null,
         order: index,
         subSteps: [],

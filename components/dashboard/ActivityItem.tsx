@@ -11,6 +11,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { useTranslations } from "next-intl";
+import { resolveAuditDetails } from "@/lib/audit-log-render";
 
 interface ActivityItemProps {
     log: {
@@ -42,7 +43,11 @@ const getActionColor = (action: string) => {
 
 export function ActivityItem({ log }: ActivityItemProps) {
     const t = useTranslations("adminActivityItem");
+    const tAudit = useTranslations("auditLog");
+    const tAction = useTranslations("auditActions");
     const [showDetails, setShowDetails] = useState(false);
+    const actionLabel = tAction.has(log.action) ? tAction(log.action) : log.action.replace(/_/g, " ");
+    const detailsText = resolveAuditDetails(log.details, tAudit, t("noDetailsProvided"));
 
     return (
         <div className="relative pl-6 border-l-2 border-slate-50 py-1 transition-all hover:bg-slate-50 rounded-r-lg group">
@@ -51,7 +56,7 @@ export function ActivityItem({ log }: ActivityItemProps) {
                 <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-2">
                         <span className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded border ${getActionColor(log.action)}`}>
-                            {log.action.replace(/_/g, " ")}
+                            {actionLabel}
                         </span>
                         <p className="text-[10px] text-gray-400 font-bold uppercase">
                             {getTimeAgo(new Date(log.createdAt), t)}
@@ -59,7 +64,7 @@ export function ActivityItem({ log }: ActivityItemProps) {
                     </div>
                     <div className="flex items-start justify-between gap-2">
                         <p className="text-sm font-medium text-gray-700 leading-tight pr-4">
-                            <TruncatedText text={log.details || ""} maxLength={60} />
+                            <TruncatedText text={detailsText} maxLength={60} />
                         </p>
                         <button 
                             onClick={() => setShowDetails(true)}
@@ -88,12 +93,12 @@ export function ActivityItem({ log }: ActivityItemProps) {
                             {t("activityDetails")}
                         </DialogTitle>
                         <DialogDescription className="text-xs font-black uppercase tracking-widest text-gray-400">
-                            {log.action.replace(/_/g, " ")} | {new Date(log.createdAt).toLocaleString()}
+                            {actionLabel} | {new Date(log.createdAt).toLocaleString()}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
                         <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                            {log.details || t("noDetailsProvided")}
+                            {detailsText}
                         </p>
                     </div>
                     <div className="mt-4 flex items-center gap-2 text-[11px] font-bold text-gray-400">
