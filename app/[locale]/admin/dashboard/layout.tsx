@@ -13,7 +13,7 @@ import {
     Settings as SettingsIcon
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { getMyAgencyName } from "@/lib/agency-actions";
 import AiSearchBar from "@/app/[locale]/admin/dashboard/search/ai-search-bar";
 import { useTranslations } from "next-intl";
@@ -25,6 +25,8 @@ export default function AdminDashboardLayout({
     const t = useTranslations("adminLayout");
     const { data: session, isPending } = useSession();
     const router = useRouter();
+    const params = useParams();
+    const locale = (params?.locale as string) || "en";
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [agencyName, setAgencyName] = useState<string | null>(null);
 
@@ -80,6 +82,7 @@ const adminSidebarItems = [
                     showLogout={true} 
                     onMenuClick={() => setIsSidebarOpen(true)}
                     centerSlot={<AiSearchBar />}
+                    locale={locale}
                 />
             
                 <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full mx-auto" style={{ backgroundColor: "#F9FAFB" }}>
