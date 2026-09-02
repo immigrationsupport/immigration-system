@@ -11,6 +11,7 @@ export async function getApplicationDetails(applicationId: string) {
         if (!session || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
             return { error: "Unauthorized access." };
         }
+
         const agencyId = (session.user as any).agencyId;
 
         const app = await prisma.application.findUnique({
@@ -42,6 +43,11 @@ export async function getApplicationDetails(applicationId: string) {
                             orderBy: {
                                 uploadedAt: "desc"
                             }
+                        },
+                        subSteps: {
+                            orderBy: {
+                                order: "asc"
+                            }
                         }
                     },
                     orderBy: {
@@ -52,7 +58,9 @@ export async function getApplicationDetails(applicationId: string) {
         }) as any;
 
         if (!app) return { error: "Procedure not found." };
-        if (app.agencyId !== agencyId) return { error: "This application does not belong to your agency." };
+        if (app.agencyId !== agencyId) {
+            return { error: "This application does not belong to your agency." };
+        }
 
         const mappedApp = {
             ...app,
@@ -69,14 +77,22 @@ export async function getApplicationDetails(applicationId: string) {
 export async function unlockApplication(applicationId: string) {
     try {
         const session = await auth.api.getSession({ headers: await headers() });
+
         if (!session || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
             return { error: "Unauthorized access." };
         }
+
         const agencyId = (session.user as any).agencyId;
 
-        const existing = await prisma.application.findUnique({ where: { id: applicationId } });
+        const existing = await prisma.application.findUnique({
+            where: { id: applicationId }
+        });
+
         if (!existing) return { error: "Procedure not found." };
-        if (existing.agencyId !== agencyId) return { error: "This application does not belong to your agency." };
+
+        if (existing.agencyId !== agencyId) {
+            return { error: "This application does not belong to your agency." };
+        }
 
         await prisma.application.update({
             where: { id: applicationId },
@@ -99,8 +115,9 @@ export async function unlockApplication(applicationId: string) {
         });
 
         revalidatePath("/admin/dashboard/applications");
+
         return { success: true };
     } catch (e: any) {
         return { error: e.message || "Failed to unlock application." };
     }
-}
+}
