@@ -14,6 +14,11 @@ export const APP_STEP_SEQUENCE: ProcedureType[] = [
     "PASSPORT_SUBMISSION"
 ];
 
+/**
+ * English fallback labels for the built-in procedure types.
+ * These are identifiers/fallbacks only; the UI should use next-intl
+ * `stepTypeLabels` for the actual language shown to the user.
+ */
 export const STEP_LABELS: Record<ProcedureType, string> = {
     REGISTRATION: "Registration",
     CONTRACT_SIGNING: "Contract Signing",
@@ -37,9 +42,8 @@ export interface SubStepDefinition {
 export interface StepDefinition {
     // Null for a fully custom step with no built-in behavior attached.
     type: ProcedureType | null;
-    // Null for a built-in type using its default translated name — only
-    // set when someone (admin or the seed data) gave the step its own
-    // literal text.
+    // Null for a built-in type using its default translated name. A literal
+    // value is only stored when an admin intentionally gives the step a custom name.
     label: string | null;
     description: string | null;
     order: number;
@@ -48,7 +52,11 @@ export interface StepDefinition {
     requiredDocuments: string[];
 }
 
-/** Every possible step an agency could enable, with its built-in default label — used to seed the admin's customization screen. */
+export function getDefaultStepLabel(type: ProcedureType): string {
+    return STEP_LABELS[type];
+}
+
+/** Every possible step an agency could enable, with its built-in default label. */
 export function getDefaultStepCatalog(): { type: ProcedureType; label: string }[] {
     return APP_STEP_SEQUENCE.map((type) => ({ type, label: STEP_LABELS[type] }));
 }

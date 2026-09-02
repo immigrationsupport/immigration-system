@@ -2,7 +2,6 @@ import "dotenv/config";
 import prisma from "../lib/prisma";
 import { hashPassword } from "better-auth/crypto";
 
-
 const DEMO_PASSWORD = "Demo2026!";
 
 const STEP_LABELS: Record<string, string> = {
@@ -50,8 +49,21 @@ async function main() {
         }
     });
 
-    // 2. Plan + Abonnement (pour que la page Billing soit garnie aussi)
-    const plan = await prisma.plan.upsert({
+    // 2. Plans — Free (actif) + Standard (référence, pour l'historique de paiement)
+    const freePlan = await prisma.plan.upsert({
+        where: { slug: "free" },
+        update: {},
+        create: {
+            name: "Free",
+            slug: "free",
+            priceFcfa: 0,
+            maxAgents: 1,
+            maxClients: 10,
+            isPublic: true
+        }
+    });
+
+    await prisma.plan.upsert({
         where: { slug: "standard" },
         update: {},
         create: {
@@ -64,31 +76,32 @@ async function main() {
         }
     });
 
+    // L'agence démarre sur le plan Free
     const subscription = await prisma.subscription.upsert({
         where: { agencyId: agency.id },
-        update: {},
+        update: { planId: freePlan.id, status: "ACTIVE" },
         create: {
             agencyId: agency.id,
-            planId: plan.id,
+            planId: freePlan.id,
             status: "ACTIVE",
             autoRenew: true,
             currentPeriodEnd: new Date(Date.now() + 200 * 24 * 60 * 60 * 1000)
         }
     });
 
-    // Historique de paiement (pour la page Billing)
+    // Historique de paiement — montants à 25 000 FCFA comme demandé
     await prisma.payment.createMany({
         data: [
             {
                 subscriptionId: subscription.id,
-                amountFcfa: 150000,
+                amountFcfa: 25000,
                 method: "MTN_MOBILE_MONEY",
                 status: "SUCCESS",
                 reference: "DEMO-PAY-001"
             },
             {
                 subscriptionId: subscription.id,
-                amountFcfa: 150000,
+                amountFcfa: 25000,
                 method: "ORANGE_MONEY",
                 status: "SUCCESS",
                 reference: "DEMO-PAY-002"
@@ -149,6 +162,69 @@ async function main() {
                         label: STEP_LABELS[type],
                         order: index
                     }))
+                }
+            }
+        });
+    }
+
+    // 5bis. Workflow PERSONNALISÉ avec sous-étapes — pour montrer la
+    // customisation en direct pendant la présentation
+    let customTemplate = await prisma.applicationTemplate.findFirst({
+        where: { agencyId: agency.id, name: "Visa Vacances-Travail (PVT) - Sur mesure" }
+    });
+    if (!customTemplate) {
+        customTemplate = await prisma.applicationTemplate.create({
+            data: {
+                agencyId: agency.id,
+                name: "Visa Vacances-Travail (PVT) - Sur mesure",
+                description: "Workflow personnalisé avec étapes sur mesure et sous-étapes détaillées.",
+                steps: {
+                    create: [
+                        {
+                            type: null,
+                            label: "Inscription initiale",
+                            order: 0
+                        },
+                        {
+                            type: "CONTRACT_SIGNING",
+                            label: "Signature du contrat",
+                            order: 1
+                        },
+                        {
+                            type: "FEE_PAYMENT",
+                            label: "Paiement des frais",
+                            order: 2
+                        },
+                        {
+                            type: "DOCUMENT_COLLECTION",
+                            label: "Collecte des documents",
+                            order: 3,
+                            subSteps: {
+                                create: [
+                                    { label: "Passeport valide", order: 0 },
+                                    { label: "Certificat médical", order: 1 },
+                                    { label: "Lettre de motivation", order: 2 },
+                                    { label: "Preuve de fonds suffisants", order: 3 }
+                                ]
+                            }
+                        },
+                        {
+                            type: null,
+                            label: "Préparation à l'entretien consulaire",
+                            order: 4,
+                            subSteps: {
+                                create: [
+                                    { label: "Révision des questions fréquentes", order: 0 },
+                                    { label: "Simulation d'entretien", order: 1 }
+                                ]
+                            }
+                        },
+                        {
+                            type: "APPLICATION_SUBMISSION",
+                            label: "Soumission finale du dossier",
+                            order: 5
+                        }
+                    ]
                 }
             }
         });
@@ -231,10 +307,52 @@ async function main() {
         createdApplications.push(app);
     }
 
+    // 7bis. Une procédure utilisant le workflow PERSONNALISÉ — assignée au
+    // client encore libre (index 7, déjà rattaché à l'agent)
+    const customTemplateSteps = await prisma.stepTemplate.findMany({
+        where: { applicationTemplateId: customTemplate.id },
+        orderBy: { order: "asc" },
+        include: { subSteps: { orderBy: { order: "asc" } } }
+    });
+    const customClient = clients[7];
+
+    const customApp = await prisma.application.create({
+        data: {
+            country: "Canada",
+            type: "WORK",
+            clientId: customClient.id,
+            agentId: agent.id,
+            agencyId: agency.id,
+            applicationTemplateId: customTemplate.id,
+            status: "IN_PROGRESS",
+            steps: {
+                create: customTemplateSteps.map((s, idx) => ({
+                    type: s.type,
+                    label: s.label,
+                    order: idx,
+                    status: idx < 2 ? "APPROVED" : idx === 2 ? "IN_PROGRESS" : "PENDING",
+                    isLocked: idx > 2,
+                    description: idx < 2 ? "Automatiquement vérifié." : null,
+                    subSteps: {
+                        create: s.subSteps.map((sub, subIdx) => ({
+                            label: sub.label,
+                            description: sub.description,
+                            order: subIdx,
+                            // Quelques sous-étapes déjà cochées sur l'étape en cours, pour le réalisme
+                            isCompleted: idx === 2 && subIdx === 0
+                        }))
+                    }
+                }))
+            }
+        }
+    });
+    createdApplications.push(customApp);
+
     // 8. Quelques documents réalistes sur les procédures les plus avancées
     const docNames = ["Passeport.pdf", "Certificat_Naissance.pdf", "Diplome.pdf", "CV.pdf"];
     for (const app of createdApplications.slice(0, 3)) {
-        const docStep = app.steps.find((s) => s.type === "DOCUMENT_COLLECTION");
+        const fullApp = await prisma.application.findUnique({ where: { id: app.id }, include: { steps: true } });
+        const docStep = fullApp?.steps.find((s) => s.type === "DOCUMENT_COLLECTION");
         if (docStep) {
             for (const docName of docNames.slice(0, 2)) {
                 await prisma.document.create({
@@ -251,7 +369,7 @@ async function main() {
         }
     }
 
-    // 9. Journal d'activité — pour que "Activité Récente" et "Journaux Système" soient garnis
+    // 9. Journal d'activité
     const now = Date.now();
     const activityLog: { action: string; details: string; hoursAgo: number; userId?: string }[] = [
         { action: "CREATE_CLIENT", details: `Client ${clients[0].name} créé par Admin ${ADMIN_NAME}.`, hoursAgo: 96, userId: admin.id },
@@ -265,7 +383,8 @@ async function main() {
         { action: "CREATE_APPLICATION", details: `Procédure (Standard PR - Canada) créée pour ${clients[3].name} par ${AGENT_NAME}.`, hoursAgo: 36, userId: agent.id },
         { action: "STEP_UPDATE", details: `Agent ${AGENT_NAME} a mis à jour l'étape FEE_PAYMENT (statut: APPROVED).`, hoursAgo: 30, userId: agent.id },
         { action: "CREATE_CLIENT", details: `Client ${clients[3].name} créé par Admin ${ADMIN_NAME}.`, hoursAgo: 24, userId: admin.id },
-        { action: "UPGRADE_SUBSCRIPTION", details: `Agence a mis à niveau vers le plan "Standard" (150 000 FCFA) via MTN_MOBILE_MONEY.`, hoursAgo: 20 },
+        { action: "CREATE_APPLICATION_TEMPLATE", details: `Admin ${ADMIN_NAME} a créé le workflow personnalisé "Visa Vacances-Travail (PVT) - Sur mesure".`, hoursAgo: 22, userId: admin.id },
+        { action: "CREATE_APPLICATION", details: `Procédure (Visa Vacances-Travail - Sur mesure) créée pour ${customClient.name} par ${AGENT_NAME}.`, hoursAgo: 20, userId: agent.id },
         { action: "STEP_UPDATE", details: `Agent ${AGENT_NAME} a mis à jour l'étape DOCUMENT_COLLECTION (statut: APPROVED).`, hoursAgo: 15, userId: agent.id },
         { action: "DOCUMENT_UPLOAD", details: `${AGENT_NAME} a téléversé "CV.pdf" pour l'étape Document Collection de ${clients[3].name}.`, hoursAgo: 10, userId: agent.id },
         { action: "STEP_UPDATE", details: `Agent ${AGENT_NAME} a mis à jour l'étape DIPLOMA_EQUIVALENCE (statut: IN_PROGRESS).`, hoursAgo: 6, userId: agent.id },
@@ -288,12 +407,13 @@ async function main() {
     console.log("");
     console.log("✅ Données de démonstration créées !");
     console.log("");
-    console.log("Agence :", AGENCY_NAME);
+    console.log("Agence :", AGENCY_NAME, "(plan Free actif, 2 paiements de 25 000 FCFA dans l'historique)");
     console.log("Connexion Admin  → admin@objectifcanada.cm / " + DEMO_PASSWORD);
     console.log("Connexion Agent  → agent@objectifcanada.cm / " + DEMO_PASSWORD);
     console.log("10 clients créés, emails : client1@objectifcanada.cm à client10@objectifcanada.cm / " + DEMO_PASSWORD);
-    console.log("7 procédures créées (4 en cours, 1 terminée, 1 en attente, 1 rejetée)");
-    console.log("17 entrées dans le journal d'activité, étalées sur les 4 derniers jours");
+    console.log("8 procédures créées (4 en cours sur le workflow standard, 1 terminée, 1 en attente, 1 rejetée,");
+    console.log("  + 1 sur le workflow PERSONNALISÉ avec sous-étapes, pour " + customClient.name + ")");
+    console.log("18 entrées dans le journal d'activité, étalées sur les 4 derniers jours");
 }
 
 main()

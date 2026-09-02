@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getAgencyTemplates, getTemplateSteps } from "@/lib/steps-server";
-import { StepDefinition, APP_STEP_SEQUENCE } from "@/lib/steps";
+import { StepDefinition, APP_STEP_SEQUENCE, STEP_LABELS } from "@/lib/steps";
 import { ProcedureType } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 
@@ -31,11 +31,7 @@ export async function createTemplateAction(name: string, description: string) {
 
     try {
         // Clone the agency's current "Default" workflow as the starting
-        // point for every new one — so if the admin edits Default (adds,
-        // removes, or renames steps), all workflows created afterwards
-        // pick up that change automatically. Falls back to the built-in
-        // 11-step catalog only if no "Default" workflow exists at all
-        // (e.g. it was renamed or deleted).
+        // point for every new one.
         const defaultTemplate = await prisma.applicationTemplate.findFirst({
             where: { agencyId: ctx.agencyId, name: "Default" }
         });
@@ -43,15 +39,13 @@ export async function createTemplateAction(name: string, description: string) {
         const seedSteps = defaultTemplate
             ? await getTemplateSteps(defaultTemplate.id)
             : await (async () => {
-                  // No "Default" workflow to clone from (rare) — fall back to
-                  // the built-in 11-step catalog, pre-filled in the admin's
-                  // current language so they see readable text to start
-                  // editing from (this is just a starting value, still free
-                  // text they can rename).
-                  const t = await getTranslations("stepTypeLabels");
+                  // If no Default workflow exists, create the built-in catalog
+                  // with NULL labels. The label is resolved from next-intl at
+                  // display time, so it never gets frozen in the language used
+                  // when the workflow was created.
                   return APP_STEP_SEQUENCE.map((type, index) => ({
                       type: type as ProcedureType,
-                      label: t(type),
+                      label: null as string | null,
                       description: null as string | null,
                       order: index,
                       subSteps: [] as { label: string; description: string | null; order: number }[],
@@ -67,7 +61,12 @@ export async function createTemplateAction(name: string, description: string) {
                 steps: {
                     create: seedSteps.map((s, index) => ({
                         type: s.type,
-                        label: s.label,
+                        // Built-in default labels are never stored. Only a
+                        // genuinely custom literal label is persisted.
+                        label:
+                            s.type && s.label?.trim() === STEP_LABELS[s.type]
+                                ? null
+                                : s.label?.trim() || null,
                         description: s.description,
                         order: index,
                         requiredDocuments: s.requiredDocuments,
@@ -114,7 +113,6 @@ export async function deleteTemplateAction(templateId: string, confirmationName?
 
         const inUse = await prisma.application.count({ where: { applicationTemplateId: templateId } });
         if (inUse > 0) {
-            // Don't delete history out from under real applications — just hide it from future use.
             await prisma.applicationTemplate.update({ where: { id: templateId }, data: { isActive: false } });
         } else {
             await prisma.applicationTemplate.delete({ where: { id: templateId } });
@@ -157,9 +155,15 @@ export async function saveTemplateStepsAction(templateId: string, steps: StepInp
     if (!Array.isArray(steps) || steps.length === 0) {
         return { error: "At least one step is required." };
     }
+
+    // A built-in step can have an empty label because its displayed name comes
+    // from next-intl. A custom step (type === null) must have its own name.
     for (const s of steps) {
-        if (!s.label || !s.label.trim()) return { error: "Every step needs a name." };
+        if (!s.type && (!s.label || !s.label.trim())) {
+            return { error: "Every custom step needs a name." };
+        }
     }
+
     if (!steps.some((s) => s.isActive)) {
         return { error: "At least one step must be active." };
     }
@@ -170,11 +174,15 @@ export async function saveTemplateStepsAction(templateId: string, steps: StepInp
 
             for (let i = 0; i < steps.length; i++) {
                 const s = steps[i];
+                const trimmedLabel = s.label?.trim() || "";
+
                 await tx.stepTemplate.create({
                     data: {
                         applicationTemplateId: templateId,
                         type: s.type || null,
-                        label: s.label.trim(),
+                        // Empty label means "use the translated built-in label".
+                        // Custom labels are still preserved exactly as entered.
+                        label: trimmedLabel || null,
                         description: s.description?.trim() || null,
                         order: i,
                         isActive: s.isActive,
@@ -211,7 +219,7 @@ export async function saveTemplateStepsAction(templateId: string, steps: StepInp
     }
 }
 
-/** Built-in step types an admin can optionally attach to a step, to keep that type's special behavior (document checks, etc.) */
+/** Built-in step types an admin can optionally attach to a step. */
 export async function getBuiltInTypeOptions() {
     const t = await getTranslations("stepTypeLabels");
     return APP_STEP_SEQUENCE.map((type) => ({ type, label: t(type) }));
