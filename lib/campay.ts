@@ -42,14 +42,26 @@ export async function collectMobileMoney(params: CollectPaymentParams): Promise<
 
     const text = await res.text();
     let data: any = {};
-    try { data = JSON.parse(text); } catch { /* handled below */ }
+    try {
+      data = JSON.parse(text);
+    } catch {
+      /* handled below */
+    }
 
     if (!res.ok) {
       console.error("CamPay collect failed:", res.status, text.slice(0, 1000));
-      return { ok: false, error: data.message || data.detail || data.error || "CamPay could not start the payment." };
+      return {
+        ok: false,
+        error: data.message || data.detail || data.error || "CamPay could not start the payment.",
+      };
     }
 
-    const reference = data.reference || data.transaction_id || data.transactionId || Object.values(data)[0];
+    const reference =
+      data.reference ||
+      data.transaction_id ||
+      data.transactionId ||
+      Object.values(data)[0];
+
     if (!reference) {
       console.error("CamPay collect returned no reference:", data);
       return { ok: false, error: "CamPay started no identifiable transaction." };
@@ -106,11 +118,18 @@ export async function initializePayment(params: HostedPaymentParams): Promise<Ho
 
     const text = await res.text();
     let data: any = {};
-    try { data = JSON.parse(text); } catch { /* handled below */ }
+    try {
+      data = JSON.parse(text);
+    } catch {
+      /* handled below */
+    }
 
     if (!res.ok || !data.link) {
       console.error("CamPay payment link failed:", res.status, text.slice(0, 1000));
-      return { ok: false, error: data.message || data.detail || data.error || "Could not create the card checkout." };
+      return {
+        ok: false,
+        error: data.message || data.detail || data.error || "Could not create the card checkout.",
+      };
     }
 
     return {
@@ -133,25 +152,152 @@ export interface VerifyTransactionResult {
   txRef?: string;
   transactionId?: string;
   paymentType?: string;
+  status?: string;
+
+  // Raw CamPay failure information, kept so the application can
+  // turn gateway errors into useful customer-facing messages.
+  reason?: string;
+  reasonCode?: string;
+
   error?: string;
+}
+
+function readCamPayReason(data: any): { reason?: string; reasonCode?: string } {
+  const candidates = [
+    data?.reason_code,
+    data?.reasonCode,
+    data?.reason,
+    data?.failure_reason,
+    data?.failureReason,
+    data?.failure_message,
+    data?.failureMessage,
+    data?.message,
+    data?.detail,
+    data?.description,
+  ];
+
+  for (const value of candidates) {
+    if (value == null || value === "") continue;
+
+    if (typeof value === "object") {
+      const code =
+        value.code ||
+        value.reason_code ||
+        value.reasonCode ||
+        value.reason ||
+        value.status_code;
+
+      const message =
+        value.message ||
+        value.detail ||
+        value.description ||
+        value.reason;
+
+      if (code || message) {
+        return {
+          reason: message ? String(message) : code ? String(code) : undefined,
+          reasonCode: code ? String(code) : undefined,
+        };
+      }
+    }
+
+    const text = String(value).trim();
+    if (text) {
+      return {
+        reason: text,
+        // A CamPay code is normally uppercase with underscores.
+        reasonCode: /^[A-Z0-9_]+$/.test(text) ? text : undefined,
+      };
+    }
+  }
+
+  return {};
+}
+
+export function getCamPayFailureMessage(reason?: string): string {
+  const value = String(reason || "").trim();
+  const code = value.toUpperCase();
+
+  if (
+    code.includes("LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED") ||
+    code.includes("LOW_BALANCE") ||
+    code.includes("INSUFFICIENT_BALANCE")
+  ) {
+    return "Your payment could not be completed because your Mobile Money balance is insufficient or a transaction limit has been reached. Please check your balance and try again.";
+  }
+
+  if (
+    code.includes("USER_CANCELED") ||
+    code.includes("USER_CANCELLED") ||
+    code.includes("CANCELLED_BY_USER") ||
+    code.includes("CANCELED_BY_USER")
+  ) {
+    return "You cancelled the payment. No subscription change was made. You can try again when you are ready.";
+  }
+
+  if (
+    code.includes("TIMEOUT") ||
+    code.includes("TIMED_OUT") ||
+    code.includes("EXPIRED")
+  ) {
+    return "The payment confirmation timed out. Please try the payment again.";
+  }
+
+  if (
+    code.includes("INVALID_MSISDN") ||
+    code.includes("INVALID_PHONE") ||
+    code.includes("INVALID_MOBILE")
+  ) {
+    return "The Mobile Money phone number is invalid. Please check the number and try again.";
+  }
+
+  if (
+    code.includes("USER_NOT_REGISTERED") ||
+    code.includes("NOT_REGISTERED")
+  ) {
+    return "This phone number is not registered for the selected Mobile Money service. Please use another number.";
+  }
+
+  if (code.includes("LIMIT_REACHED") || code.includes("LIMIT")) {
+    return "The transaction could not be completed because a Mobile Money transaction limit was reached. Please try another payment method or try again later.";
+  }
+
+  // Do not expose technical CamPay codes to customers.
+  if (!value || /^[A-Z0-9_]+$/.test(value)) {
+    return "Your payment could not be completed. Please check your Mobile Money account and try again.";
+  }
+
+  return `Your payment could not be completed. ${value}`;
 }
 
 export async function verifyTransaction(gatewayReference: string): Promise<VerifyTransactionResult> {
   try {
-    const res = await fetch(`${CAMPAY_BASE_URL}/api/transaction/${encodeURIComponent(gatewayReference)}/`, {
-      headers: { Authorization: `Token ${getToken()}` },
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${CAMPAY_BASE_URL}/api/transaction/${encodeURIComponent(gatewayReference)}/`,
+      {
+        headers: { Authorization: `Token ${getToken()}` },
+        cache: "no-store",
+      }
+    );
 
     const text = await res.text();
     let data: any = {};
-    try { data = JSON.parse(text); } catch { /* handled below */ }
+    try {
+      data = JSON.parse(text);
+    } catch {
+      /* handled below */
+    }
 
     if (!res.ok) {
-      return { ok: false, successful: false, error: data.message || data.detail || "Verification failed." };
+      return {
+        ok: false,
+        successful: false,
+        error: data.message || data.detail || "Verification failed.",
+      };
     }
 
     const status = String(data.status || "").toUpperCase();
+    const failure = readCamPayReason(data);
 
     return {
       ok: true,
@@ -162,6 +308,9 @@ export async function verifyTransaction(gatewayReference: string): Promise<Verif
       txRef: data.external_reference,
       transactionId: data.reference || data.transaction_id,
       paymentType: data.operator || data.payment_type,
+      status,
+      reason: failure.reason,
+      reasonCode: failure.reasonCode,
     };
   } catch (error) {
     console.error("CamPay verification error:", error);
@@ -169,7 +318,9 @@ export async function verifyTransaction(gatewayReference: string): Promise<Verif
   }
 }
 
-export function mapPaymentType(operator?: string): "MTN_MOBILE_MONEY" | "ORANGE_MONEY" | "CARD" {
+export function mapPaymentType(
+  operator?: string
+): "MTN_MOBILE_MONEY" | "ORANGE_MONEY" | "CARD" {
   const value = (operator || "").toLowerCase();
   if (value.includes("mtn")) return "MTN_MOBILE_MONEY";
   if (value.includes("orange")) return "ORANGE_MONEY";
