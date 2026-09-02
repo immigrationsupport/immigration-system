@@ -83,7 +83,7 @@ export async function initializePayment(params: InitializePaymentParams): Promis
         // Log the full response server-side (visible in Vercel Function
         // Logs) whenever it's not a clean success, so we can see exactly
         // what CamPay actually said instead of guessing.
-        if (!res.ok || data.status !== "SUCCESSFUL" || !data.link) {
+        if (!res.ok || !data.link) {
             console.error("CamPay get_payment_link failed:", res.status, JSON.stringify(data));
             const message =
                 data.message ||

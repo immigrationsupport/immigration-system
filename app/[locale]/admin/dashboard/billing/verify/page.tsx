@@ -1,4 +1,3 @@
-
 import React from "react";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
@@ -10,15 +9,29 @@ export const dynamic = "force-dynamic";
 
 export default async function VerifyPaymentPage({
     params,
+    searchParams,
 }: {
-    params: Promise<{ txRef: string; locale: string }>;
+    params: Promise<{ locale: string }>;
+    searchParams: Promise<{ ref?: string }>;
 }) {
-    const { txRef, locale } = await params;
+    const { locale } = await params;
+    const { ref: txRef } = await searchParams;
 
     const t = await getTranslations({
         locale,
         namespace: "adminBilling.verify",
     });
+
+    if (!txRef) {
+        return (
+            <Result
+                locale={locale}
+                icon={<XCircle className="h-10 w-10 text-gray-400" />}
+                title={t("checkingTitle")}
+                message={t("checkingMessage")}
+            />
+        );
+    }
 
     const payment = await prisma.payment.findUnique({
         where: { reference: txRef },

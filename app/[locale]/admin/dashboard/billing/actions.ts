@@ -110,10 +110,12 @@ export async function upgradeSubscriptionAction(formData: FormData) {
             txRef,
             amount: newPlan.priceFcfa,
             currency: CURRENCY,
-            // txRef lives in the path (not a query param) so it survives
-            // regardless of whatever query params CamPay appends on its
-            // own redirect back — see verify/[txRef]/page.tsx.
-            redirectUrl: `${appUrl}/${locale}/admin/dashboard/billing/verify/${txRef}`,
+            // ref is passed as a query param since this route is static
+            // (no [txRef] dynamic segment). CamPay's docs don't confirm
+            // whether it appends its own query params on redirect — if it
+            // does, they should just add alongside ours rather than
+            // overwrite it, but this is worth confirming with a real test.
+            redirectUrl: `${appUrl}/${locale}/admin/dashboard/billing/verify?ref=${txRef}`,
             customerEmail: session.user.email,
             customerName: session.user.name,
             title: `${newPlan.name} plan subscription`,
