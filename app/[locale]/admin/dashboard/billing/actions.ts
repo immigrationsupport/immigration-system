@@ -54,33 +54,23 @@ export async function upgradeSubscriptionAction(formData: FormData) {
         if (!newPlan || !newPlan.isPublic) return { error: "This plan is not available." };
         if (newPlan.id === subscription.planId) return { error: "You are already on this plan." };
 
-        const isDowngrade = newPlan.priceFcfa < subscription.plan.priceFcfa;
-
-        if (isDowngrade || newPlan.priceFcfa === 0) {
+        // If plan is free (0 FCFA), switch immediately
+        if (newPlan.priceFcfa === 0) {
             await prisma.$transaction(async (tx) => {
-                if (isDowngrade) {
-                    await tx.subscription.update({
-                        where: { agencyId },
-                        data: { pendingPlanId: newPlan.id },
-                    });
-                } else {
-                    await tx.subscription.update({
-                        where: { agencyId },
-                        data: {
-                            planId: newPlan.id,
-                            pendingPlanId: null,
-                            status: "ACTIVE",
-                            currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-                        },
-                    });
-                }
+                await tx.subscription.update({
+                    where: { agencyId },
+                    data: {
+                        planId: newPlan.id,
+                        pendingPlanId: null,
+                        status: "ACTIVE",
+                        currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+                    },
+                });
 
                 await tx.auditLog.create({
                     data: {
-                        action: isDowngrade ? "SCHEDULE_PLAN_DOWNGRADE" : "UPGRADE_SUBSCRIPTION",
-                        details: isDowngrade
-                            ? `Agency scheduled a downgrade to plan "${newPlan.name}".`
-                            : `Agency switched to the free plan "${newPlan.name}".`,
+                        action: "UPGRADE_SUBSCRIPTION",
+                        details: `Agency switched to the free plan "${newPlan.name}".`,
                         userId: session.user.id,
                         agencyId,
                         targetId: subscription.id,
@@ -89,15 +79,23 @@ export async function upgradeSubscriptionAction(formData: FormData) {
             });
 
             revalidatePath("/admin/dashboard/billing");
-            return { success: true, downgrade: isDowngrade };
+            return { success: true };
         }
 
+        // Paid plan: requires real payment method
         if (paymentMethod !== "MTN_MOBILE_MONEY" && paymentMethod !== "ORANGE_MONEY" && paymentMethod !== "CARD") {
-            return { error: "Choose a payment method." };
+            return { error: "Please select a payment method (MTN Mobile Money, Orange Money, or Card)." };
         }
 
-        if ((paymentMethod === "MTN_MOBILE_MONEY" || paymentMethod === "ORANGE_MONEY") && !/^2376\d{8}$/.test(phoneNumber)) {
-            return { error: "Enter a valid Cameroon mobile number, for example 2376XXXXXXXX." };
+        let normalizedPhone = phoneNumber.replace(/\D/g, "");
+        if (paymentMethod === "MTN_MOBILE_MONEY" || paymentMethod === "ORANGE_MONEY") {
+            if (normalizedPhone.startsWith("237") && normalizedPhone.length === 12) {
+                // Already 2376XXXXXXXX
+            } else if (normalizedPhone.length === 9 && normalizedPhone.startsWith("6")) {
+                normalizedPhone = `237${normalizedPhone}`;
+            } else {
+                return { error: "Enter a valid Cameroon mobile number (e.g. 6XX XX XX XX or 2376XXXXXXXX)." };
+            }
         }
 
         const txRef = `UPG-${agencyId.slice(0, 8)}-${Date.now()}-${randomUUID().slice(0, 8)}`;
@@ -150,13 +148,13 @@ export async function upgradeSubscriptionAction(formData: FormData) {
         const collect = await collectMobileMoney({
             txRef,
             amount: newPlan.priceFcfa,
-            phoneNumber,
+            phoneNumber: normalizedPhone,
             description: `${newPlan.name} subscription`,
         });
 
         if (!collect.ok || !collect.gatewayReference) {
             await prisma.payment.update({ where: { reference: txRef }, data: { status: "FAILED" } });
-            return { error: collect.error || "Could not start the Mobile Money payment." };
+            return { error: collect.error || "Could not start the Mobile Money payment. Please verify your phone number." };
         }
 
         await prisma.payment.update({

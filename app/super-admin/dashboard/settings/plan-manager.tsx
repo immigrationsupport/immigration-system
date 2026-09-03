@@ -12,9 +12,9 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Loader2, Layers, AlertCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Layers, AlertCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { createPlanAction, updatePlanAction } from "./actions";
+import { createPlanAction, updatePlanAction, deletePlanAction } from "./actions";
 
 interface Plan {
     id: string;
@@ -31,8 +31,10 @@ export default function PlanManager({ initialPlans }: { initialPlans: Plan[] }) 
     const [plans, setPlans] = useState(initialPlans);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+    const [deletingPlan, setDeletingPlan] = useState<Plan | null>(null);
     const [error, setError] = useState("");
     const [isPending, startTransition] = useTransition();
+    const [isDeletePending, startDeleteTransition] = useTransition();
     const createFormRef = useRef<HTMLFormElement>(null);
 
     function handleCreate(formData: FormData) {
@@ -65,6 +67,22 @@ export default function PlanManager({ initialPlans }: { initialPlans: Plan[] }) 
         });
     }
 
+    function handleDelete() {
+        if (!deletingPlan) return;
+        setError("");
+        startDeleteTransition(async () => {
+            const result = await deletePlanAction(deletingPlan.id);
+            if (result?.error) {
+                setError(result.error);
+                toast.error(result.error);
+            } else {
+                toast.success(`Plan "${deletingPlan.name}" deleted`);
+                setDeletingPlan(null);
+                window.location.reload();
+            }
+        });
+    }
+
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -81,20 +99,29 @@ export default function PlanManager({ initialPlans }: { initialPlans: Plan[] }) 
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {plans.map((plan) => (
-                    <Card key={plan.id} className="border-none shadow-lg rounded-2xl overflow-hidden">
+                    <Card key={plan.id} className="border-none shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
                         <CardContent className="p-5 space-y-3">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="font-black text-gray-900">{plan.name}</p>
+                                    <p className="font-black text-gray-900 text-lg">{plan.name}</p>
                                     <p className="text-xs text-gray-400 font-mono">{plan.slug}</p>
                                 </div>
-                                <button
-                                    onClick={() => { setError(""); setEditingPlan(plan); }}
-                                    className="p-2 text-gray-400 hover:text-[#1E3A8A] transition-colors rounded-lg"
-                                    title="Edit plan"
-                                >
-                                    <Pencil className="h-4 w-4" />
-                                </button>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => { setError(""); setEditingPlan(plan); }}
+                                        className="p-2 text-gray-400 hover:text-[#1E3A8A] hover:bg-blue-50 transition-colors rounded-lg"
+                                        title="Edit plan"
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => { setError(""); setDeletingPlan(plan); }}
+                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors rounded-lg"
+                                        title="Delete plan"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
                             </div>
                             <p className="text-lg font-black text-[#1E3A8A]">{plan.priceFcfa.toLocaleString()} FCFA<span className="text-xs text-gray-400 font-bold">/year</span></p>
                             <div className="flex flex-wrap gap-2 text-xs font-bold text-gray-500">
@@ -213,6 +240,55 @@ export default function PlanManager({ initialPlans }: { initialPlans: Plan[] }) 
                     )}
                 </DialogContent>
             </Dialog>
+
+            {/* Delete confirmation dialog */}
+            <Dialog open={!!deletingPlan} onOpenChange={(open) => !open && !isDeletePending && setDeletingPlan(null)}>
+                <DialogContent className="sm:max-w-md rounded-2xl">
+                    <DialogHeader>
+                        <div className="mx-auto mb-2 h-12 w-12 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+                            <AlertTriangle className="h-6 w-6" />
+                        </div>
+                        <DialogTitle className="text-xl font-black text-center text-gray-900">Delete Subscription Plan</DialogTitle>
+                        <DialogDescription className="text-center text-gray-600">
+                            Are you sure you want to delete the plan <strong className="text-gray-900">{deletingPlan?.name}</strong>?
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {error && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-red-700 text-xs">
+                            <AlertCircle className="shrink-0 w-4 h-4 mt-0.5" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+
+                    {deletingPlan && deletingPlan._count.subscriptions > 0 && (
+                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-semibold">
+                            ⚠️ This plan currently has {deletingPlan._count.subscriptions} active agenc{deletingPlan._count.subscriptions === 1 ? "y" : "ies"}. You must move them to another plan or hide this plan before deleting.
+                        </div>
+                    )}
+
+                    <div className="flex gap-3 pt-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            disabled={isDeletePending}
+                            onClick={() => setDeletingPlan(null)}
+                            className="flex-1 rounded-xl font-bold"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            disabled={isDeletePending || (deletingPlan?._count.subscriptions ?? 0) > 0}
+                            onClick={handleDelete}
+                            className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold"
+                        >
+                            {isDeletePending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                            Delete Plan
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
-}
+}

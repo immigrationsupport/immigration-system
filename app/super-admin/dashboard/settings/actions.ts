@@ -108,3 +108,62 @@ export async function updatePlanAction(planId: string, formData: FormData) {
         return { error: "Failed to update plan." };
     }
 }
+
+export async function deletePlanAction(planId: string) {
+    const session = await requireSuperAdmin();
+    if (!session) return { error: "Unauthorized access." };
+
+    try {
+        const plan = await prisma.plan.findUnique({
+            where: { id: planId },
+            include: {
+                _count: {
+                    select: { subscriptions: true },
+                },
+            },
+        });
+
+        if (!plan) return { error: "Plan not found." };
+
+        if (plan._count.subscriptions > 0) {
+            return {
+                error: `Cannot delete plan "${plan.name}" because it is currently assigned to ${plan._count.subscriptions} active agenc${plan._count.subscriptions === 1 ? "y" : "ies"}. Please reassign them or set this plan to hidden.`,
+            };
+        }
+
+        await prisma.$transaction(async (tx) => {
+            // Unlink any pending downgrade/upgrade references
+            await tx.subscription.updateMany({
+                where: { pendingPlanId: planId },
+                data: { pendingPlanId: null },
+            });
+
+            // Unlink any payment targetPlanId references
+            await tx.payment.updateMany({
+                where: { targetPlanId: planId },
+                data: { targetPlanId: null },
+            });
+
+            // Delete the plan
+            await tx.plan.delete({
+                where: { id: planId },
+            });
+
+            await tx.auditLog.create({
+                data: {
+                    action: "DELETE_PLAN",
+                    details: `Plan "${plan.name}" (${plan.slug}) deleted by Super Admin.`,
+                    userId: session.user.id,
+                    targetId: planId,
+                },
+            });
+        });
+
+        revalidatePath("/super-admin/dashboard/settings");
+        revalidatePath("/admin/dashboard/billing");
+        return { success: true };
+    } catch (e: any) {
+        console.error("Delete plan error:", e);
+        return { error: e.message || "Failed to delete plan." };
+    }
+}
