@@ -587,7 +587,18 @@
     "colActions": "Actions",
     "notAvailable": "N/D",
     "noProcedure": "Aucune procédure",
-    "noClientsDescription": "Lorsqu'un administrateur vous assignera des clients, ils apparaîtront ici."
+    "noClientsDescription": "Lorsqu'un administrateur vous assignera des clients, ils apparaîtront ici.",
+    "searchClients": "Rechercher des clients...",
+    "application": "Procédure",
+    "updated": "Mis à jour le",
+    "statusPending": "En attente",
+    "statusInProgress": "En cours",
+    "statusApproved": "Approuvé",
+    "statusRejected": "Rejeté",
+    "statusCompleted": "Terminé",
+    "statusCancelled": "Annulé",
+    "view": "Voir",
+    "noClientsFound": "Aucun client trouvé."
   },
   "agents": {
     "agentWorkspace": "Espace de travail de l'agent",

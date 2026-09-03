@@ -587,7 +587,18 @@
     "colActions": "Actions",
     "notAvailable": "N/A",
     "noProcedure": "No Procedure",
-    "noClientsDescription": "When an administrator assigns clients to you, they will appear here."
+    "noClientsDescription": "When an administrator assigns clients to you, they will appear here.",
+    "searchClients": "Search clients...",
+    "application": "Procedure",
+    "updated": "Updated",
+    "statusPending": "Pending",
+    "statusInProgress": "In Progress",
+    "statusApproved": "Approved",
+    "statusRejected": "Rejected",
+    "statusCompleted": "Completed",
+    "statusCancelled": "Cancelled",
+    "view": "View",
+    "noClientsFound": "No clients found."
   },
   "agents": {
     "agentWorkspace": "Agent Workspace",
