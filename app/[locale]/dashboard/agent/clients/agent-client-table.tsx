@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { TruncatedText } from "@/components/ui/truncated-text";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 const PAGE_SIZE = 10;
 
@@ -34,9 +34,10 @@ interface AgentClientTableProps {
 }
 
 export default function AgentClientTable({
-    clients,
+    clients
 }: AgentClientTableProps) {
     const t = useTranslations("clients");
+    const locale = useLocale();
 
     const [searchTerm, setSearchTerm] = useState("");
     const [page, setPage] = useState(1);
@@ -80,6 +81,50 @@ export default function AgentClientTable({
         safePage * PAGE_SIZE
     );
 
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case "PENDING":
+                return t("statusPending");
+
+            case "IN_PROGRESS":
+                return t("statusInProgress");
+
+            case "APPROVED":
+                return t("statusApproved");
+
+            case "REJECTED":
+                return t("statusRejected");
+
+            case "COMPLETED":
+                return t("statusCompleted");
+
+            case "CANCELLED":
+                return t("statusCancelled");
+
+            default:
+                return status.replace(/_/g, " ");
+        }
+    };
+
+    const getStatusClass = (status: string) => {
+        switch (status) {
+            case "APPROVED":
+            case "COMPLETED":
+                return "bg-emerald-50 text-emerald-600 border border-emerald-200";
+
+            case "REJECTED":
+            case "CANCELLED":
+                return "bg-red-50 text-red-600 border border-red-200";
+
+            case "PENDING":
+                return "bg-amber-50 text-amber-600 border border-amber-200";
+
+            case "IN_PROGRESS":
+            default:
+                return "bg-blue-50 text-blue-600 border border-blue-200";
+        }
+    };
+
     return (
         <>
             <div className="flex gap-4 mb-6 relative w-full md:w-1/2">
@@ -98,23 +143,23 @@ export default function AgentClientTable({
                     <thead>
                         <tr className="bg-gray-100/80">
                             <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl">
-                                {t("clientDetail")}
+                                {t("colClientDetail")}
                             </th>
 
                             <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                {t("latestProcedure")}
+                                {t("colLatestProcedure")}
                             </th>
 
                             <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                {t("status")}
+                                {t("colStatus")}
                             </th>
 
                             <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-center">
-                                {t("documents")}
+                                {t("colDocuments")}
                             </th>
 
                             <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">
-                                {t("actions")}
+                                {t("colActions")}
                             </th>
                         </tr>
                     </thead>
@@ -175,7 +220,11 @@ export default function AgentClientTable({
                                                         {t("updated")}{" "}
                                                         {new Date(
                                                             latestApplication.updatedAt
-                                                        ).toLocaleDateString()}
+                                                        ).toLocaleDateString(
+                                                            locale === "fr"
+                                                                ? "fr-FR"
+                                                                : "en-US"
+                                                        )}
                                                     </div>
                                                 </div>
                                             ) : (
@@ -188,24 +237,17 @@ export default function AgentClientTable({
                                         <td className="px-6 py-5">
                                             {latestApplication ? (
                                                 <span
-                                                    className={`inline-flex items-center px-4 py-1.5 rounded-full text-[13px] font-extrabold uppercase tracking-tight ${
-                                                        latestApplication.status ===
-                                                        "APPROVED"
-                                                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                                                            : latestApplication.status ===
-                                                                "REJECTED"
-                                                              ? "bg-red-50 text-red-600 border border-red-200"
-                                                              : "bg-blue-50 text-blue-600 border border-blue-200"
-                                                    }`}
+                                                    className={`inline-flex items-center px-4 py-1.5 rounded-full text-[13px] font-extrabold uppercase tracking-tight ${getStatusClass(
+                                                        latestApplication.status
+                                                    )}`}
                                                 >
-                                                    {latestApplication.status.replace(
-                                                        /_/g,
-                                                        " "
+                                                    {getStatusLabel(
+                                                        latestApplication.status
                                                     )}
                                                 </span>
                                             ) : (
                                                 <span className="text-[#9CA3AF]">
-                                                    —
+                                                    {t("notAvailable")}
                                                 </span>
                                             )}
                                         </td>
@@ -218,7 +260,7 @@ export default function AgentClientTable({
 
                                         <td className="px-6 py-5 text-right">
                                             <Link
-                                                href={`/dashboard/agent/clients/${client.id}`}
+                                                href={`/${locale}/dashboard/agent/clients/${client.id}`}
                                             >
                                                 <Button
                                                     type="button"

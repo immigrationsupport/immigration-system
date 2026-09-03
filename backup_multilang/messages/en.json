@@ -394,7 +394,18 @@
     "noClientsAssigned": "No clients assigned yet",
     "files": "files",
     "viewProfile": "View Profile",
-    "assignedClient": "Assigned Client"
+    "assignedClient": "Assigned Client",
+    "searchClients": "Search clients...",
+    "application": "Procedure",
+    "updated": "Updated",
+    "statusPending": "Pending",
+    "statusInProgress": "In Progress",
+    "statusApproved": "Approved",
+    "statusRejected": "Rejected",
+    "statusCompleted": "Completed",
+    "statusCancelled": "Cancelled",
+    "view": "View",
+    "noClientsFound": "No clients found."
   },
   "agents": {
     "agentWorkspace": "Agent Workspace",
