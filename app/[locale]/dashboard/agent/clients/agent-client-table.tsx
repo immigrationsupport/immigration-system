@@ -34,7 +34,7 @@ interface AgentClientTableProps {
 }
 
 export default function AgentClientTable({
-    clients
+    clients,
 }: AgentClientTableProps) {
     const t = useTranslations("clients");
 
@@ -86,7 +86,7 @@ export default function AgentClientTable({
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#374151]" />
 
                 <Input
-                    placeholder="Search clients..."
+                    placeholder={t("searchClients")}
                     className="pl-12 h-12 text-[16px] bg-white border-gray-300 placeholder-[#6B7280] rounded-xl"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -98,23 +98,23 @@ export default function AgentClientTable({
                     <thead>
                         <tr className="bg-gray-100/80">
                             <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl">
-                                Client Detail
+                                {t("clientDetail")}
                             </th>
 
                             <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                Latest Procedure
+                                {t("latestProcedure")}
                             </th>
 
                             <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                Status
+                                {t("status")}
                             </th>
 
                             <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-center">
-                                Documents
+                                {t("documents")}
                             </th>
 
                             <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">
-                                Actions
+                                {t("actions")}
                             </th>
                         </tr>
                     </thead>
@@ -165,14 +165,14 @@ export default function AgentClientTable({
                                                                 latestApplication
                                                                     .template
                                                                     ?.name ||
-                                                                "Application"
+                                                                t("application")
                                                             }
                                                             maxLength={25}
                                                         />
                                                     </div>
 
                                                     <div className="text-[13px] text-[#6B7280] mt-1">
-                                                        Updated{" "}
+                                                        {t("updated")}{" "}
                                                         {new Date(
                                                             latestApplication.updatedAt
                                                         ).toLocaleDateString()}
@@ -180,7 +180,7 @@ export default function AgentClientTable({
                                                 </div>
                                             ) : (
                                                 <span className="text-[#9CA3AF] font-medium">
-                                                    No procedure
+                                                    {t("noProcedure")}
                                                 </span>
                                             )}
                                         </td>
@@ -225,7 +225,7 @@ export default function AgentClientTable({
                                                     className="h-10 px-4"
                                                 >
                                                     <Eye className="h-4 w-4 mr-2" />
-                                                    View
+                                                    {t("view")}
                                                 </Button>
                                             </Link>
                                         </td>
@@ -240,7 +240,7 @@ export default function AgentClientTable({
                                 >
                                     <div className="flex flex-col items-center gap-3">
                                         <Users className="h-10 w-10 text-gray-300" />
-                                        <span>No clients found</span>
+                                        <span>{t("noClientsFound")}</span>
                                     </div>
                                 </td>
                             </tr>
