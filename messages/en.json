@@ -762,6 +762,38 @@
     "openInClients": "Open in Clients",
     "openInAgents": "Open in Agents",
     "openInApplications": "Open in Applications",
+    "manage": "Manage",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "agent": "Agent",
+      "status": "Status",
+      "applications": "Applications",
+      "country": "Country",
+      "client": "Client",
+      "action": "Action",
+      "assignedClients": "Clients",
+      "unassigned": "Unassigned",
+      "noProcedures": "None"
+    },
+    "chat": {
+      "buttonLabel": "AI Chat",
+      "tooltip": "Chat with AI Assistant",
+      "title": "AI Assistant Chat",
+      "statusSaved": "Chat history saved",
+      "clearHistory": "Clear conversation",
+      "clearHistoryConfirm": "Are you sure you want to clear your chat history?",
+      "inputPlaceholder": "Ask the AI assistant anything...",
+      "send": "Send",
+      "emptyStateTitle": "How can I help you today?",
+      "emptyStateSubtitle": "Ask questions about clients, agents, applications, or how to use the dashboard. Your conversation is saved automatically.",
+      "prompt1": "How do I create a new workflow?",
+      "prompt2": "Find all pending applications",
+      "prompt3": "List all active clients",
+      "prompt4": "Show agents and their assigned clients",
+      "searching": "AI is thinking..."
+    },
     "thread": {
       "newSearchTooltip": "New search",
       "searching": "Searching...",
@@ -878,7 +910,21 @@
     "unsuspendTooltip": "Unsuspend Client",
     "suspendTooltip": "Suspend Client",
     "deleteTooltip": "Delete Client",
-    "noClientsFound": "No clients found matching your search."
+    "noClientsFound": "No clients found matching your search.",
+    "edit": {
+      "tooltip": "Edit Client",
+      "toastSuccess": "Client updated successfully",
+      "toastError": "Failed to update client",
+      "title": "Edit Client Account",
+      "subtitlePrefix": "Modify details or reset password for",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Max 50 characters",
+      "email": "Email Address",
+      "newPassword": "New Password (Optional)",
+      "newPasswordPlaceholder": "Leave blank to keep current",
+      "cancel": "Cancel",
+      "save": "Save Changes"
+    }
   },
   "adminSteps": {
     "pageTitle": "Procedure Steps",
@@ -1201,7 +1247,17 @@
     "cancel": "Cancel",
     "sending": "Sending...",
     "sendRequestToClient": "Send Request to Client",
-    "understood": "Understood"
+    "understood": "Understood",
+    "finalizeProcedure": "Finalize Procedure",
+    "finalizeProcedureTitle": "Finalize Procedure & Notify Client",
+    "finalizeProcedureSubtitle": "Mark this procedure as completed and send a confirmation message to the client.",
+    "finalizeDefaultMessage": "Congratulations! Your immigration procedure has been successfully completed. We were delighted to guide you through every step of this journey and wish you all the best for your future!",
+    "finalizeMessageLabel": "Completion message for client:",
+    "confirmFinalize": "Confirm & Finalize",
+    "finalizing": "Finalizing...",
+    "procedureFinalized": "Procedure Completed",
+    "toastFinalizedSuccess": "Procedure finalized successfully! The client has been notified.",
+    "toastFinalizedError": "Failed to finalize procedure."
   },
   "agentApplicationDetail": {
     "procedureNotFound": "Procedure Not Found",

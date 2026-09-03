@@ -297,3 +297,106 @@ export async function deleteClientAction(clientId: string) {
         return { error: `Failed to delete client: ${e.message || "Unknown Error"}` };
     }
 }
+
+export async function updateClientAction(clientId: string, name: string, email: string, password?: string) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || (session.user as any).role !== "ADMIN") {
+        return { error: "Unauthorized access." };
+    }
+
+    const adminAgencyId = (session.user as any).agencyId;
+    if (!adminAgencyId) {
+        return { error: "Your account is not linked to an agency." };
+    }
+
+    const nameTrimmed = name?.trim();
+    const emailTrimmed = email?.trim()?.toLowerCase();
+
+    if (!nameTrimmed || !emailTrimmed) {
+        return { error: "Name and email are required." };
+    }
+
+    if (nameTrimmed.length > 50) {
+        return { error: "Name must be 50 characters or less." };
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailTrimmed)) {
+        return { error: "Invalid email format." };
+    }
+
+    if (password && password.trim() !== "" && password.length < 8) {
+        return { error: "Password must be at least 8 characters." };
+    }
+
+    try {
+        const existingClient = await prisma.user.findUnique({ where: { id: clientId } });
+        if (!existingClient) return { error: "Client not found." };
+        if (existingClient.agencyId !== adminAgencyId) {
+            return { error: "This client does not belong to your agency." };
+        }
+
+        // Check if email changed and if it is taken by another user
+        if (emailTrimmed !== existingClient.email.toLowerCase()) {
+            const emailInUse = await prisma.user.findFirst({
+                where: {
+                    email: emailTrimmed,
+                    NOT: { id: clientId }
+                }
+            });
+            if (emailInUse) {
+                return { error: "A user with this email already exists." };
+            }
+        }
+
+        const updateData: any = {
+            name: nameTrimmed,
+            email: emailTrimmed
+        };
+
+        const updateAccountData: any = {
+            accountId: emailTrimmed
+        };
+
+        if (password && password.trim() !== "") {
+            const hashedPassword = await hashPassword(password);
+            updateData.password = hashedPassword;
+            updateAccountData.password = hashedPassword;
+        }
+
+        // Update User
+        const updatedClient = await prisma.user.update({
+            where: { id: clientId },
+            data: updateData
+        });
+
+        // Update Credential Account (better-auth)
+        await prisma.account.updateMany({
+            where: {
+                userId: clientId,
+                providerId: "credential"
+            },
+            data: updateAccountData
+        });
+
+        // Audit Log
+        await prisma.auditLog.create({
+            data: {
+                action: "UPDATE_CLIENT",
+                details: `Client ${nameTrimmed} (${emailTrimmed}) details updated by Admin ${session.user.name}.${password && password.trim() !== "" ? " Password reset." : ""}`,
+                userId: session.user.id,
+                agencyId: adminAgencyId,
+                targetId: clientId
+            }
+        });
+
+        revalidatePath("/admin/dashboard/clients");
+        return { success: true, client: updatedClient };
+    } catch (e: any) {
+        console.error("Update Client Error:", e);
+        return { error: "Failed to update client details." };
+    }
+}

@@ -16,6 +16,7 @@ import {
 } from "./actions";
 import { TruncatedText } from "@/components/ui/truncated-text";
 import CreateClientModal from "./create-client-modal";
+import EditClientModal from "./edit-client-modal";
 import { useTranslations } from "next-intl";
 import { TablePagination } from "@/components/ui/table-pagination";
 
@@ -368,6 +369,29 @@ export default function ClientList({
 
                                     <td className="px-6 py-5 text-right">
                                         <div className="flex items-center justify-end gap-2 transition-all duration-300">
+                                            <EditClientModal
+                                                clientId={client.id}
+                                                currentName={client.name}
+                                                currentEmail={client.email}
+                                                onClientUpdated={({
+                                                    id,
+                                                    name,
+                                                    email
+                                                }) => {
+                                                    setClients((prev) =>
+                                                        prev.map((c) =>
+                                                            c.id === id
+                                                                ? {
+                                                                      ...c,
+                                                                      name,
+                                                                      email
+                                                                  }
+                                                                : c
+                                                        )
+                                                    );
+                                                }}
+                                            />
+
                                             <button
                                                 className="p-2 text-[#374151] hover:text-[#1E3A8A] hover:bg-white rounded-lg transition-all disabled:opacity-50"
                                                 title={

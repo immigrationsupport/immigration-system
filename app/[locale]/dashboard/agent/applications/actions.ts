@@ -744,3 +744,138 @@ export async function createApplicationAction(clientId: string, templateId: stri
         return { error: "Failed to create the application." };
     }
 }
+
+export async function finalizeProcedureAction(
+    applicationId: string,
+    customMessage?: string
+) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
+        return { error: "Unauthorized access." };
+    }
+
+    try {
+        const application = await prisma.application.findUnique({
+            where: { id: applicationId },
+            include: {
+                client: true,
+                steps: {
+                    orderBy: { order: "asc" }
+                }
+            }
+        });
+
+        if (!application) return { error: "Procedure not found." };
+
+        const agencyName = await getApplicationAgencyName(application.agencyId);
+        const finalMessage = customMessage?.trim() ||
+            "Congratulations! Your immigration procedure has been successfully completed. We were delighted to guide you through every step of this journey and wish you all the best for your future!";
+
+        await prisma.$transaction(async (tx) => {
+            // 1. Update Application status to COMPLETED
+            await tx.application.update({
+                where: { id: applicationId },
+                data: { status: "COMPLETED" as ApplicationStatus }
+            });
+
+            // 2. Also mark any remaining non-approved steps as APPROVED
+            await tx.applicationStep.updateMany({
+                where: {
+                    applicationId,
+                    status: { not: "APPROVED" }
+                },
+                data: {
+                    status: "APPROVED" as ProcedureStatus,
+                    isLocked: false
+                }
+            });
+
+            // 3. Create OfficialMessage for client dashboard
+            await tx.officialMessage.create({
+                data: {
+                    subject: "Procedure Completed - Congratulations!",
+                    content: finalMessage,
+                    senderId: session.user.id,
+                    receiverId: application.clientId
+                }
+            });
+
+            // 4. Create in-step thread message if step exists
+            const firstStep = application.steps[0];
+            if (firstStep) {
+                const actorRole = (session.user as any).role === "ADMIN" ? "ADMIN" : "AGENT";
+                await tx.message.create({
+                    data: {
+                        content: `🎉 ${actorRole} FINALIZED PROCEDURE: ${finalMessage}`,
+                        procedureId: firstStep.id,
+                        senderId: session.user.id
+                    }
+                });
+            }
+
+            // 5. Audit Log
+            await tx.auditLog.create({
+                data: {
+                    action: "FINALIZE_PROCEDURE",
+                    details: `Procedure ${applicationId} (${application.country}) was finalized and marked COMPLETED for ${application.client.name} (${application.client.email}) by ${session.user.name}.`,
+                    userId: session.user.id,
+                    agencyId: application.agencyId,
+                    targetId: applicationId
+                }
+            });
+        });
+
+        // 6. Send celebratory email notification to client via Resend
+        if (application.client.email) {
+            try {
+                await sendEmail({
+                    to: application.client.email,
+                    subject: `🎉 Congratulations! Your Procedure is Complete - ${agencyName || "ATLE Immigration"}`,
+                    fromName: agencyName || undefined,
+                    html: `
+                        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                            <div style="background: linear-gradient(135deg, #059669 0%, #10B981 100%); padding: 30px 20px; text-align: center;">
+                                <div style="font-size: 40px; margin-bottom: 8px;">🎉</div>
+                                <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800;">Procedure Completed!</h1>
+                                <p style="color: #ecfdf5; margin: 8px 0 0 0; font-size: 14px;">Destination: <strong>${application.country}</strong></p>
+                            </div>
+                            <div style="padding: 30px; background-color: #ffffff;">
+                                <p style="font-size: 16px; color: #1f2937;">Hello <strong>${application.client.name}</strong>,</p>
+                                <p style="font-size: 15px; color: #374151; line-height: 1.6;">
+                                    ${finalMessage}
+                                </p>
+                                <div style="background-color: #f0fdf4; border-left: 4px solid #059669; padding: 16px; margin: 24px 0; border-radius: 4px;">
+                                    <p style="font-size: 14px; color: #065f46; margin: 0; font-weight: 600;">
+                                        ✓ All steps and requirements for this procedure have been fully verified and approved.
+                                    </p>
+                                </div>
+                                <p style="font-size: 14px; color: #6b7280; line-height: 1.6;">
+                                    You can access your completed documents and official confirmation messages anytime by logging into your client dashboard.
+                                </p>
+                                <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #f3f4f6; text-align: center;">
+                                    <p style="font-size: 13px; color: #9ca3af; margin: 0;">
+                                        Thank you for trusting <strong>${agencyName || "our team"}</strong> to guide you through this journey.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                });
+            } catch (emailErr) {
+                console.error("Failed to send finalization email:", emailErr);
+            }
+        }
+
+        revalidatePath("/dashboard/agent/applications");
+        revalidatePath(`/dashboard/agent/applications/${applicationId}`);
+        revalidatePath("/admin/dashboard/applications");
+        revalidatePath("/dashboard/client");
+        return { success: true };
+    } catch (e: any) {
+        console.error("Finalize Procedure Error:", e);
+        return { error: e.message || "Failed to finalize procedure." };
+    }
+}

@@ -6,7 +6,10 @@ import {
     Upload,
     FileCheck2,
     ChevronDown,
-    GitBranch
+    GitBranch,
+    Sparkles,
+    CheckCircle2,
+    X
 } from "lucide-react";
 import {
     updateStepAction,
@@ -14,7 +17,8 @@ import {
     addDocumentAction,
     deleteDocumentAction,
     toggleSubStepAction,
-    createDocumentUploadAction
+    createDocumentUploadAction,
+    finalizeProcedureAction
 } from "../actions";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -102,6 +106,10 @@ export default function StepManagement({
     const [requestMsg, setRequestMsg] = useState("");
     const [isSubmittingRes, setIsSubmittingRes] = useState(false);
     const [successModal, setSuccessModal] = useState<string | null>(null);
+
+    const [finalizeModalOpen, setFinalizeModalOpen] = useState(false);
+    const [finalizeMessage, setFinalizeMessage] = useState("");
+    const [loadingFinalize, setLoadingFinalize] = useState(false);
 
     const [uploadingStepId, setUploadingStepId] = useState<string | null>(
         null
@@ -263,6 +271,34 @@ export default function StepManagement({
     };
 
     // ---------------------------------------------------------
+    // FINALIZE PROCEDURE ACTION
+    // ---------------------------------------------------------
+    const handleFinalizeProcedure = async () => {
+        setLoadingFinalize(true);
+
+        const res = await finalizeProcedureAction(
+            applicationId,
+            finalizeMessage || undefined
+        );
+
+        setLoadingFinalize(false);
+
+        if (res.error) {
+            alert(res.error);
+        } else {
+            setAppStatus("COMPLETED");
+            setFinalizeModalOpen(false);
+            setSuccessModal(
+                t("toastFinalizedSuccess", {
+                    defaultValue:
+                        "Procedure finalized successfully! The client has been notified."
+                })
+            );
+            refreshAll();
+        }
+    };
+
+    // ---------------------------------------------------------
     // MAIN STEP UPDATE
     // ---------------------------------------------------------
     const handleUpdateStep = async (
@@ -337,6 +373,40 @@ export default function StepManagement({
 
                     {loadingAppStatus && (
                         <Loader2 className="animate-spin h-5 w-5 text-blue-500" />
+                    )}
+
+                    <div className="h-6 w-px bg-gray-200 hidden sm:block mx-1" />
+
+                    {appStatus === "COMPLETED" ? (
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-300 text-emerald-800 font-extrabold rounded-lg text-sm shadow-2xs">
+                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                            <span>
+                                {t("procedureFinalized", {
+                                    defaultValue: "Procedure Completed"
+                                })}
+                            </span>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setFinalizeMessage(
+                                    t("finalizeDefaultMessage", {
+                                        defaultValue:
+                                            "Congratulations! Your immigration procedure has been successfully completed. We were delighted to guide you through every step of this journey and wish you all the best for your future!"
+                                    })
+                                );
+                                setFinalizeModalOpen(true);
+                            }}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold rounded-lg shadow-sm hover:shadow transition-all duration-200 text-sm"
+                        >
+                            <Sparkles className="h-4 w-4 text-amber-300" />
+                            <span>
+                                {t("finalizeProcedure", {
+                                    defaultValue: "Finalize Procedure"
+                                })}
+                            </span>
+                        </button>
                     )}
                 </div>
             </div>
@@ -1284,6 +1354,105 @@ export default function StepManagement({
                                       )}
                             </button>
 
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* =====================================================
+                FINALIZE PROCEDURE MODAL
+            ===================================================== */}
+            {finalizeModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+                    <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="h-11 w-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200 shrink-0">
+                                    <Sparkles className="h-6 w-6 text-emerald-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 leading-tight">
+                                        {t("finalizeProcedureTitle", {
+                                            defaultValue:
+                                                "Finalize Procedure & Notify Client"
+                                        })}
+                                    </h3>
+                                    <p className="text-xs text-gray-500 font-medium mt-0.5">
+                                        {t("finalizeProcedureSubtitle", {
+                                            defaultValue:
+                                                "Mark this procedure as completed and send a confirmation message to the client."
+                                        })}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setFinalizeModalOpen(false)}
+                                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-2 pt-1">
+                            <label className="text-xs font-bold text-gray-700">
+                                {t("finalizeMessageLabel", {
+                                    defaultValue:
+                                        "Completion message for client:"
+                                })}
+                            </label>
+                            <textarea
+                                rows={4}
+                                value={finalizeMessage}
+                                onChange={(e) =>
+                                    setFinalizeMessage(e.target.value)
+                                }
+                                className="w-full text-xs p-3.5 rounded-2xl border border-gray-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all leading-relaxed"
+                            />
+                            <div className="p-3 bg-emerald-50/70 border border-emerald-100 rounded-xl flex items-center gap-2 text-[11px] text-emerald-800 font-medium">
+                                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                                <span>
+                                    An official message and notification will be delivered to the client immediately.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+                            <button
+                                type="button"
+                                disabled={loadingFinalize}
+                                onClick={() => setFinalizeModalOpen(false)}
+                                className="px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                            >
+                                {t("cancel", { defaultValue: "Cancel" })}
+                            </button>
+                            <button
+                                type="button"
+                                disabled={loadingFinalize}
+                                onClick={handleFinalizeProcedure}
+                                className="px-5 py-2.5 text-xs font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl shadow-md transition-all flex items-center gap-2 disabled:opacity-50"
+                            >
+                                {loadingFinalize ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <span>
+                                            {t("finalizing", {
+                                                defaultValue: "Finalizing..."
+                                            })}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        <span>
+                                            {t("confirmFinalize", {
+                                                defaultValue:
+                                                    "Confirm & Finalize"
+                                            })}
+                                        </span>
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
                 </div>

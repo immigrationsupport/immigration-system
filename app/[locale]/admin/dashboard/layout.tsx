@@ -16,6 +16,7 @@ import { useSession } from "@/lib/auth-client";
 import { useRouter, useParams } from "next/navigation";
 import { getMyAgencyName } from "@/lib/agency-actions";
 import AiSearchBar from "@/app/[locale]/admin/dashboard/search/ai-search-bar";
+import AiChatDrawer from "@/app/[locale]/admin/dashboard/search/ai-chat-drawer";
 import { useTranslations } from "next-intl";
 export default function AdminDashboardLayout({
     children,
@@ -88,6 +89,8 @@ const adminSidebarItems = [
                 <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full mx-auto" style={{ backgroundColor: "#F9FAFB" }}>
                     {children}
                 </main>
+
+                <AiChatDrawer />
             </div>
         </div>
     );

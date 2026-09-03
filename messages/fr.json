@@ -762,6 +762,38 @@
     "openInClients": "Ouvrir dans Clients",
     "openInAgents": "Ouvrir dans Agents",
     "openInApplications": "Ouvrir dans Procédures",
+    "manage": "Gérer",
+    "table": {
+      "name": "Nom",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "agent": "Agent",
+      "status": "Statut",
+      "applications": "Procédures",
+      "country": "Pays",
+      "client": "Client",
+      "action": "Action",
+      "assignedClients": "Clients",
+      "unassigned": "Non assigné",
+      "noProcedures": "Aucune"
+    },
+    "chat": {
+      "buttonLabel": "Chat IA",
+      "tooltip": "Discuter avec l'assistant IA",
+      "title": "Assistant IA - Discussion",
+      "statusSaved": "Historique enregistré",
+      "clearHistory": "Effacer la conversation",
+      "clearHistoryConfirm": "Êtes-vous sûr de vouloir effacer l'historique de discussion ?",
+      "inputPlaceholder": "Posez votre question à l'assistant IA...",
+      "send": "Envoyer",
+      "emptyStateTitle": "Comment puis-je vous aider aujourd'hui ?",
+      "emptyStateSubtitle": "Posez des questions sur vos clients, agents, procédures ou l'utilisation du tableau de bord. Votre conversation est enregistrée automatiquement.",
+      "prompt1": "Comment créer un nouveau workflow ?",
+      "prompt2": "Trouver toutes les demandes en attente",
+      "prompt3": "Lister tous les clients actifs",
+      "prompt4": "Afficher les agents et leurs clients assignés",
+      "searching": "L'IA réfléchit..."
+    },
     "thread": {
       "newSearchTooltip": "Nouvelle recherche",
       "searching": "Recherche en cours...",
@@ -878,7 +910,21 @@
     "unsuspendTooltip": "Réactiver le client",
     "suspendTooltip": "Suspendre le client",
     "deleteTooltip": "Supprimer le client",
-    "noClientsFound": "Aucun client trouvé correspondant à votre recherche."
+    "noClientsFound": "Aucun client trouvé correspondant à votre recherche.",
+    "edit": {
+      "tooltip": "Modifier le client",
+      "toastSuccess": "Client mis à jour avec succès",
+      "toastError": "Échec de la mise à jour du client",
+      "title": "Modifier le compte client",
+      "subtitlePrefix": "Modifier les détails ou réinitialiser le mot de passe pour",
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Max 50 caractères",
+      "email": "Adresse e-mail",
+      "newPassword": "Nouveau mot de passe (Facultatif)",
+      "newPasswordPlaceholder": "Laisser vide pour conserver le mot de passe actuel",
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications"
+    }
   },
   "adminSteps": {
     "pageTitle": "Étapes de procédure",
@@ -1201,7 +1247,17 @@
   "cancel": "Annuler",
   "sending": "Envoi en cours...",
   "sendRequestToClient": "Envoyer la demande au client",
-  "understood": "Compris"
+  "understood": "Compris",
+  "finalizeProcedure": "Finaliser la procédure",
+  "finalizeProcedureTitle": "Finaliser la procédure et notifier le client",
+  "finalizeProcedureSubtitle": "Marquer cette procédure comme terminée et envoyer un message de confirmation au client.",
+  "finalizeDefaultMessage": "Félicitations ! Votre procédure d'immigration a été finalisée avec succès. Nous avons été ravis de vous accompagner tout au long de cette démarche et vous souhaitons une excellente continuation !",
+  "finalizeMessageLabel": "Message de finalisation pour le client :",
+  "confirmFinalize": "Confirmer et finaliser",
+  "finalizing": "Finalisation...",
+  "procedureFinalized": "Procédure terminée",
+  "toastFinalizedSuccess": "Procédure finalisée avec succès ! Le client a été notifié.",
+  "toastFinalizedError": "Échec de la finalisation de la procédure."
 },
   "agentApplicationDetail": {
     "procedureNotFound": "Procédure introuvable",
