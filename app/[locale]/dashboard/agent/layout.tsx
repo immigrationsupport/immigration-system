@@ -6,7 +6,8 @@ import { Users, FileText, MessageSquare, User, LayoutDashboard } from "lucide-re
 import { useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import { getMyAgencyName } from "@/lib/agency-actions";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+const locale = useLocale();
 
 export default function AgentLayout({ children }: { children: React.ReactNode }) {
     const t = useTranslations("agentLayout");
@@ -38,7 +39,11 @@ export default function AgentLayout({ children }: { children: React.ReactNode })
                 onClose={() => setSidebarOpen(false)}
             />
             <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300 relative max-w-full overflow-x-hidden">
-                <Header title={t("headerTitle")} onMenuClick={() => setSidebarOpen(true)} />
+               <Header
+                    title={t("headerTitle")}
+                    onMenuClick={() => setSidebarOpen(true)}
+                    locale={locale}
+                />
                 <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
                     {children}
                 </main>

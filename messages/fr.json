@@ -992,7 +992,7 @@
     "filterVerified": "Vérifié (approuvé)",
     "filterRejected": "Rejeté",
     "colDocDetails": "Détails du document",
-    "colClientUploader": "Client et auteur du téléversement",
+    "colClientUploader": "Client",
     "colContextRef": "Référence de contexte",
     "colReviewStatus": "Statut d'examen",
     "colUploadedAt": "Téléversé le",

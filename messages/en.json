@@ -992,7 +992,7 @@
     "filterVerified": "Verified (Approved)",
     "filterRejected": "Rejected",
     "colDocDetails": "Document Details",
-    "colClientUploader": "Client & Uploader",
+    "colClientUploader": "Client",
     "colContextRef": "Context Reference",
     "colReviewStatus": "Review Status",
     "colUploadedAt": "Uploaded At",

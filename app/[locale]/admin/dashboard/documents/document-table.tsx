@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Search,
     Filter,
@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { updateDocumentStatusAction } from "@/app/[locale]/admin/dashboard/documents/actions";
 import { TruncatedText } from "@/components/ui/truncated-text";
+import { TablePagination } from "@/components/ui/table-pagination";
 import {
     Dialog,
     DialogContent,
@@ -50,10 +51,11 @@ interface DocumentItem {
     };
     step: {
         id: string;
-        // Null for a fully custom step with no built-in type attached.
         type: string | null;
     };
 }
+
+const PAGE_SIZE = 10;
 
 export default function DocumentTable({
     initialDocuments
@@ -62,42 +64,104 @@ export default function DocumentTable({
 }) {
     const t = useTranslations("adminDocuments");
     const locale = useLocale();
+
     const [documents, setDocuments] = useState<DocumentItem[]>(initialDocuments);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
+    const [page, setPage] = useState(1);
 
-    const isImage = (url: string) => /\.(jpg|jpeg|png|webp|gif)$/i.test(url);
-    const isPDF = (url: string) => /\.pdf$/i.test(url);
+    const isImage = (url: string) =>
+        /\.(jpg|jpeg|png|webp|gif)$/i.test(url);
 
-    const filteredDocuments = documents.filter(doc => {
+    const isPDF = (url: string) =>
+        /\.pdf$/i.test(url);
+
+    const filteredDocuments = documents.filter((doc) => {
+        const search = searchTerm.toLowerCase();
+
         const matchesSearch =
-            doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            doc.client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            doc.application.id.toLowerCase().includes(searchTerm.toLowerCase());
+            doc.name.toLowerCase().includes(search) ||
+            doc.client.name.toLowerCase().includes(search) ||
+            doc.application.id.toLowerCase().includes(search);
 
-        const matchesStatus = statusFilter === "ALL" || doc.status === statusFilter;
+        const matchesStatus =
+            statusFilter === "ALL" || doc.status === statusFilter;
 
         return matchesSearch && matchesStatus;
     });
 
-    const handleStatusChange = async (docId: string, newStatus: string) => {
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm, statusFilter]);
+
+    const totalPages = Math.max(
+        1,
+        Math.ceil(filteredDocuments.length / PAGE_SIZE)
+    );
+
+    const safePage = Math.min(page, totalPages);
+
+    const paginatedDocuments = filteredDocuments.slice(
+        (safePage - 1) * PAGE_SIZE,
+        safePage * PAGE_SIZE
+    );
+
+    const handleStatusChange = async (
+        docId: string,
+        newStatus: string
+    ) => {
         setLoadingId(docId);
+
         const res = await updateDocumentStatusAction(docId, newStatus);
+
         setLoadingId(null);
 
         if (res.success) {
-            setDocuments(prev => prev.map(d => d.id === docId ? { ...d, status: newStatus } : d));
+            setDocuments((prev) =>
+                prev.map((doc) =>
+                    doc.id === docId
+                        ? { ...doc, status: newStatus }
+                        : doc
+                )
+            );
         }
     };
 
     const getStatusStyles = (status: string) => {
         switch (status) {
-            case "VERIFIED": return { bg: "bg-gray-50", text: "text-green-700", border: "border-gray-200", icon: <CheckCircle2 size={14} /> };
-            case "REJECTED": return { bg: "bg-gray-50", text: "text-red-700", border: "border-gray-200", icon: <XCircle size={14} /> };
-            case "UPLOADED": return { bg: "bg-gray-50", text: "text-amber-700", border: "border-gray-200", icon: <Clock size={14} /> };
-            default: return { bg: "bg-gray-50", text: "text-gray-700", border: "border-gray-200", icon: <AlertCircle size={14} /> };
+            case "VERIFIED":
+                return {
+                    bg: "bg-gray-50",
+                    text: "text-green-700",
+                    border: "border-gray-200",
+                    icon: <CheckCircle2 size={14} />
+                };
+
+            case "REJECTED":
+                return {
+                    bg: "bg-gray-50",
+                    text: "text-red-700",
+                    border: "border-gray-200",
+                    icon: <XCircle size={14} />
+                };
+
+            case "UPLOADED":
+                return {
+                    bg: "bg-gray-50",
+                    text: "text-amber-700",
+                    border: "border-gray-200",
+                    icon: <Clock size={14} />
+                };
+
+            default:
+                return {
+                    bg: "bg-gray-50",
+                    text: "text-gray-700",
+                    border: "border-gray-200",
+                    icon: <AlertCircle size={14} />
+                };
         }
     };
 
@@ -107,6 +171,7 @@ export default function DocumentTable({
             <div className="p-6 lg:p-8 border-b border-gray-200 bg-[#F9FAFB] flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="relative w-full md:w-96">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#374151]" />
+
                     <Input
                         placeholder={t("searchPlaceholder")}
                         className="pl-12 h-12 text-[16px] bg-white border-gray-300 focus:ring-blue-100 placeholder-[#6B7280]"
@@ -117,15 +182,27 @@ export default function DocumentTable({
 
                 <div className="flex items-center gap-3 w-full md:w-auto">
                     <Filter className="h-5 w-5 text-[#374151]" />
+
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className="text-[16px] border border-gray-300 rounded-md bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100 min-w-[160px]"
                     >
-                        <option value="ALL">{t("filterAll")}</option>
-                        <option value="UPLOADED">{t("filterUploaded")}</option>
-                        <option value="VERIFIED">{t("filterVerified")}</option>
-                        <option value="REJECTED">{t("filterRejected")}</option>
+                        <option value="ALL">
+                            {t("filterAll")}
+                        </option>
+
+                        <option value="UPLOADED">
+                            {t("filterUploaded")}
+                        </option>
+
+                        <option value="VERIFIED">
+                            {t("filterVerified")}
+                        </option>
+
+                        <option value="REJECTED">
+                            {t("filterRejected")}
+                        </option>
                     </select>
                 </div>
             </div>
@@ -134,25 +211,50 @@ export default function DocumentTable({
                 <table className="w-full text-left border-separate border-spacing-0">
                     <thead>
                         <tr className="bg-gray-100/80">
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">{t("colDocDetails")}</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colClientUploader")}</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colContextRef")}</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colReviewStatus")}</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">{t("colUploadedAt")}</th>
-                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">{t("colPreview")}</th>
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 first:rounded-tl-xl whitespace-nowrap">
+                                {t("colDocDetails")}
+                            </th>
+
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">
+                                {t("colClientUploader")}
+                            </th>
+
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">
+                                {t("colContextRef")}
+                            </th>
+
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">
+                                {t("colReviewStatus")}
+                            </th>
+
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 whitespace-nowrap">
+                                {t("colUploadedAt")}
+                            </th>
+
+                            <th className="px-6 py-5 text-[14px] lg:text-[16px] font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right last:rounded-tr-xl">
+                                {t("colPreview")}
+                            </th>
                         </tr>
                     </thead>
+
                     <tbody className="divide-y divide-gray-100">
-                        {filteredDocuments.map((doc) => (
-                            <tr key={doc.id} className="hover:bg-blue-50/40 transition-all duration-200 group">
+                        {paginatedDocuments.map((doc) => (
+                            <tr
+                                key={doc.id}
+                                className="hover:bg-blue-50/40 transition-all duration-200 group"
+                            >
                                 <td className="px-6 py-5">
                                     <div className="flex items-center gap-4">
                                         <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center text-[#374151] font-bold border border-gray-200">
                                             <FileText size={20} />
                                         </div>
+
                                         <div className="max-w-[200px] md:max-w-xs">
                                             <p className="text-[16px] lg:text-[18px] font-extrabold text-[#111827] truncate leading-none mb-1.5">
-                                                <TruncatedText text={doc.name} maxLength={30} />
+                                                <TruncatedText
+                                                    text={doc.name}
+                                                    maxLength={30}
+                                                />
                                             </p>
                                         </div>
                                     </div>
@@ -160,14 +262,21 @@ export default function DocumentTable({
 
                                 <td className="px-6 py-5">
                                     <p className="text-[16px] lg:text-[18px] font-bold text-[#374151]">
-                                        <TruncatedText text={doc.client.name} maxLength={20} />
+                                        <TruncatedText
+                                            text={doc.client.name}
+                                            maxLength={20}
+                                        />
                                     </p>
                                 </td>
 
                                 <td className="px-6 py-5">
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-center gap-2 text-[12px] lg:text-[14px] font-bold text-[#374151] bg-blue-50 w-fit px-3 py-1 uppercase tracking-tight rounded">
-                                            {t("stepPrefix")} {(doc.step.type || "GENERAL").replace('_', ' ')}
+                                            {t("stepPrefix")}{" "}
+                                            {(doc.step.type || "GENERAL").replace(
+                                                "_",
+                                                " "
+                                            )}
                                         </div>
                                     </div>
                                 </td>
@@ -176,27 +285,56 @@ export default function DocumentTable({
                                     <div className="flex items-center gap-2">
                                         <select
                                             value={doc.status}
-                                            onChange={(e) => handleStatusChange(doc.id, e.target.value)}
+                                            onChange={(e) =>
+                                                handleStatusChange(
+                                                    doc.id,
+                                                    e.target.value
+                                                )
+                                            }
                                             className={`
-                                                ${getStatusStyles(doc.status).bg} 
-                                                ${getStatusStyles(doc.status).text} 
-                                                ${getStatusStyles(doc.status).border} 
+                                                ${getStatusStyles(doc.status).bg}
+                                                ${getStatusStyles(doc.status).text}
+                                                ${getStatusStyles(doc.status).border}
                                                 text-[14px] font-extrabold uppercase tracking-tight px-3 py-1.5 rounded-full border outline-none cursor-pointer transition-all hover:brightness-95 min-w-[150px]
                                             `}
                                             disabled={loadingId === doc.id}
                                         >
-                                            <option value="UPLOADED">{t("statusUnderReview")}</option>
-                                            <option value="VERIFIED">{t("statusApprovedVerified")}</option>
-                                            <option value="REJECTED">{t("statusRejected")}</option>
+                                            <option value="UPLOADED">
+                                                {t("statusUnderReview")}
+                                            </option>
+
+                                            <option value="VERIFIED">
+                                                {t("statusApprovedVerified")}
+                                            </option>
+
+                                            <option value="REJECTED">
+                                                {t("statusRejected")}
+                                            </option>
                                         </select>
-                                        {loadingId === doc.id && <Loader2 size={16} className="animate-spin text-blue-500" />}
+
+                                        {loadingId === doc.id && (
+                                            <Loader2
+                                                size={16}
+                                                className="animate-spin text-blue-500"
+                                            />
+                                        )}
                                     </div>
                                 </td>
 
                                 <td className="px-6 py-5 text-[#4B5563] text-[16px] lg:text-[18px] font-bold">
                                     <div className="flex items-center gap-2 whitespace-nowrap">
-                                        <Calendar size={18} className="text-[#9CA3AF]" />
-                                        {new Date(doc.uploadedAt).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        <Calendar
+                                            size={18}
+                                            className="text-[#9CA3AF]"
+                                        />
+
+                                        {new Date(
+                                            doc.uploadedAt
+                                        ).toLocaleDateString(locale, {
+                                            month: "short",
+                                            day: "numeric",
+                                            year: "numeric"
+                                        })}
                                     </div>
                                 </td>
 
@@ -207,30 +345,58 @@ export default function DocumentTable({
                                         className="h-12 px-6 text-[14px] font-extrabold uppercase tracking-widest gap-2"
                                         onClick={() => setPreviewDoc(doc)}
                                     >
-                                        {t("view")} <ExternalLink size={16} />
+                                        {t("view")}{" "}
+                                        <ExternalLink size={16} />
                                     </Button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+
                 {filteredDocuments.length === 0 && (
                     <div className="py-24 flex flex-col items-center justify-center text-[#6B7280]">
-                        <FileText size={50} className="mb-4 opacity-30" />
-                        <p className="text-[18px] font-bold">{t("noneMatch")}</p>
+                        <FileText
+                            size={50}
+                            className="mb-4 opacity-30"
+                        />
+
+                        <p className="text-[18px] font-bold">
+                            {t("noneMatch")}
+                        </p>
                     </div>
                 )}
             </div>
+
+            {filteredDocuments.length > PAGE_SIZE && (
+                <div className="px-6 pb-6">
+                    <TablePagination
+                        page={safePage}
+                        totalItems={filteredDocuments.length}
+                        pageSize={PAGE_SIZE}
+                        onPageChange={setPage}
+                    />
+                </div>
+            )}
+
             {/* Preview Modal */}
-            <Dialog open={!!previewDoc} onOpenChange={(open) => !open && setPreviewDoc(null)}>
+            <Dialog
+                open={!!previewDoc}
+                onOpenChange={(open) =>
+                    !open && setPreviewDoc(null)
+                }
+            >
                 <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden border-none shadow-2xl">
                     <DialogHeader className="px-6 py-4 border-b bg-white">
                         <DialogTitle className="text-lg font-bold text-[#1E3A8A] flex items-center gap-2">
                             <FileText size={20} />
                             {previewDoc?.name}
                         </DialogTitle>
+
                         <DialogDescription className="text-xs uppercase font-black tracking-widest text-gray-400">
-                            {t("docIdPrefix")} {previewDoc?.id.substring(0, 8)} | {t("typePrefix")} {previewDoc?.type}
+                            {t("docIdPrefix")}{" "}
+                            {previewDoc?.id.substring(0, 8)} |{" "}
+                            {t("typePrefix")} {previewDoc?.type}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -238,29 +404,42 @@ export default function DocumentTable({
                         {previewDoc && (
                             <>
                                 {isImage(previewDoc.fileUrl) ? (
-                                    <img 
-                                        src={previewDoc.fileUrl} 
-                                        alt={previewDoc.name} 
+                                    <img
+                                        src={previewDoc.fileUrl}
+                                        alt={previewDoc.name}
                                         className="max-w-full max-h-full object-contain shadow-lg rounded-sm"
                                     />
                                 ) : isPDF(previewDoc.fileUrl) ? (
                                     <iframe
-                                        src={`${previewDoc.fileUrl}`}
+                                        src={previewDoc.fileUrl}
                                         className="w-full h-full border-none bg-white shadow-lg rounded-sm"
                                         title={previewDoc.name}
                                     />
                                 ) : (
                                     <div className="text-center p-12 bg-white rounded-2xl shadow-sm border border-gray-200">
-                                        <AlertCircle size={48} className="mx-auto mb-4 text-amber-500" />
-                                        <p className="text-lg font-bold text-gray-800">{t("previewNotAvailable")}</p>
-                                        <p className="text-sm text-gray-500 mt-2">{t("previewNotAvailableDescription")}</p>
-                                        <a 
-                                            href={previewDoc.fileUrl} 
-                                            target="_blank" 
+                                        <AlertCircle
+                                            size={48}
+                                            className="mx-auto mb-4 text-amber-500"
+                                        />
+
+                                        <p className="text-lg font-bold text-gray-800">
+                                            {t("previewNotAvailable")}
+                                        </p>
+
+                                        <p className="text-sm text-gray-500 mt-2">
+                                            {t(
+                                                "previewNotAvailableDescription"
+                                            )}
+                                        </p>
+
+                                        <a
+                                            href={previewDoc.fileUrl}
+                                            target="_blank"
                                             rel="noopener noreferrer"
                                             className="mt-6 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-[#1E3A8A] text-white hover:bg-blue-800 h-10 px-4 py-2"
                                         >
-                                            {t("downloadInstead")} <Download className="ml-2 h-4 w-4" />
+                                            {t("downloadInstead")}{" "}
+                                            <Download className="ml-2 h-4 w-4" />
                                         </a>
                                     </div>
                                 )}

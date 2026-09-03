@@ -9,49 +9,117 @@ export const dynamic = "force-dynamic";
 
 export default async function SystemLogsPage() {
     const t = await getTranslations("adminLogs");
-    const session = await auth.api.getSession({ headers: await headers() });
-    const agencyId = (session?.user as any)?.agencyId;
 
-    // 1. Fetch system logs for this agency only
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session) {
+        return null;
+    }
+
+    const agencyId = (session.user as any)?.agencyId;
+
+    if (!agencyId) {
+        return (
+            <div className="space-y-6 max-w-7xl mx-auto">
+                <div>
+                    <h1
+                        className="text-2xl font-bold tracking-tight"
+                        style={{ color: "#1E3A8A" }}
+                    >
+                        {t("title")}
+                    </h1>
+
+                    <p className="text-gray-500 text-sm mt-1">
+                        {t("subtitle")}
+                    </p>
+                </div>
+
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
+                    No agency is associated with this account.
+                </div>
+            </div>
+        );
+    }
+
     const logs = await prisma.auditLog.findMany({
-        where: { agencyId },
+        where: {
+            agencyId
+        },
         include: {
-        author: true, // This populates the 'author' field in your interface
-  },
+            author: true
+        },
         orderBy: {
             createdAt: "desc"
         }
     });
 
-    // 2. Fetch users associated with the logs (Resilient fetch bypasses cache issues)
-    const userIds = Array.from(new Set(logs.map(l => l.userId).filter(Boolean))) as string[];
-    const users = await prisma.user.findMany({
-        where: { id: { in: userIds } },
-        select: { id: true, name: true, role: true, email: true }
-    });
+    const userIds = Array.from(
+        new Set(
+            logs
+                .map((log) => log.userId)
+                .filter(Boolean)
+        )
+    ) as string[];
 
-    const userMap = Object.fromEntries(users.map(u => [u.id, u]));
+    const users =
+        userIds.length > 0
+            ? await prisma.user.findMany({
+                  where: {
+                      id: {
+                          in: userIds
+                      }
+                  },
+                  select: {
+                      id: true,
+                      name: true,
+                      role: true,
+                      email: true
+                  }
+              })
+            : [];
 
-    // 3. Map to UI format
-    const formattedLogs = logs.map(log => ({
+    const userMap = Object.fromEntries(
+        users.map((user) => [user.id, user])
+    );
+
+    const formattedLogs = logs.map((log) => ({
         id: log.id,
         logNumber: log.logNumber,
         action: log.action,
         details: log.details || t("noDetails"),
         createdAt: log.createdAt,
-        author: log.userId && userMap[log.userId] ? userMap[log.userId] : null
+        author:
+            log.userId && userMap[log.userId]
+                ? userMap[log.userId]
+                : null
     }));
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#1E3A8A" }}>{t("title")}</h1>
-                    <p className="text-gray-500 text-sm mt-1">{t("subtitle")}</p>
+                    <h1
+                        className="text-2xl font-bold tracking-tight"
+                        style={{ color: "#1E3A8A" }}
+                    >
+                        {t("title")}
+                    </h1>
+
+                    <p className="text-gray-500 text-sm mt-1">
+                        {t("subtitle")}
+                    </p>
                 </div>
+
                 <div className="bg-slate-100 flex items-center gap-3 px-4 py-2 rounded-lg border border-slate-200">
-                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-slate-700 text-sm font-bold tracking-widest uppercase">{t("totalLogs", { count: formattedLogs.length })}</span>
+                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+
+                    <span className="text-slate-700 text-sm font-bold tracking-widest uppercase">
+                        {t("totalLogs", {
+                            count: formattedLogs.length
+                        })}
+                    </span>
                 </div>
             </div>
 
