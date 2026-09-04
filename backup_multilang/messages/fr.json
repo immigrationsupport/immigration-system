@@ -39,7 +39,7 @@
     "fullName": "Nom complet",
     "yes": "Oui",
     "no": "Non",
-    "appName": "ATLE Immigration"
+    "appName": "Procédure Facile"
   },
   "navigation": {
     "navbar": {
@@ -58,21 +58,21 @@
     "dashboard": {
       "logout": "Déconnexion",
       "client": {
-        "atleClient": "ATLE Client",
+        "atleClient": "PF Client",
         "overview": "Tableau de Bord",
         "applications": "Demandes",
         "messages": "Messages Officiels",
         "profile": "Profil"
       },
       "agent": {
-        "atleAgent": "ATLE Agent",
+        "atleAgent": "PF Agent",
         "overview": "Aperçu",
         "applications": "Toutes les Demandes",
         "profile": "Profil",
         "clients": "Clients"
       },
       "admin": {
-        "atleAdmin": "ATLE Admin",
+        "atleAdmin": "PF Admin",
         "overview": "Tableau de Bord",
         "clients": "Clients",
         "agents": "Agents",
@@ -86,7 +86,7 @@
       "offices": "Nos Bureaux",
       "privacy": "Politique de Confidentialité",
       "terms": "Conditions d'Utilisation",
-      "copyright": "ATLE Immigration Consultancy.",
+      "copyright": "PF Immigration Consultancy.",
       "address": "DOUALA, CAMEROUN\nBonamoussadi, carrefour maison blanche"
     }
   },
@@ -115,7 +115,7 @@
       "learnMore": "En savoir plus"
     },
     "whyChooseUs": {
-      "title": "Pourquoi choisir ATLE Immigration ?",
+      "title": "Pourquoi choisir  Procédure Facile ?",
       "subtitle": "Nous combinons des années d'expertise juridique avec un engagement envers le succès des clients, garantissant que votre cas est traité avec le plus haut niveau de professionnalisme et de diligence.",
       "provenTrackRecord": {
         "title": "Antécédents éprouvés",

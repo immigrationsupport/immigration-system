@@ -5,8 +5,8 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 
 export const metadata: Metadata = {
-  title: "ATLE Immigration - Admin",
-  description: "Admin dashboard for ATLE Immigration",
+  title: "Procédure Facile - Admin",
+  description: "Admin dashboard for Procédure Facile",
 };
 
 export default function AdminRootLayout({

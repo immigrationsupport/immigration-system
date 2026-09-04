@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ATLE Immigration",
+  title: "Procédure Facile",
   description: "Professional immigration consultancy...",
 };
 

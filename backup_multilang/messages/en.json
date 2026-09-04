@@ -58,21 +58,21 @@
     "dashboard": {
       "logout": "Logout",
       "client": {
-        "atleClient": "ATLE Client",
+        "atleClient": "PF Client",
         "overview": "Dashboard",
         "applications": "Applications",
         "messages": "Official Messages",
         "profile": "Profile"
       },
       "agent": {
-        "atleAgent": "ATLE Agent",
+        "atleAgent": "PF Agent",
         "overview": "Overview",
         "applications": "All Applications",
         "profile": "Profile",
         "clients": "Clients"
       },
       "admin": {
-        "atleAdmin": "ATLE Admin",
+        "atleAdmin": "PF Admin",
         "overview": "Dashboard",
         "clients": "Clients",
         "agents": "Agents",
@@ -86,7 +86,7 @@
       "offices": "Our Offices",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
-      "copyright": "ATLE Immigration Consultancy.",
+      "copyright": "PF Immigration Consultancy.",
       "address": "DOUALA, CAMEROON\nBonamoussadi, carrefour maison blanche"
     }
   },
@@ -115,7 +115,7 @@
       "learnMore": "Learn more"
     },
     "whyChooseUs": {
-      "title": "Why Choose ATLE Immigration?",
+      "title": "Why Choose  Procédure Facile?",
       "subtitle": "We combine years of legal expertise with a commitment to client success, ensuring your case is handled with the highest level of professionalism and diligence.",
       "provenTrackRecord": {
         "title": "Proven Track Record",

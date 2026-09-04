@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ATLE Immigration - Super Admin",
-  description: "Platform-wide Super Admin console for ATLE Immigration",
+  title: "Procédure Facile - Super Admin",
+  description: "Platform-wide Super Admin console for Procédure Facile",
 };
 
 export default function SuperAdminRootLayout({

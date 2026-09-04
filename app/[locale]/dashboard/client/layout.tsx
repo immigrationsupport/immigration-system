@@ -21,7 +21,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         }
     }, [session?.user]);
 
-    const displayName = agencyName || "ATLE Immigration";
+    const displayName = agencyName || "Procedure Facile";
 
     const navItems = [
         { label: t("overview"), href: "/dashboard/client" },
