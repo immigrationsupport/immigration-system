@@ -34,6 +34,7 @@ import {
     deleteUserAction,
 } from "./actions";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 
 const PAGE_SIZE = 10;
 
@@ -102,7 +103,11 @@ export default function UserList({
     const [query, setQuery] = useState("");
     const [role, setRole] = useState("ALL");
     const [page, setPage] = useState(1);
+    const [deletingUser, setDeletingUser] = useState<UserRow | null>(null);
+    const [suspendingUser, setSuspendingUser] = useState<UserRow | null>(null);
+    const [actionError, setActionError] = useState("");
     const [isPending, startTransition] = useTransition();
+
 
     const filtered = useMemo(() => {
         return users.filter((u) => {
@@ -407,12 +412,10 @@ export default function UserList({
                                                     disabled={
                                                         isPending
                                                     }
-                                                    onClick={() =>
-                                                        handleToggleSuspend(
-                                                            u.id,
-                                                            u.isSuspended
-                                                        )
-                                                    }
+                                                    onClick={() => {
+                                                        setActionError("");
+                                                        setSuspendingUser(u);
+                                                    }}
                                                     className="gap-1.5 font-bold"
                                                 >
                                                     {u.isSuspended ? (
@@ -428,61 +431,16 @@ export default function UserList({
                                                     )}
                                                 </Button>
 
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger
-                                                        asChild
-                                                    >
-                                                        <button
-                                                            className="p-2 text-gray-400 hover:text-red-600 transition-all rounded-lg"
-                                                            title="Delete User"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </AlertDialogTrigger>
-
-                                                    <AlertDialogContent className="border-none shadow-2xl rounded-2xl">
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle className="text-xl font-black text-gray-900">
-                                                                Delete this user?
-                                                            </AlertDialogTitle>
-
-                                                            <AlertDialogDescription className="text-gray-500 font-medium pt-2">
-                                                                This permanently
-                                                                deletes{" "}
-                                                                {
-                                                                    u.name
-                                                                }{" "}
-                                                                (
-                                                                {
-                                                                    u.email
-                                                                }
-                                                                ). This
-                                                                may fail if
-                                                                they have
-                                                                linked
-                                                                applications
-                                                                or records.
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-
-                                                        <AlertDialogFooter className="pt-4">
-                                                            <AlertDialogCancel className="font-bold border-none bg-gray-100 hover:bg-gray-200 rounded-xl">
-                                                                Cancel
-                                                            </AlertDialogCancel>
-
-                                                            <AlertDialogAction
-                                                                onClick={() =>
-                                                                    handleDelete(
-                                                                        u.id
-                                                                    )
-                                                                }
-                                                                className="bg-red-600 hover:bg-red-700 text-white font-black rounded-xl px-6"
-                                                            >
-                                                                Delete User
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
+                                                <button
+                                                    onClick={() => {
+                                                        setActionError("");
+                                                        setDeletingUser(u);
+                                                    }}
+                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all rounded-lg"
+                                                    title="Delete User"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </div>
                                         )}
                                     </td>
@@ -514,6 +472,50 @@ export default function UserList({
                     </div>
                 )}
             </div>
+
+            {/* Delete User Confirmation Dialog (with Typed Name) */}
+            {deletingUser && (
+                <ConfirmActionDialog
+                    open={!!deletingUser}
+                    onOpenChange={(open) => !open && setDeletingUser(null)}
+                    onConfirm={() => {
+                        handleDelete(deletingUser.id);
+                        setDeletingUser(null);
+                    }}
+                    title="Delete User"
+                    description={`This will permanently delete the user account for "${deletingUser.name}" (${deletingUser.email}). This action cannot be undone.`}
+                    confirmTargetName={deletingUser.name}
+                    confirmButtonText="Delete User"
+                    actionType="delete"
+                    variant="danger"
+                    isPending={isPending}
+                    error={actionError}
+                />
+            )}
+
+            {/* Suspend User Confirmation Dialog (with Typed Name) */}
+            {suspendingUser && (
+                <ConfirmActionDialog
+                    open={!!suspendingUser}
+                    onOpenChange={(open) => !open && setSuspendingUser(null)}
+                    onConfirm={() => {
+                        handleToggleSuspend(suspendingUser.id, suspendingUser.isSuspended);
+                        setSuspendingUser(null);
+                    }}
+                    title={suspendingUser.isSuspended ? "Reactivate User" : "Suspend User"}
+                    description={
+                        suspendingUser.isSuspended
+                            ? `This will restore account access for "${suspendingUser.name}" (${suspendingUser.email}).`
+                            : `This will immediately block "${suspendingUser.name}" (${suspendingUser.email}) from logging into the platform.`
+                    }
+                    confirmTargetName={suspendingUser.name}
+                    confirmButtonText={suspendingUser.isSuspended ? "Reactivate User" : "Suspend User"}
+                    actionType="suspend"
+                    variant="warning"
+                    isPending={isPending}
+                    error={actionError}
+                />
+            )}
         </TooltipProvider>
     );
 }

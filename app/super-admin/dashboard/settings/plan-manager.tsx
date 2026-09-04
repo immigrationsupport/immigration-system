@@ -15,6 +15,7 @@ import {
 import { Plus, Pencil, Trash2, Loader2, Layers, AlertCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { createPlanAction, updatePlanAction, deletePlanAction } from "./actions";
+import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 
 interface Plan {
     id: string;
@@ -241,54 +242,26 @@ export default function PlanManager({ initialPlans }: { initialPlans: Plan[] }) 
                 </DialogContent>
             </Dialog>
 
-            {/* Delete confirmation dialog */}
-            <Dialog open={!!deletingPlan} onOpenChange={(open) => !open && !isDeletePending && setDeletingPlan(null)}>
-                <DialogContent className="sm:max-w-md rounded-2xl">
-                    <DialogHeader>
-                        <div className="mx-auto mb-2 h-12 w-12 rounded-full bg-red-50 flex items-center justify-center text-red-600">
-                            <AlertTriangle className="h-6 w-6" />
-                        </div>
-                        <DialogTitle className="text-xl font-black text-center text-gray-900">Delete Subscription Plan</DialogTitle>
-                        <DialogDescription className="text-center text-gray-600">
-                            Are you sure you want to delete the plan <strong className="text-gray-900">{deletingPlan?.name}</strong>?
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {error && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-red-700 text-xs">
-                            <AlertCircle className="shrink-0 w-4 h-4 mt-0.5" />
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    {deletingPlan && deletingPlan._count.subscriptions > 0 && (
-                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-semibold">
-                            ⚠️ This plan currently has {deletingPlan._count.subscriptions} active agenc{deletingPlan._count.subscriptions === 1 ? "y" : "ies"}. You must move them to another plan or hide this plan before deleting.
-                        </div>
-                    )}
-
-                    <div className="flex gap-3 pt-2">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            disabled={isDeletePending}
-                            onClick={() => setDeletingPlan(null)}
-                            className="flex-1 rounded-xl font-bold"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="button"
-                            disabled={isDeletePending || (deletingPlan?._count.subscriptions ?? 0) > 0}
-                            onClick={handleDelete}
-                            className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold"
-                        >
-                            {isDeletePending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
-                            Delete Plan
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            {/* Delete confirmation dialog (with typed name) */}
+            {deletingPlan && (
+                <ConfirmActionDialog
+                    open={!!deletingPlan}
+                    onOpenChange={(open) => !open && setDeletingPlan(null)}
+                    onConfirm={handleDelete}
+                    title="Delete Subscription Plan"
+                    description={
+                        deletingPlan._count.subscriptions > 0
+                            ? `⚠️ This plan currently has ${deletingPlan._count.subscriptions} active agenc${deletingPlan._count.subscriptions === 1 ? "y" : "ies"}. You must move them to another plan or hide this plan before deleting.`
+                            : `Are you sure you want to delete the plan "${deletingPlan.name}"? This action cannot be undone.`
+                    }
+                    confirmTargetName={deletingPlan.name}
+                    confirmButtonText="Delete Plan"
+                    actionType="delete"
+                    variant="danger"
+                    isPending={isDeletePending}
+                    error={error}
+                />
+            )}
         </div>
     );
 }

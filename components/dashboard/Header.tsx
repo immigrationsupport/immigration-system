@@ -11,21 +11,12 @@ interface HeaderProps {
     onMenuClick?: () => void;
     showLogout?: boolean;
     centerSlot?: React.ReactNode;
-    // Only pass this when Header is rendered inside a route under
-    // app/[locale]/... — it's what turns on the EN/FR switcher. Routes
-    // outside the locale structure (e.g. /super-admin/*) aren't localized
-    // at all, so leave this undefined there and the switcher just won't
-    // render — calling next-intl's locale-aware hooks unconditionally here
-    // would otherwise crash on those routes, since they're not wrapped in
-    // a NextIntlClientProvider.
     locale?: string;
 }
 
 export function Header({ title, onMenuClick, showLogout = false, centerSlot, locale }: HeaderProps) {
     const router = useRouter();
     const { data: session } = useSession();
-    // Plain, locale-agnostic pathname — safe to call on every route,
-    // localized or not.
     const pathname = usePathname();
 
     const handleLogout = async () => {
@@ -45,59 +36,75 @@ export function Header({ title, onMenuClick, showLogout = false, centerSlot, loc
         });
     };
 
-    // Swap the leading /en or /fr segment for the target locale, keeping
-    // the rest of the path (and query string) intact.
     function localizedHref(targetLocale: "en" | "fr") {
         const withoutLocale = pathname.replace(/^\/(en|fr)(?=\/|$)/, "");
         return `/${targetLocale}${withoutLocale}`;
     }
 
     return (
-        <header className="bg-white border-b border-gray-200 h-16 flex items-center gap-4 px-6 sticky top-0 z-20">
-            <div className="flex items-center gap-4 shrink-0">
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+            {/* ── Top row: hamburger | title | locale | logout ── */}
+            <div className="h-14 md:h-16 flex items-center gap-3 px-4 md:px-6">
                 {onMenuClick && (
-                    <Button variant="outline" className="md:hidden" onClick={onMenuClick}>
-                        <Menu className="h-6 w-6" />
-                    </Button>
+                    <button
+                        onClick={onMenuClick}
+                        className="md:hidden p-2 -ml-1 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors shrink-0"
+                        aria-label="Open menu"
+                    >
+                        <Menu className="h-5 w-5" />
+                    </button>
                 )}
-                <h1 className="text-xl font-semibold text-gray-800 tracking-tight">{title}</h1>
-            </div>
 
-            {centerSlot && (
-                <div className="flex-1 min-w-0 hidden md:flex justify-center">
-                    {centerSlot}
-                </div>
-            )}
+                {title && (
+                    <h1 className="text-lg font-semibold text-gray-800 tracking-tight shrink-0">
+                        {title}
+                    </h1>
+                )}
 
-            <div className="flex items-center gap-4 shrink-0 ml-auto">
-                {locale && (
-                    <div className="flex items-center rounded-full border border-gray-200 p-0.5 text-xs font-bold mr-2">
-                        <Link
-                            href={localizedHref("en")}
-                            className={`px-2.5 py-1 rounded-full transition-colors ${locale === "en" ? "bg-[#1E3A8A] text-white" : "text-gray-500 hover:text-gray-700"}`}
-                        >
-                            EN
-                        </Link>
-                        <Link
-                            href={localizedHref("fr")}
-                            className={`px-2.5 py-1 rounded-full transition-colors ${locale === "fr" ? "bg-[#1E3A8A] text-white" : "text-gray-500 hover:text-gray-700"}`}
-                        >
-                            FR
-                        </Link>
+                {/* Desktop search (centred) */}
+                {centerSlot && (
+                    <div className="hidden md:flex flex-1 min-w-0 justify-center">
+                        {centerSlot}
                     </div>
                 )}
 
-                {showLogout && (
-                    <Button
-                        variant="ghost"
-                        onClick={handleLogout}
-                        className="text-gray-500 hover:text-red-600 hover:bg-red-50 flex items-center gap-2 rounded-xl font-bold transition-all"
-                    >
-                        <LogOut className="h-4 w-4" />
-                        <span className="hidden sm:inline">Logout</span>
-                    </Button>
-                )}
+                <div className="flex items-center gap-2 md:gap-4 shrink-0 ml-auto">
+                    {locale && (
+                        <div className="flex items-center rounded-full border border-gray-200 p-0.5 text-xs font-bold">
+                            <Link
+                                href={localizedHref("en")}
+                                className={`px-2.5 py-1 rounded-full transition-colors ${locale === "en" ? "bg-[#1E3A8A] text-white" : "text-gray-500 hover:text-gray-700"}`}
+                            >
+                                EN
+                            </Link>
+                            <Link
+                                href={localizedHref("fr")}
+                                className={`px-2.5 py-1 rounded-full transition-colors ${locale === "fr" ? "bg-[#1E3A8A] text-white" : "text-gray-500 hover:text-gray-700"}`}
+                            >
+                                FR
+                            </Link>
+                        </div>
+                    )}
+
+                    {showLogout && (
+                        <Button
+                            variant="ghost"
+                            onClick={handleLogout}
+                            className="text-gray-500 hover:text-red-600 hover:bg-red-50 flex items-center gap-2 rounded-xl font-bold transition-all px-2 md:px-3"
+                        >
+                            <LogOut className="h-4 w-4" />
+                            <span className="hidden sm:inline">Logout</span>
+                        </Button>
+                    )}
+                </div>
             </div>
+
+            {/* ── Mobile search row (visible only below md) ── */}
+            {centerSlot && (
+                <div className="md:hidden px-4 pb-3">
+                    {centerSlot}
+                </div>
+            )}
         </header>
     );
 }

@@ -88,21 +88,21 @@ export default function AiSearchBar() {
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => messages.length > 0 && setPanelOpen(true)}
                     placeholder={t("placeholder")}
-                    className="pl-11 pr-24 h-12 rounded-2xl"
+                    className="pl-11 pr-24 h-11 rounded-2xl text-sm"
                     disabled={loading}
                 />
-                <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
+                <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
                     {messages.length > 0 && (
                         <button
                             type="button"
                             onClick={handleReset}
                             title={t("thread.newSearchTooltip")}
-                            className="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                            className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
                         >
                             <RotateCcw className="h-4 w-4" />
                         </button>
                     )}
-                    <Button type="submit" disabled={loading} className="h-9 rounded-xl bg-[#1E3A8A]">
+                    <Button type="submit" disabled={loading} className="h-8 rounded-xl bg-[#1E3A8A] px-3">
                         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                     </Button>
                 </div>
@@ -110,8 +110,11 @@ export default function AiSearchBar() {
 
             {/* Floating overlay — never affects the layout below it */}
             {panelOpen && messages.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4">
-                    <div className="flex justify-between items-center mb-2">
+                <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4
+                    max-h-[60vh] md:max-h-[480px] flex flex-col
+                    -mx-4 md:mx-0 w-screen md:w-auto px-4 md:px-4"
+                >
+                    <div className="flex justify-between items-center mb-2 shrink-0">
                         <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("panelLabel")}</span>
                         <button
                             type="button"
@@ -121,7 +124,7 @@ export default function AiSearchBar() {
                             <X className="h-4 w-4" />
                         </button>
                     </div>
-                    <div ref={threadRef} className="max-h-[420px] overflow-y-auto space-y-4 pr-1">
+                    <div ref={threadRef} className="flex-1 overflow-y-auto space-y-4 pr-1">
                         {messages.map((m, i) => (
                             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                                 {m.role === "user" ? (
@@ -163,4 +166,4 @@ export default function AiSearchBar() {
             )}
         </div>
     );
-}
+}

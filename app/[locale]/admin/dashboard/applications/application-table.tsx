@@ -23,6 +23,8 @@ import ApplicationDetailsModal from "./application-details-modal";
 import { TruncatedText } from "@/components/ui/truncated-text";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { useTranslations } from "next-intl";
+import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
+import { toast } from "sonner";
 
 interface Application {
     id: string;
@@ -64,6 +66,8 @@ export default function ApplicationTable({
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+    const [deletingApp, setDeletingApp] = useState<Application | null>(null);
+    const [actionError, setActionError] = useState("");
 
     const [page, setPage] = useState(1);
 
@@ -157,19 +161,25 @@ export default function ApplicationTable({
         }
     };
 
-    const handleDelete = async (appId: string) => {
-        if (!confirm(t("confirmDelete"))) return;
+    const handleDeleteConfirm = async () => {
+        if (!deletingApp) return;
 
-        setLoadingId(appId);
+        setLoadingId(deletingApp.id);
+        setActionError("");
 
-        const res = await deleteApplicationAction(appId);
+        const res = await deleteApplicationAction(deletingApp.id);
 
         setLoadingId(null);
 
         if (res.success) {
             setApplications(prev =>
-                prev.filter(a => a.id !== appId)
+                prev.filter(a => a.id !== deletingApp.id)
             );
+            toast.success("Procedure deleted successfully");
+            setDeletingApp(null);
+        } else {
+            setActionError(res.error || "Failed to delete procedure");
+            toast.error(res.error || "Failed to delete procedure");
         }
     };
 
@@ -525,12 +535,10 @@ export default function ApplicationTable({
                                             variant="ghost"
                                             size="sm"
                                             className="h-12 w-12 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 bg-white"
-                                            onClick={() =>
-                                                handleDelete(app.id)
-                                            }
-                                            disabled={
-                                                loadingId === app.id
-                                            }
+                                            onClick={() => {
+                                                setActionError("");
+                                                setDeletingApp(app);
+                                            }}
                                             title={t(
                                                 "deleteTooltip"
                                             )}
@@ -579,6 +587,23 @@ export default function ApplicationTable({
                     onClose={() => setSelectedAppId(null)}
                 />
             )}
+
+            {/* Delete Procedure Confirmation Dialog (with Typed Name) */}
+            {deletingApp && (
+                <ConfirmActionDialog
+                    open={!!deletingApp}
+                    onOpenChange={(open) => !open && setDeletingApp(null)}
+                    onConfirm={handleDeleteConfirm}
+                    title={t("confirmDelete")}
+                    description={`This will permanently delete the procedure for client "${deletingApp.client.name}" (${deletingApp.destination}). All associated documents and step history will be removed.`}
+                    confirmTargetName={deletingApp.client.name}
+                    confirmButtonText="Delete Procedure"
+                    actionType="delete"
+                    variant="danger"
+                    isPending={loadingId === deletingApp.id}
+                    error={actionError}
+                />
+            )}
         </div>
     );
-}
+}

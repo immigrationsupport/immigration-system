@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     Search,
     Ban,
     Replace,
     XCircle,
-    Trash2
+    Trash2,
+    CheckCircle2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +20,8 @@ import CreateClientModal from "./create-client-modal";
 import EditClientModal from "./edit-client-modal";
 import { useTranslations } from "next-intl";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
+import { toast } from "sonner";
 
 const PAGE_SIZE = 10;
 
@@ -51,19 +54,27 @@ export default function ClientList({
 }: ClientListProps) {
     const t = useTranslations("adminClients");
 
-    const [search, setSearch] = useState("");
     const [clients, setClients] = useState<Client[]>(initialClients);
+    const [search, setSearch] = useState("");
     const [isAssigning, setIsAssigning] = useState<string | null>(null);
     const [page, setPage] = useState(1);
+    const [deletingClient, setDeletingClient] = useState<Client | null>(null);
+    const [suspendingClient, setSuspendingClient] = useState<Client | null>(null);
+    const [actionError, setActionError] = useState("");
+    const [isPendingAction, setIsPendingAction] = useState(false);
 
-    const filteredClients = clients.filter((client) => {
-        const searchValue = search.toLowerCase();
-
-        return (
-            client.name.toLowerCase().includes(searchValue) ||
-            client.email.toLowerCase().includes(searchValue)
+    // Filter clients based on search query (name or email)
+    const filteredClients = useMemo(() => {
+        return clients.filter(
+            (client) =>
+                client.name
+                    .toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                client.email
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
         );
-    });
+    }, [clients, search]);
 
     // Reset pagination whenever the search changes.
     useEffect(() => {
@@ -75,17 +86,12 @@ export default function ClientList({
         Math.ceil(filteredClients.length / PAGE_SIZE)
     );
 
-    // Keep the current page valid after deleting a client.
-    useEffect(() => {
-        if (page > totalPages) {
-            setPage(totalPages);
-        }
-    }, [page, totalPages]);
+    const safePage = Math.min(page, totalPages);
 
-    const paginatedClients = filteredClients.slice(
-        (page - 1) * PAGE_SIZE,
-        page * PAGE_SIZE
-    );
+    const paginatedClients = useMemo(() => {
+        const start = (safePage - 1) * PAGE_SIZE;
+        return filteredClients.slice(start, start + PAGE_SIZE);
+    }, [filteredClients, safePage]);
 
     const handleAssign = async (
         clientId: string,
@@ -97,7 +103,7 @@ export default function ClientList({
         );
 
         if (res.error) {
-            alert(res.error);
+            toast.error(res.error);
             return;
         }
 
@@ -117,55 +123,67 @@ export default function ClientList({
         );
 
         setIsAssigning(null);
+        toast.success(t("toastAssignSuccess"));
     };
 
-    const handleToggleSuspend = async (
-        clientId: string,
-        isCurrentlySuspended: boolean
-    ) => {
-        const confirmed = window.confirm(
-            isCurrentlySuspended
-                ? t("confirmUnsuspend")
-                : t("confirmSuspend")
-        );
-
-        if (!confirmed) return;
+    const handleToggleSuspendConfirm = async () => {
+        if (!suspendingClient) return;
+        setIsPendingAction(true);
+        setActionError("");
 
         const res = await toggleSuspendClientAction(
-            clientId,
-            isCurrentlySuspended
+            suspendingClient.id,
+            suspendingClient.isSuspended
         );
 
+        setIsPendingAction(false);
+
         if (res.error) {
-            alert(res.error);
+            setActionError(res.error);
+            toast.error(res.error);
             return;
         }
 
         setClients((prev) =>
             prev.map((client) =>
-                client.id === clientId
+                client.id === suspendingClient.id
                     ? {
                           ...client,
-                          isSuspended: !isCurrentlySuspended
+                          isSuspended: !suspendingClient.isSuspended
                       }
                     : client
             )
         );
+
+        toast.success(
+            suspendingClient.isSuspended
+                ? t("toastUnsuspended")
+                : t("toastSuspended")
+        );
+        setSuspendingClient(null);
     };
 
-    const handleDelete = async (clientId: string) => {
-        if (!confirm(t("confirmDelete"))) return;
+    const handleDeleteConfirm = async () => {
+        if (!deletingClient) return;
+        setIsPendingAction(true);
+        setActionError("");
 
-        const res = await deleteClientAction(clientId);
+        const res = await deleteClientAction(deletingClient.id);
+
+        setIsPendingAction(false);
 
         if (res.error) {
-            alert(res.error);
+            setActionError(res.error);
+            toast.error(res.error);
             return;
         }
 
         setClients((prev) =>
-            prev.filter((client) => client.id !== clientId)
+            prev.filter((client) => client.id !== deletingClient.id)
         );
+
+        toast.success(t("toastDeleteSuccess"));
+        setDeletingClient(null);
     };
 
     return (
@@ -419,7 +437,7 @@ export default function ClientList({
                                                 className={`p-2 rounded-lg transition-all bg-white ${
                                                     client.isSuspended
                                                         ? "text-emerald-600 hover:bg-emerald-50"
-                                                        : "text-red-500 hover:bg-red-50"
+                                                        : "text-amber-500 hover:bg-amber-50"
                                                 }`}
                                                 title={
                                                     client.isSuspended
@@ -430,26 +448,27 @@ export default function ClientList({
                                                               "suspendTooltip"
                                                           )
                                                 }
-                                                onClick={() =>
-                                                    handleToggleSuspend(
-                                                        client.id,
-                                                        client.isSuspended
-                                                    )
-                                                }
+                                                onClick={() => {
+                                                    setActionError("");
+                                                    setSuspendingClient(client);
+                                                }}
                                             >
-                                                <Ban size={20} />
+                                                {client.isSuspended ? (
+                                                    <CheckCircle2 size={20} />
+                                                ) : (
+                                                    <Ban size={20} />
+                                                )}
                                             </button>
 
                                             <button
-                                                className="p-2 text-red-700 hover:text-red-900 hover:bg-red-100 rounded-lg transition-all bg-white"
+                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all bg-white"
                                                 title={t(
                                                     "deleteTooltip"
                                                 )}
-                                                onClick={() =>
-                                                    handleDelete(
-                                                        client.id
-                                                    )
-                                                }
+                                                onClick={() => {
+                                                    setActionError("");
+                                                    setDeletingClient(client);
+                                                }}
                                             >
                                                 <Trash2 size={20} />
                                             </button>
@@ -462,9 +481,9 @@ export default function ClientList({
                                 <tr>
                                     <td
                                         colSpan={5}
-                                        className="px-6 py-12 text-center text-[#374151] font-bold uppercase tracking-widest text-[16px]"
+                                        className="px-6 py-16 text-center text-gray-400 font-semibold"
                                     >
-                                        {t("noClientsFound")}
+                                        {t("noClients")}
                                     </td>
                                 </tr>
                             )}
@@ -472,16 +491,63 @@ export default function ClientList({
                     </table>
                 </div>
 
-                {/* Pagination */}
-                <div className="mt-6">
-                    <TablePagination
-                        page={page}
-                        totalItems={filteredClients.length}
-                        pageSize={PAGE_SIZE}
-                        onPageChange={setPage}
-                    />
-                </div>
+                {filteredClients.length > PAGE_SIZE && (
+                    <div className="pt-6">
+                        <TablePagination
+                            page={safePage}
+                            totalItems={filteredClients.length}
+                            pageSize={PAGE_SIZE}
+                            onPageChange={setPage}
+                        />
+                    </div>
+                )}
             </div>
+
+            {/* Delete Client Confirmation Dialog (with Typed Name) */}
+            {deletingClient && (
+                <ConfirmActionDialog
+                    open={!!deletingClient}
+                    onOpenChange={(open) => !open && setDeletingClient(null)}
+                    onConfirm={handleDeleteConfirm}
+                    title={t("confirmDelete")}
+                    description={`This will permanently delete "${deletingClient.name}" (${deletingClient.email}) and all their uploaded documents. This action cannot be undone.`}
+                    confirmTargetName={deletingClient.name}
+                    confirmButtonText={t("confirmDelete")}
+                    actionType="delete"
+                    variant="danger"
+                    isPending={isPendingAction}
+                    error={actionError}
+                />
+            )}
+
+            {/* Suspend Client Confirmation Dialog (with Typed Name) */}
+            {suspendingClient && (
+                <ConfirmActionDialog
+                    open={!!suspendingClient}
+                    onOpenChange={(open) => !open && setSuspendingClient(null)}
+                    onConfirm={handleToggleSuspendConfirm}
+                    title={
+                        suspendingClient.isSuspended
+                            ? t("confirmUnsuspend")
+                            : t("confirmSuspend")
+                    }
+                    description={
+                        suspendingClient.isSuspended
+                            ? `This will restore platform access for "${suspendingClient.name}".`
+                            : `This will block "${suspendingClient.name}" from logging in to check their procedures.`
+                    }
+                    confirmTargetName={suspendingClient.name}
+                    confirmButtonText={
+                        suspendingClient.isSuspended
+                            ? t("confirmUnsuspend")
+                            : t("confirmSuspend")
+                    }
+                    actionType="suspend"
+                    variant="warning"
+                    isPending={isPendingAction}
+                    error={actionError}
+                />
+            )}
         </div>
     );
 }
