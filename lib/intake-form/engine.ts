@@ -204,6 +204,13 @@ export function extractProfileSyncFields(country: string | null, answers: Answer
             continue;
         }
 
+        if (q.type === "date") {
+            const parsed = new Date(value);
+            if (isNaN(parsed.getTime())) continue;
+            updates[q.profileField] = parsed;
+            continue;
+        }
+
         updates[q.profileField] = value;
     }
 

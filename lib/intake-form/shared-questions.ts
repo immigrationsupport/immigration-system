@@ -20,6 +20,15 @@ export const destinationQuestion: Question = {
 
 export const personalDetailsQuestions: Question[] = [
     {
+        id: "fullName",
+        section: "personalDetails",
+        label: "Quel est votre nom complet ?",
+        placeholder: "Exemple : TAGNE YVAN JOËL",
+        type: "text",
+        required: true,
+        profileField: "name",
+    },
+    {
         id: "phone",
         section: "personalDetails",
         label: "Votre numéro de téléphone (WhatsApp de préférence)",

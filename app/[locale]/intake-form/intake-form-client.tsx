@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, LogOut, Save } from "lucide-react";
 import { toast } from "sonner";
 import {
     getVisibleQuestions,
@@ -154,6 +155,7 @@ export default function IntakeFormClient({
     initialSection,
     initialStatus,
 }: Props) {
+    const router = useRouter();
     const [answers, setAnswers] = useState<Record<string, any>>(initialAnswers);
     const [submitted, setSubmitted] = useState(initialStatus === "SUBMITTED");
     const [isPending, startTransition] = useTransition();
@@ -213,6 +215,18 @@ export default function IntakeFormClient({
     const handleBack = () => {
         setError("");
         setStepIndex((i) => Math.max(0, i - 1));
+    };
+
+    const handleSaveAndExit = () => {
+        startTransition(async () => {
+            const result = await saveIntakeFormProgressAction(answers, currentStep?.section || null);
+            if (result?.error) {
+                toast.error(result.error);
+                return;
+            }
+            toast.success("Votre progression a été enregistrée. Vous pourrez reprendre exactement ici.");
+            router.push("/dashboard/client");
+        });
     };
 
     const handleSubmit = () => {
@@ -292,7 +306,7 @@ export default function IntakeFormClient({
                     </div>
                 )}
 
-                <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
+                <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100 gap-3">
                     <Button
                         variant="outline"
                         onClick={handleBack}
@@ -301,6 +315,16 @@ export default function IntakeFormClient({
                     >
                         <ChevronLeft className="h-4 w-4" />
                         Précédent
+                    </Button>
+
+                    <Button
+                        variant="ghost"
+                        onClick={handleSaveAndExit}
+                        disabled={isPending}
+                        className="gap-2 rounded-xl text-gray-500 hover:text-red-600 hover:bg-red-50"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        Enregistrer et quitter
                     </Button>
 
                     {isLastStep ? (

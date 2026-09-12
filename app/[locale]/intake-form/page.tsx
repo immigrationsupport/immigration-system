@@ -33,10 +33,16 @@ export default async function IntakeFormPage() {
         });
     }
 
+    const savedAnswers = (form.answers as Record<string, any>) || {};
+    const initialAnswers = {
+        ...savedAnswers,
+        fullName: savedAnswers.fullName ?? session.user.name ?? "",
+    };
+
     return (
         <IntakeFormClient
             clientName={session.user.name || ""}
-            initialAnswers={(form.answers as Record<string, any>) || {}}
+            initialAnswers={initialAnswers}
             initialSection={form.currentSection}
             initialStatus={form.status}
         />

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Clock, CheckCircle, XCircle, ArrowRight } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle, ArrowRight, ClipboardList } from "lucide-react";
+import { getVisibleQuestions } from "@/lib/intake-form/engine";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -58,6 +59,30 @@ export default async function ClientDashboard() {
 
     const profileCompleted = (session.user as any).profileCompleted;
 
+    const intakeForm = await prisma.intakeFormResponse.findUnique({
+        where: { clientId },
+    });
+
+    let intakeFormStatus: "NOT_STARTED" | "IN_PROGRESS" | "SUBMITTED" = "NOT_STARTED";
+    let intakeFormPercent = 0;
+
+    if (intakeForm) {
+        const answers = (intakeForm.answers as Record<string, any>) || {};
+        const country = intakeForm.country || answers.destinationCountry || null;
+        const visible = getVisibleQuestions(country, answers);
+        const answeredCount = visible.filter((q) => {
+            const v = answers[q.id];
+            return v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0);
+        }).length;
+
+        intakeFormPercent = visible.length > 0 ? Math.round((answeredCount / visible.length) * 100) : 0;
+        intakeFormStatus = intakeForm.status === "SUBMITTED"
+            ? "SUBMITTED"
+            : answeredCount > 0
+            ? "IN_PROGRESS"
+            : "NOT_STARTED";
+    }
+
     // Fetch Action Required count from steps
     const actionRequiredCount = await prisma.application.count({
         where: { 
@@ -74,6 +99,31 @@ export default async function ClientDashboard() {
                     <p className="text-gray-500 font-medium tracking-tight">{t("subtitle")}</p>
                 </div>
             </div>
+            {intakeFormStatus !== "SUBMITTED" && (
+                <Link href="/intake-form">
+                    <div className="bg-white p-6 shadow-sm border border-blue-100 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-all cursor-pointer group">
+                        <div className="flex items-center gap-4">
+                            <div className="p-4 rounded-2xl bg-blue-50 text-[#1E3A8A] group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                <ClipboardList size={26} />
+                            </div>
+                            <div>
+                                <p className="font-black text-gray-900">
+                                    {intakeFormStatus === "NOT_STARTED"
+                                        ? "Compléter le formulaire de renseignement"
+                                        : "Continuer le formulaire de renseignement"}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    {intakeFormStatus === "NOT_STARTED"
+                                        ? "Aidez votre agent à préparer votre dossier plus rapidement."
+                                        : `${intakeFormPercent}% complété — reprenez là où vous vous étiez arrêté.`}
+                                </p>
+                            </div>
+                        </div>
+                        <ArrowRight className="h-5 w-5 text-gray-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all shrink-0" />
+                    </div>
+                </Link>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard icon={<FileText size={26} />} label={t("statCards.totalCases")} value={totalApps} color="blue" />
                 <StatCard icon={<Clock size={26} />} label={t("statCards.pending")} value={pendingApps} color="amber" />
