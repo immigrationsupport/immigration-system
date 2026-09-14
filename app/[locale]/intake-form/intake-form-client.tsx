@@ -306,12 +306,12 @@ export default function IntakeFormClient({
                     </div>
                 )}
 
-                <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100 gap-3">
+                <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between mt-8 pt-6 border-t border-gray-100 gap-3">
                     <Button
                         variant="outline"
                         onClick={handleBack}
                         disabled={safeStepIndex === 0 || isPending}
-                        className="gap-2 rounded-xl"
+                        className="gap-2 rounded-xl w-full sm:w-auto justify-center"
                     >
                         <ChevronLeft className="h-4 w-4" />
                         Précédent
@@ -321,7 +321,7 @@ export default function IntakeFormClient({
                         variant="ghost"
                         onClick={handleSaveAndExit}
                         disabled={isPending}
-                        className="gap-2 rounded-xl text-gray-500 hover:text-red-600 hover:bg-red-50"
+                        className="gap-2 rounded-xl text-gray-500 hover:text-red-600 hover:bg-red-50 w-full sm:w-auto justify-center"
                     >
                         <LogOut className="h-4 w-4" />
                         Enregistrer et quitter
@@ -331,7 +331,7 @@ export default function IntakeFormClient({
                         <Button
                             onClick={handleSubmit}
                             disabled={isPending}
-                            className="gap-2 rounded-xl text-white"
+                            className="gap-2 rounded-xl text-white w-full sm:w-auto justify-center"
                             style={{ backgroundColor: "#1E3A8A" }}
                         >
                             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
@@ -341,7 +341,7 @@ export default function IntakeFormClient({
                         <Button
                             onClick={handleNext}
                             disabled={isPending}
-                            className="gap-2 rounded-xl text-white"
+                            className="gap-2 rounded-xl text-white w-full sm:w-auto justify-center"
                             style={{ backgroundColor: "#1E3A8A" }}
                         >
                             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

@@ -109,13 +109,13 @@ export default async function ClientDashboard() {
                             <div>
                                 <p className="font-black text-gray-900">
                                     {intakeFormStatus === "NOT_STARTED"
-                                        ? "Compléter le formulaire de renseignement"
-                                        : "Continuer le formulaire de renseignement"}
+                                        ? t("intakeFormStart")
+                                        : t("intakeFormContinue")}
                                 </p>
                                 <p className="text-sm text-gray-500">
                                     {intakeFormStatus === "NOT_STARTED"
-                                        ? "Aidez votre agent à préparer votre dossier plus rapidement."
-                                        : `${intakeFormPercent}% complété — reprenez là où vous vous étiez arrêté.`}
+                                        ? t("intakeFormStartDesc")
+                                        : t("intakeFormContinueDesc", { percent: intakeFormPercent })}
                                 </p>
                             </div>
                         </div>

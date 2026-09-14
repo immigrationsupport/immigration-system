@@ -285,6 +285,10 @@
       "pendingApprovalDesc": "Pour commencer, veuillez contacter l'agence pour l'ouverture et le debut de vôtre procédure ",
       "contactAgencyNow": "Contacter l'agence maintenant",
       "viewApplication": "Voir la demande",
+      "intakeFormStart": "Compléter le formulaire de renseignement",
+      "intakeFormContinue": "Continuer le formulaire de renseignement",
+      "intakeFormStartDesc": "Aidez votre agent à préparer votre dossier plus rapidement.",
+      "intakeFormContinueDesc": "{percent}% complété — reprenez là où vous vous étiez arrêté.",
       "noApplications": "Aucune demande trouvée.",
       "tableHeaders": {
         "country": "Pays",
@@ -1239,7 +1243,16 @@
     "sendIntakeForm": "Envoyer un formulaire de renseignement",
     "sendingIntakeForm": "Envoi en cours...",
     "intakeFormSentToast": "Le lien du formulaire a été envoyé au client.",
-    "intakeFormErrorToast": "Impossible d'envoyer le lien du formulaire."
+    "intakeFormErrorToast": "Impossible d'envoyer le lien du formulaire.",
+    "questionnaireBackToProfile": "Retour au profil",
+    "questionnaireTitle": "Réponses au questionnaire — {clientName}",
+    "questionnaireDestination": "Destination : {country}",
+    "questionnaireCountryCanada": "Canada",
+    "questionnaireCountryFrance": "France",
+    "questionnaireCountryGermany": "Allemagne",
+    "questionnaireEmpty": "Ce client n'a pas encore commencé ou soumis son formulaire de renseignement.",
+    "questionnaireStatusSubmitted": "Formulaire soumis",
+    "questionnaireStatusDraft": "Brouillon en cours"
   },
   "agentEditClientProfile": {
     "toastSuccess": "Profil du client mis à jour avec succès",

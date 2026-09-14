@@ -60,7 +60,7 @@ export const personalDetailsQuestions: Question[] = [
         placeholder: "Exemple : Yaoundé",
         type: "text",
         required: true,
-        profileField: "currentAddress",
+        profileField: "address",
     },
     {
         id: "passportStatus",

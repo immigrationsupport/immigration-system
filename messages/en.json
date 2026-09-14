@@ -285,6 +285,10 @@
       "pendingApprovalDesc": "To get started, please contact the agency to open your file and begin your procedure process.",
       "contactAgencyNow": "Contact Agency Now",
       "viewApplication": "View Procedure",
+      "intakeFormStart": "Complete the intake form",
+      "intakeFormContinue": "Continue the intake form",
+      "intakeFormStartDesc": "Help your agent prepare your file faster.",
+      "intakeFormContinueDesc": "{percent}% complete — pick up right where you left off.",
       "noApplications": "No procedures found.",
       "tableHeaders": {
         "country": "Country",
@@ -1239,7 +1243,16 @@
     "sendIntakeForm": "Send Intake Form",
     "sendingIntakeForm": "Sending...",
     "intakeFormSentToast": "Intake form link sent to the client.",
-    "intakeFormErrorToast": "Couldn't send the intake form link."
+    "intakeFormErrorToast": "Couldn't send the intake form link.",
+    "questionnaireBackToProfile": "Back to profile",
+    "questionnaireTitle": "Questionnaire answers — {clientName}",
+    "questionnaireDestination": "Destination: {country}",
+    "questionnaireCountryCanada": "Canada",
+    "questionnaireCountryFrance": "France",
+    "questionnaireCountryGermany": "Germany",
+    "questionnaireEmpty": "This client hasn't started or submitted their intake form yet.",
+    "questionnaireStatusSubmitted": "Form submitted",
+    "questionnaireStatusDraft": "Draft in progress"
   },
   "agentEditClientProfile": {
     "toastSuccess": "Client profile updated successfully",

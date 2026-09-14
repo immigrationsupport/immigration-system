@@ -5,16 +5,12 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ClipboardList } from "lucide-react";
 import { getAnsweredQuestionsBySection, formatAnswerForDisplay } from "@/lib/intake-form/engine";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
-const COUNTRY_LABELS: Record<string, string> = {
-    CANADA: "Canada",
-    FRANCE: "France",
-    GERMANY: "Allemagne",
-};
-
 export default async function ClientQuestionnairePage({ params }: { params: { id: string } }) {
+    const t = await getTranslations("agentClientDetail");
     const session = await auth.api.getSession({ headers: await headers() });
 
     if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
@@ -42,6 +38,12 @@ export default async function ClientQuestionnairePage({ params }: { params: { id
     const country = form?.country || null;
     const steps = form ? getAnsweredQuestionsBySection(country, answers) : [];
 
+    const countryLabels: Record<string, string> = {
+        CANADA: t("questionnaireCountryCanada"),
+        FRANCE: t("questionnaireCountryFrance"),
+        GERMANY: t("questionnaireCountryGermany"),
+    };
+
     return (
         <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
             <Link
@@ -49,7 +51,7 @@ export default async function ClientQuestionnairePage({ params }: { params: { id
                 className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-[#1E3A8A] transition-colors"
             >
                 <ArrowLeft className="h-4 w-4" />
-                Retour au profil
+                {t("questionnaireBackToProfile")}
             </Link>
 
             <div className="flex items-center gap-3">
@@ -58,11 +60,11 @@ export default async function ClientQuestionnairePage({ params }: { params: { id
                 </div>
                 <div>
                     <h1 className="text-xl font-bold text-gray-900">
-                        Réponses au questionnaire — {client.name}
+                        {t("questionnaireTitle", { clientName: client.name })}
                     </h1>
                     {country && (
                         <p className="text-sm text-gray-500">
-                            Destination : {COUNTRY_LABELS[country] || country}
+                            {t("questionnaireDestination", { country: countryLabels[country] || country })}
                         </p>
                     )}
                 </div>
@@ -71,7 +73,7 @@ export default async function ClientQuestionnairePage({ params }: { params: { id
             {!form || Object.keys(answers).length === 0 ? (
                 <div className="bg-white border-2 border-dashed border-gray-100 rounded-3xl p-16 text-center">
                     <p className="text-gray-400 font-semibold">
-                        Ce client n'a pas encore commencé ou soumis son formulaire de renseignement.
+                        {t("questionnaireEmpty")}
                     </p>
                 </div>
             ) : (
@@ -83,7 +85,7 @@ export default async function ClientQuestionnairePage({ params }: { params: { id
                                 : "bg-yellow-50 text-yellow-700"
                         }`}
                     >
-                        {form.status === "SUBMITTED" ? "Formulaire soumis" : "Brouillon en cours"}
+                        {form.status === "SUBMITTED" ? t("questionnaireStatusSubmitted") : t("questionnaireStatusDraft")}
                     </div>
 
                     <div className="space-y-6">
