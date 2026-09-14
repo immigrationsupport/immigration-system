@@ -16,6 +16,18 @@ model PricingSettings {
   @@map("pricing_settings")
 }
 
+model IntakeFormDocument {
+  id         String   @id @default(uuid())
+  clientId   String
+  client     User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  questionId String
+  fileName   String
+  storageKey String
+  uploadedAt DateTime @default(now())
+
+  @@map("intake_form_documents")
+}
+
 model IntakeFormResponse {
   id             String    @id @default(uuid())
   clientId       String    @unique
@@ -132,6 +144,7 @@ model User {
   authoredLogs       AuditLog[]        @relation("AuthorLogs")
   documents          Document[]
   intakeFormResponse IntakeFormResponse?
+  intakeFormDocuments IntakeFormDocument[]
   messages           Message[]
   receivedMessages   OfficialMessage[] @relation("ReceivedMessages")
   sentMessages       OfficialMessage[] @relation("SentMessages")

@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, LogOut, Save } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, LogOut, Save, Upload, FileCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import {
     getVisibleQuestions,
@@ -13,13 +13,20 @@ import {
     FormStep,
 } from "@/lib/intake-form/engine";
 import { Question } from "@/lib/intake-form/types";
-import { saveIntakeFormProgressAction, submitIntakeFormAction } from "./actions";
+import {
+    saveIntakeFormProgressAction,
+    submitIntakeFormAction,
+    createIntakeFormUploadUrlAction,
+    confirmIntakeFormUploadAction,
+    removeIntakeFormDocumentAction,
+} from "./actions";
 
 interface Props {
     clientName: string;
     initialAnswers: Record<string, any>;
     initialSection: string | null;
     initialStatus: string;
+    existingDocuments: { id: string; questionId: string; fileName: string }[];
 }
 
 function QuestionField({
@@ -63,6 +70,13 @@ function QuestionField({
             );
 
         case "radio":
+            if (!question.options || question.options.length === 0) {
+                return (
+                    <p className="text-xs text-gray-400 italic p-3 bg-gray-50 rounded-xl">
+                        Aucune option disponible pour le moment — votre agent s'en occupera avec vous.
+                    </p>
+                );
+            }
             return (
                 <div className="space-y-2">
                     {question.options?.map((opt) => (
@@ -137,16 +151,110 @@ function QuestionField({
             );
         }
 
-        case "upload":
-            return (
-                <p className="text-xs text-gray-400 italic p-3 bg-gray-50 rounded-xl">
-                    Le téléversement de document dans le formulaire arrive bientôt — votre agent pourra vous le demander séparément pour le moment.
-                </p>
-            );
-
         default:
             return null;
     }
+}
+
+function DocumentUploadField({
+    questionId,
+    uploadedFile,
+    onChange,
+}: {
+    questionId: string;
+    uploadedFile: { id: string; fileName: string } | null;
+    onChange: (file: { id: string; fileName: string } | null) => void;
+}) {
+    const [uploading, setUploading] = useState(false);
+
+    const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = "";
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const prepared = await createIntakeFormUploadUrlAction(questionId, file.name, file.type || "application/octet-stream", file.size);
+            if (prepared?.error || !prepared.uploadUrl || !prepared.storageKey) {
+                toast.error(prepared?.error || "Échec de la préparation de l'envoi.");
+                return;
+            }
+
+            const uploadRes = await fetch(prepared.uploadUrl, {
+                method: "PUT",
+                headers: { "Content-Type": file.type || "application/octet-stream" },
+                body: file,
+            });
+
+            if (!uploadRes.ok) {
+                toast.error("Échec de l'envoi du fichier.");
+                return;
+            }
+
+            const confirmed = await confirmIntakeFormUploadAction(questionId, file.name, prepared.storageKey);
+            if (confirmed?.error || !confirmed.document) {
+                toast.error(confirmed?.error || "Échec de l'enregistrement du fichier.");
+                return;
+            }
+
+            onChange({ id: confirmed.document.id, fileName: confirmed.document.fileName });
+            toast.success("Fichier envoyé avec succès.");
+        } catch (err) {
+            console.error(err);
+            toast.error("Une erreur est survenue lors de l'envoi.");
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleRemove = async () => {
+        setUploading(true);
+        try {
+            const result = await removeIntakeFormDocumentAction(questionId);
+            if (result?.error) {
+                toast.error(result.error);
+                return;
+            }
+            onChange(null);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    if (uploadedFile) {
+        return (
+            <div className="flex items-center justify-between gap-3 p-3.5 bg-emerald-50 border border-emerald-100 rounded-xl">
+                <div className="flex items-center gap-2.5 min-w-0">
+                    <FileCheck className="h-5 w-5 text-emerald-600 shrink-0" />
+                    <span className="text-sm font-semibold text-emerald-800 truncate">{uploadedFile.fileName}</span>
+                </div>
+                <button
+                    type="button"
+                    onClick={handleRemove}
+                    disabled={uploading}
+                    className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-100 transition-colors shrink-0"
+                    aria-label="Retirer le fichier"
+                >
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all text-sm font-semibold text-gray-500">
+            {uploading ? (
+                <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Envoi en cours...
+                </>
+            ) : (
+                <>
+                    <Upload className="h-4 w-4" /> Téléverser un fichier (optionnel)
+                </>
+            )}
+            <input type="file" className="hidden" onChange={handleFileSelect} disabled={uploading} />
+        </label>
+    );
 }
 
 export default function IntakeFormClient({
@@ -154,9 +262,17 @@ export default function IntakeFormClient({
     initialAnswers,
     initialSection,
     initialStatus,
+    existingDocuments,
 }: Props) {
     const router = useRouter();
     const [answers, setAnswers] = useState<Record<string, any>>(initialAnswers);
+    const [documents, setDocuments] = useState<Record<string, { id: string; fileName: string } | null>>(() => {
+        const map: Record<string, { id: string; fileName: string } | null> = {};
+        for (const doc of existingDocuments) {
+            map[doc.questionId] = { id: doc.id, fileName: doc.fileName };
+        }
+        return map;
+    });
     const [submitted, setSubmitted] = useState(initialStatus === "SUBMITTED");
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState("");
@@ -296,6 +412,17 @@ export default function IntakeFormClient({
                                 value={answers[q.id]}
                                 onChange={(v) => setAnswer(q.id, v)}
                             />
+                            {q.documentType && (
+                                <div className="mt-3">
+                                    <DocumentUploadField
+                                        questionId={q.id}
+                                        uploadedFile={documents[q.id] || null}
+                                        onChange={(file) =>
+                                            setDocuments((prev) => ({ ...prev, [q.id]: file }))
+                                        }
+                                    />
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

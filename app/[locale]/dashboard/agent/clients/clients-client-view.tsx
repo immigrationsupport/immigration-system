@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Search, X, Filter, UserPlus, Mail, FileText, Users, CheckCircle, AlertCircle, Clock, Ban } from "lucide-react";
+import { Search, X, Filter, UserPlus, Mail, FileText, Users } from "lucide-react";
 import ApplicationList from "../applications/application-list";
 import SendIntakeFormButton from "./[id]/send-intake-form-button";
 import NewApplicationModal from "./[id]/new-application-modal";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 
 interface Application {
     id: string;
@@ -40,6 +41,7 @@ export default function ClientsClientView({
     applications,
     clientsWithoutProcedure,
 }: ClientsClientViewProps) {
+    const t = useTranslations("agentClients");
     const [searchQuery, setSearchQuery] = useState("");
     const [sectionFilter, setSectionFilter] = useState<SectionFilter>("all");
     const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
@@ -49,12 +51,10 @@ export default function ClientsClientView({
         if (sectionFilter === "no_procedure") return [];
 
         return applications.filter((app) => {
-            // Status match
             if (statusFilter !== "ALL" && app.status !== statusFilter) {
                 return false;
             }
 
-            // Search query match
             if (!searchQuery.trim()) return true;
 
             const query = searchQuery.toLowerCase().trim();
@@ -77,7 +77,7 @@ export default function ClientsClientView({
     // Filter clients without procedure based on search
     const filteredClientsWithoutProcedure = useMemo(() => {
         if (sectionFilter === "procedures") return [];
-        if (statusFilter !== "ALL") return []; // Clients without procedure don't have an application status
+        if (statusFilter !== "ALL") return [];
 
         return clientsWithoutProcedure.filter((client) => {
             if (!searchQuery.trim()) return true;
@@ -108,7 +108,7 @@ export default function ClientsClientView({
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <Input
                             type="text"
-                            placeholder="Rechercher par nom de client, email, type de procédure ou pays..."
+                            placeholder={t("searchPlaceholder")}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-12 pr-10 py-6 rounded-2xl border-gray-200 bg-gray-50/50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-[#1E3A8A] transition-all"
@@ -129,7 +129,7 @@ export default function ClientsClientView({
                             onClick={resetFilters}
                             className="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-4 py-3 rounded-xl transition-colors shrink-0 flex items-center gap-1.5"
                         >
-                            <X className="h-3.5 w-3.5" /> Réinitialiser les filtres
+                            <X className="h-3.5 w-3.5" /> {t("resetFilters")}
                         </button>
                     )}
                 </div>
@@ -139,7 +139,7 @@ export default function ClientsClientView({
                     {/* Category Tabs */}
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-1 flex items-center gap-1">
-                            <Filter className="h-3.5 w-3.5" /> Vue:
+                            <Filter className="h-3.5 w-3.5" /> {t("viewLabel")}
                         </span>
                         <button
                             onClick={() => setSectionFilter("all")}
@@ -149,7 +149,7 @@ export default function ClientsClientView({
                                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                             }`}
                         >
-                            Tous ({applications.length + clientsWithoutProcedure.length})
+                            {t("all", { count: applications.length + clientsWithoutProcedure.length })}
                         </button>
                         <button
                             onClick={() => setSectionFilter("procedures")}
@@ -159,7 +159,7 @@ export default function ClientsClientView({
                                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                             }`}
                         >
-                            Procédures en cours ({applications.length})
+                            {t("procedures", { count: applications.length })}
                         </button>
                         <button
                             onClick={() => setSectionFilter("no_procedure")}
@@ -169,24 +169,24 @@ export default function ClientsClientView({
                                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                             }`}
                         >
-                            Clients sans procédure ({clientsWithoutProcedure.length})
+                            {t("noProcedure", { count: clientsWithoutProcedure.length })}
                         </button>
                     </div>
 
-                    {/* Status Dropdown / Filter (only applicable for procedures) */}
+                    {/* Status Dropdown / Filter */}
                     {sectionFilter !== "no_procedure" && (
                         <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Statut:</span>
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t("statusLabel")}</span>
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
                                 className="bg-gray-100 border border-transparent rounded-xl px-3 py-1.5 text-xs font-bold text-gray-700 focus:bg-white focus:border-gray-300 focus:outline-none cursor-pointer"
                             >
-                                <option value="ALL">Tous les statuts</option>
-                                <option value="IN_REVIEW">En cours d'examen</option>
-                                <option value="APPROVED">Approuvés</option>
-                                <option value="PENDING">En attente</option>
-                                <option value="REJECTED">Refusés</option>
+                                <option value="ALL">{t("allStatuses")}</option>
+                                <option value="IN_REVIEW">{t("inReview")}</option>
+                                <option value="APPROVED">{t("approved")}</option>
+                                <option value="PENDING">{t("pending")}</option>
+                                <option value="REJECTED">{t("rejected")}</option>
                             </select>
                         </div>
                     )}
@@ -203,16 +203,16 @@ export default function ClientsClientView({
                             <div className="h-12 w-12 rounded-2xl bg-blue-50 text-[#1E3A8A] flex items-center justify-center mx-auto">
                                 <FileText className="h-6 w-6" />
                             </div>
-                            <h3 className="font-extrabold text-gray-800 text-lg">Aucune procédure ne correspond à votre recherche</h3>
+                            <h3 className="font-extrabold text-gray-800 text-lg">{t("noProcedureMatchTitle")}</h3>
                             <p className="text-sm text-gray-500 max-w-md mx-auto">
-                                Essayez de modifier vos termes de recherche ou de réinitialiser le filtre de statut.
+                                {t("noProcedureMatchDesc")}
                             </p>
                             {hasActiveFilters && (
                                 <button
                                     onClick={resetFilters}
                                     className="text-xs font-bold text-[#1E3A8A] bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors inline-block mt-2"
                                 >
-                                    Effacer les filtres
+                                    {t("clearFilters")}
                                 </button>
                             )}
                         </div>
@@ -228,11 +228,11 @@ export default function ClientsClientView({
                             <div className="flex items-center gap-2 pt-2">
                                 <UserPlus className="h-5 w-5 text-gray-400" />
                                 <h2 className="text-lg font-black text-gray-700">
-                                    Clients sans procédure ({filteredClientsWithoutProcedure.length})
+                                    {t("clientsWithoutProcedureTitle", { count: filteredClientsWithoutProcedure.length })}
                                 </h2>
                             </div>
                             <p className="text-sm text-gray-400 -mt-2">
-                                Ces clients n'ont pas encore de procédure en cours — envoyez-leur le formulaire de renseignement ou créez-en une directement.
+                                {t("clientsWithoutProcedureSubtitle")}
                             </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -271,16 +271,16 @@ export default function ClientsClientView({
                             <div className="h-12 w-12 rounded-2xl bg-gray-50 text-gray-400 flex items-center justify-center mx-auto">
                                 <Users className="h-6 w-6" />
                             </div>
-                            <h3 className="font-extrabold text-gray-800 text-lg">Aucun client sans procédure ne correspond</h3>
+                            <h3 className="font-extrabold text-gray-800 text-lg">{t("noClientWithoutProcedureMatchTitle")}</h3>
                             <p className="text-sm text-gray-500 max-w-md mx-auto">
-                                Aucun client sans procédure active n'a été trouvé pour vos critères.
+                                {t("noClientWithoutProcedureMatchDesc")}
                             </p>
                             {hasActiveFilters && (
                                 <button
                                     onClick={resetFilters}
                                     className="text-xs font-bold text-[#1E3A8A] bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors inline-block mt-2"
                                 >
-                                    Effacer les filtres
+                                    {t("clearFilters")}
                                 </button>
                             )}
                         </div>
@@ -295,16 +295,16 @@ export default function ClientsClientView({
                         <Search className="h-7 w-7" />
                     </div>
                     <div className="space-y-1">
-                        <h3 className="font-extrabold text-gray-900 text-xl">Aucun résultat trouvé</h3>
+                        <h3 className="font-extrabold text-gray-900 text-xl">{t("noResultsTitle")}</h3>
                         <p className="text-sm text-gray-500 max-w-md mx-auto">
-                            Aucune procédure ni client ne correspond à votre recherche "{searchQuery}".
+                            {t("noResultsDesc", { query: searchQuery })}
                         </p>
                     </div>
                     <button
                         onClick={resetFilters}
                         className="text-sm font-bold text-white bg-[#1E3A8A] hover:bg-blue-900 px-6 py-3 rounded-2xl transition-all shadow-lg shadow-blue-900/10 inline-block"
                     >
-                        Réinitialiser la recherche
+                        {t("resetSearch")}
                     </button>
                 </div>
             )}

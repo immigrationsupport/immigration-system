@@ -6,6 +6,8 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auditDetails } from "@/lib/audit-log";
 import { extractProfileSyncFields } from "@/lib/intake-form/engine";
+import { createS3UploadUrl, createS3DownloadUrl } from "@/lib/s3";
+import crypto from "crypto";
 
 async function requireClient() {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -140,5 +142,112 @@ export async function submitIntakeFormAction(answers: Record<string, any>) {
     } catch (e: any) {
         console.error("Submit intake form error:", e);
         return { error: "Failed to submit the form. Please try again." };
+    }
+}
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
+
+/**
+ * Step 1 of the upload — get a signed S3 PUT url. These documents aren't
+ * attached to an ApplicationStep (none may exist yet for this client), so
+ * they live in their own IntakeFormDocument table until an agent creates
+ * the actual procedure and moves/re-references them as needed.
+ */
+export async function createIntakeFormUploadUrlAction(
+    questionId: string,
+    fileName: string,
+    contentType: string,
+    fileSize: number
+) {
+    const session = await requireClient();
+    if (!session) return { error: "Unauthorized access." };
+
+    if (!fileName || !fileName.trim()) return { error: "File name is required." };
+    if (fileSize > MAX_FILE_SIZE) return { error: "File is too large. Maximum size is 20 MB." };
+
+    try {
+        const safeFileName = fileName.trim().replace(/[^a-zA-Z0-9._-]/g, "_");
+        const key = ["intake-form-documents", session.user.id, questionId, `${crypto.randomUUID()}-${safeFileName}`].join("/");
+
+        const uploadUrl = await createS3UploadUrl(key, contentType);
+
+        return { success: true, uploadUrl, storageKey: key };
+    } catch (e: any) {
+        console.error("Create intake form upload URL error:", e);
+        return { error: "Failed to prepare the upload." };
+    }
+}
+
+/**
+ * Step 2 — called once the browser has successfully PUT the file to S3.
+ * Replaces any earlier upload for this exact question (re-uploading = swap,
+ * not duplicate).
+ */
+export async function confirmIntakeFormUploadAction(questionId: string, fileName: string, storageKey: string) {
+    const session = await requireClient();
+    if (!session) return { error: "Unauthorized access." };
+
+    try {
+        await prisma.intakeFormDocument.deleteMany({
+            where: { clientId: session.user.id, questionId },
+        });
+
+        const doc = await prisma.intakeFormDocument.create({
+            data: {
+                clientId: session.user.id,
+                questionId,
+                fileName,
+                storageKey,
+            },
+        });
+
+        return { success: true, document: { id: doc.id, questionId: doc.questionId, fileName: doc.fileName } };
+    } catch (e: any) {
+        console.error("Confirm intake form upload error:", e);
+        return { error: "Failed to save the uploaded file." };
+    }
+}
+
+export async function removeIntakeFormDocumentAction(questionId: string) {
+    const session = await requireClient();
+    if (!session) return { error: "Unauthorized access." };
+
+    try {
+        await prisma.intakeFormDocument.deleteMany({
+            where: { clientId: session.user.id, questionId },
+        });
+        return { success: true };
+    } catch (e: any) {
+        console.error("Remove intake form document error:", e);
+        return { error: "Failed to remove the file." };
+    }
+}
+
+/**
+ * Agent/admin-facing — a short-lived download link for a specific
+ * uploaded intake-form document, scoped to the same agency as the client.
+ */
+export async function getIntakeFormDocumentUrlAction(documentId: string) {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
+        return { error: "Unauthorized access." };
+    }
+
+    try {
+        const doc = await prisma.intakeFormDocument.findUnique({
+            where: { id: documentId },
+            include: { client: { select: { agencyId: true } } },
+        });
+
+        if (!doc) return { error: "Document not found." };
+
+        const agencyId = (session.user as any).agencyId;
+        if (doc.client.agencyId !== agencyId) return { error: "Unauthorized access." };
+
+        const url = await createS3DownloadUrl(doc.storageKey);
+        return { success: true, url };
+    } catch (e: any) {
+        console.error("Get intake form document URL error:", e);
+        return { error: "Failed to generate the download link." };
     }
 }

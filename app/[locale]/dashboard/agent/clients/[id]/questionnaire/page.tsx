@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, ClipboardList } from "lucide-react";
 import { getAnsweredQuestionsBySection, formatAnswerForDisplay } from "@/lib/intake-form/engine";
 import { getTranslations } from "next-intl/server";
+import IntakeFormDocumentLink from "./intake-form-document-link";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,15 @@ export default async function ClientQuestionnairePage({ params }: { params: { id
 
     const answers = (form?.answers as Record<string, any>) || {};
     const country = form?.country || null;
+
+    const documents = await prisma.intakeFormDocument.findMany({
+        where: { clientId: id },
+        select: { id: true, questionId: true, fileName: true },
+    });
+    const documentsByQuestion: Record<string, { id: string; fileName: string }> = {};
+    for (const doc of documents) {
+        documentsByQuestion[doc.questionId] = { id: doc.id, fileName: doc.fileName };
+    }
     const steps = form ? getAnsweredQuestionsBySection(country, answers) : [];
 
     const countryLabels: Record<string, string> = {
@@ -100,14 +110,20 @@ export default async function ClientQuestionnairePage({ params }: { params: { id
                                     </h2>
                                 </div>
                                 <div className="divide-y divide-gray-50">
-                                    {step.questions.map((q) => (
-                                        <div key={q.id} className="px-6 py-4">
-                                            <p className="text-xs font-bold text-gray-400 mb-1">{q.label}</p>
-                                            <p className="text-sm font-semibold text-gray-900">
-                                                {formatAnswerForDisplay(q, answers[q.id])}
-                                            </p>
-                                        </div>
-                                    ))}
+                                    {step.questions.map((q) => {
+                                        const doc = documentsByQuestion[q.id];
+                                        return (
+                                            <div key={q.id} className="px-6 py-4">
+                                                <p className="text-xs font-bold text-gray-400 mb-1">{q.label}</p>
+                                                <p className="text-sm font-semibold text-gray-900">
+                                                    {formatAnswerForDisplay(q, answers[q.id])}
+                                                </p>
+                                                {doc && (
+                                                    <IntakeFormDocumentLink documentId={doc.id} fileName={doc.fileName} />
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         ))}

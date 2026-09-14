@@ -39,12 +39,18 @@ export default async function IntakeFormPage() {
         fullName: savedAnswers.fullName ?? session.user.name ?? "",
     };
 
+    const existingDocuments = await prisma.intakeFormDocument.findMany({
+        where: { clientId: session.user.id },
+        select: { id: true, questionId: true, fileName: true },
+    });
+
     return (
         <IntakeFormClient
             clientName={session.user.name || ""}
             initialAnswers={initialAnswers}
             initialSection={form.currentSection}
             initialStatus={form.status}
+            existingDocuments={existingDocuments}
         />
     );
 }

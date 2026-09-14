@@ -1,11 +1,28 @@
 import React from "react";
 import GeneralSettingsPanel from "./general-settings-panel";
 import { getTranslations } from "next-intl/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
     const t = await getTranslations("adminSettings");
+
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+
+    const agencyId = (session?.user as any)?.agencyId;
+    let agency = null;
+
+    if (agencyId) {
+        agency = await prisma.agency.findUnique({
+            where: { id: agencyId },
+        });
+    }
+
     return (
         <div className="space-y-12 max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b-4 border-gray-900">
@@ -16,7 +33,10 @@ export default async function AdminSettingsPage() {
                 </div>
             </div>
 
-            <GeneralSettingsPanel />
+            <GeneralSettingsPanel
+                agency={agency}
+                adminUser={session?.user || null}
+            />
         </div>
     );
 }
