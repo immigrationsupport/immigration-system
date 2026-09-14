@@ -5,6 +5,10 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import ApplicationList from "../applications/application-list";
 import NewClientButton from "./new-client-button";
+import SendIntakeFormButton from "./[id]/send-intake-form-button";
+import NewApplicationModal from "./[id]/new-application-modal";
+import Link from "next/link";
+import { UserPlus, Mail } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
@@ -64,6 +68,20 @@ export default async function AssignedClientsPage() {
             : { role: "CLIENT", agentId: session.user.id }
     });
 
+    // Clients with zero procedures — invisible on the ApplicationList above
+    // (which is procedure-centric), so agents previously could only find
+    // them via the client dropdown inside "New Procedure". Surfaced here
+    // so they're not lost.
+    const clientsWithoutProcedure = await prisma.user.findMany({
+        where: {
+            role: "CLIENT",
+            ...(isAdmin ? { agencyId } : { agentId: session.user.id }),
+            applications: { none: {} }
+        },
+        select: { id: true, name: true, email: true },
+        orderBy: { createdAt: "desc" }
+    });
+
     return (
         <div className="space-y-8 max-w-6xl mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row md:items-end justify-between border-b pb-4 border-gray-100 gap-4">
@@ -90,6 +108,51 @@ export default async function AssignedClientsPage() {
             </div>
 
             <ApplicationList initialApplications={applications} />
+
+            {clientsWithoutProcedure.length > 0 && (
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 pt-2">
+                        <UserPlus className="h-5 w-5 text-gray-400" />
+                        <h2 className="text-lg font-black text-gray-700">
+                            Clients sans procédure ({clientsWithoutProcedure.length})
+                        </h2>
+                    </div>
+                    <p className="text-sm text-gray-400 -mt-2">
+                        Ces clients n'ont pas encore de procédure en cours — envoyez-leur le formulaire de renseignement ou créez-en une directement.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {clientsWithoutProcedure.map((client) => (
+                            <div
+                                key={client.id}
+                                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="h-11 w-11 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 font-black shrink-0">
+                                        {client.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <Link
+                                            href={`/dashboard/agent/clients/${client.id}`}
+                                            className="font-bold text-gray-900 hover:text-[#1E3A8A] transition-colors truncate block"
+                                        >
+                                            {client.name}
+                                        </Link>
+                                        <p className="text-xs text-gray-400 flex items-center gap-1 truncate">
+                                            <Mail className="h-3 w-3 shrink-0" /> {client.email}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <SendIntakeFormButton clientId={client.id} />
+                                    <NewApplicationModal clientId={client.id} clientName={client.name} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
