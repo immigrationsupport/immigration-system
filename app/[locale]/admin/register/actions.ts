@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { hashPassword } from "better-auth/crypto";
 import { auditDetails } from "@/lib/audit-log";
+import { sendAgencyCreatedNotificationEmail } from "@/lib/email";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -201,6 +202,13 @@ export async function registerAgencyAdminAction(
 
             return { agency, admin };
         });
+
+        // Send agency creation notification email
+        sendAgencyCreatedNotificationEmail({
+            agencyName: result.agency.name,
+            adminName: result.admin.name,
+            adminEmail: result.admin.email,
+        }).catch((err) => console.error("Error sending agency notification email:", err));
 
         return { success: true, agencyId: result.agency.id };
     } catch (e: any) {

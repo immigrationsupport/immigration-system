@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import { hashPassword } from "better-auth/crypto";
 import { revalidatePath } from "next/cache";
 import { auditDetails } from "@/lib/audit-log";
+import { sendAgencyCreatedNotificationEmail } from "@/lib/email";
 
 /**
  * Make sure the current user is a SUPER_ADMIN.
@@ -199,6 +200,13 @@ export async function createAgencyAction(formData: FormData) {
                 admin,
             };
         });
+
+        // Send agency creation notification email
+        sendAgencyCreatedNotificationEmail({
+            agencyName: result.agency.name,
+            adminName: result.admin.name,
+            adminEmail: result.admin.email,
+        }).catch((err) => console.error("Error sending agency notification email:", err));
 
         revalidatePath("/super-admin/dashboard");
         revalidatePath("/super-admin/dashboard/agencies");

@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { hashPassword } from "better-auth/crypto";
 import { checkClientQuota } from "@/lib/subscription";
 import { auditDetails } from "@/lib/audit-log";
+import { sendClientWelcomeEmail } from "@/lib/email";
 export async function createClientAction(data: {
     name: string;
     email: string;
@@ -79,6 +80,13 @@ if (!quota.ok) return { error: quota.error, code: quota.code };
                 targetId: newClient.id,
             }
         });
+
+        // Send email to newly created client with system link
+        sendClientWelcomeEmail({
+            clientEmail: email,
+            clientName: name,
+            password: password,
+        }).catch((err) => console.error("Error sending welcome email to client:", err));
 
         revalidatePath("/admin/dashboard/clients");
         return { success: true, client: newClient };

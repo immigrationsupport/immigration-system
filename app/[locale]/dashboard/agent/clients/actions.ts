@@ -9,6 +9,7 @@ import { ApplicationType } from "@prisma/client";
 import { auditDetails } from "@/lib/audit-log";
 import { hashPassword } from "better-auth/crypto";
 import { checkClientQuota } from "@/lib/subscription";
+import { sendClientWelcomeEmail } from "@/lib/email";
 export async function createClientAction(formData: FormData) {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -94,6 +95,13 @@ if (!quota.ok) {
                 targetId: newClient.id,
             },
         });
+
+        // Send email to newly created client with system link
+        sendClientWelcomeEmail({
+            clientEmail: email,
+            clientName: name,
+            password: password,
+        }).catch((err) => console.error("Error sending welcome email to client:", err));
 
         revalidatePath("/dashboard/agent/clients");
 
