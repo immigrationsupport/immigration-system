@@ -1,5 +1,5 @@
 import { CardsGridSkeleton } from "@/components/ui/table-skeleton";
 
 export default function Loading() {
-    return <CardsGridSkeleton />;
+    return <CardsGridSkeleton cards={3} />;
 }
