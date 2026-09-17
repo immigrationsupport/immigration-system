@@ -931,12 +931,13 @@
       "mtnNumberLabel": "Numéro MTN Mobile Money",
       "orangeNumberLabel": "Numéro Orange Money",
       "phoneCountryLabel": "Cameroun (+237)",
+      "clientCapacityHint": "Chaque agent couvre jusqu'à {ratio} clients — avec ce nombre d'agents, vous pourrez gérer jusqu'à {count} clients.",
       "phoneHint": "Une demande de paiement apparaîtra sur ce téléphone. Entrez votre code PIN pour valider.",
       "cardPaymentTitle": "Paiement par carte via CamPay",
       "cardPaymentDescription": "Vous serez redirigé vers la passerelle sécurisée CamPay pour finaliser le paiement par Visa ou Mastercard.",
       "errorMinimum": "Saisissez au moins 1 agent et 1 client.",
       "errorPhone": "Veuillez saisir un numéro de téléphone camerounais valide (ex. 6XX XX XX XX).",
-      "securityNote": "Paiement sécurisé et chiffré 256 bits via CamPay",
+      "securityNote": "Paiement sécurisé",
       "payButton": "Payer {amount} FCFA",
       "processingPayment": "Traitement du paiement..."
     },
@@ -1661,5 +1662,32 @@
         "noResultsTitle": "Aucun résultat trouvé",
         "noResultsDesc": "Aucune procédure ni client ne correspond à votre recherche \"{query}\".",
         "resetSearch": "Réinitialiser la recherche"
-    }
+    },
+  "forgotPassword": {
+    "title": "Mot de passe oublié",
+    "subtitle": "Entrez votre e-mail pour recevoir un lien de réinitialisation.",
+    "emailLabel": "Adresse e-mail",
+    "emailPlaceholder": "Entrez votre e-mail",
+    "sendButton": "Envoyer le lien",
+    "sending": "Envoi en cours...",
+    "backToSignIn": "Retour à la connexion",
+    "successMessage": "Si cet e-mail correspond à un compte, un lien de réinitialisation a été envoyé.",
+    "errorGeneric": "Une erreur est survenue. Veuillez réessayer."
+  },
+  "resetPassword": {
+    "title": "Réinitialiser le mot de passe",
+    "subtitle": "Choisissez un nouveau mot de passe pour votre compte.",
+    "newPasswordLabel": "Nouveau mot de passe",
+    "confirmPasswordLabel": "Confirmer le mot de passe",
+    "submitButton": "Réinitialiser le mot de passe",
+    "submitting": "Réinitialisation...",
+    "backToSignIn": "Retour à la connexion",
+    "successMessage": "Votre mot de passe a été réinitialisé. Redirection vers la connexion...",
+    "invalidTokenTitle": "Lien invalide ou expiré",
+    "invalidTokenMessage": "Ce lien de réinitialisation est invalide ou a expiré.",
+    "requestNewLink": "Demander un nouveau lien",
+    "errorMismatch": "Les mots de passe ne correspondent pas.",
+    "errorTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+    "errorGeneric": "Une erreur est survenue. Veuillez réessayer."
+  }
 }

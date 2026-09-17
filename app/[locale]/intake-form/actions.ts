@@ -63,6 +63,10 @@ export async function saveIntakeFormProgressAction(
             return { error: "This form has already been submitted." };
         }
 
+        if (!existing || !existing.invited) {
+            return { error: "You are not authorized to fill out this form." };
+        }
+
         await prisma.intakeFormResponse.upsert({
             where: { clientId: session.user.id },
             update: { answers, currentSection },
@@ -93,6 +97,10 @@ export async function submitIntakeFormAction(answers: Record<string, any>) {
 
         if (existing?.status === "SUBMITTED") {
             return { error: "This form has already been submitted." };
+        }
+
+        if (!existing || !existing.invited) {
+            return { error: "You are not authorized to fill out this form." };
         }
 
         const country = answers.destinationCountry || null;

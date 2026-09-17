@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Lock, CheckCircle2, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { resetPasswordAction } from "./actions";
 
 export default function ResetPasswordForm({ token, locale }: { token: string; locale: string }) {
+    const t = useTranslations("resetPassword");
     const router = useRouter();
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -16,11 +18,20 @@ export default function ResetPasswordForm({ token, locale }: { token: string; lo
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError(null);
+
+        if (newPassword !== confirmPassword) {
+            setError(t("errorMismatch"));
+            return;
+        }
+        if (newPassword.length < 8) {
+            setError(t("errorTooShort"));
+            return;
+        }
+
         setLoading(true);
-
         const result = await resetPasswordAction(token, newPassword, confirmPassword);
-
         setLoading(false);
+
         if (result.error) {
             setError(result.error);
             return;
@@ -36,11 +47,7 @@ export default function ResetPasswordForm({ token, locale }: { token: string; lo
         return (
             <div className="bg-emerald-50 border border-emerald-100 text-emerald-800 px-4 py-4 rounded-sm text-sm flex items-start gap-3">
                 <CheckCircle2 className="shrink-0 h-5 w-5 mt-0.5" />
-                <span className="font-medium">
-                    {locale === "fr"
-                        ? "Votre mot de passe a été réinitialisé. Redirection vers la connexion..."
-                        : "Your password has been reset. Redirecting to sign in..."}
-                </span>
+                <span className="font-medium">{t("successMessage")}</span>
             </div>
         );
     }
@@ -56,7 +63,7 @@ export default function ResetPasswordForm({ token, locale }: { token: string; lo
 
             <div>
                 <label htmlFor="newPassword" className="block text-sm font-semibold text-gray-800 mb-1">
-                    {locale === "fr" ? "Nouveau mot de passe" : "New password"}
+                    {t("newPasswordLabel")}
                 </label>
                 <div className="relative">
                     <input
@@ -75,7 +82,7 @@ export default function ResetPasswordForm({ token, locale }: { token: string; lo
 
             <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-800 mb-1">
-                    {locale === "fr" ? "Confirmer le mot de passe" : "Confirm password"}
+                    {t("confirmPasswordLabel")}
                 </label>
                 <div className="relative">
                     <input
@@ -97,7 +104,7 @@ export default function ResetPasswordForm({ token, locale }: { token: string; lo
                 disabled={loading}
                 className="w-full flex justify-center items-center py-2.5 px-4 rounded-sm shadow-sm text-sm font-medium text-white bg-[#1E3A8A] hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1E3A8A] disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
             >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (locale === "fr" ? "Réinitialiser le mot de passe" : "Reset password")}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("submitButton")}
             </button>
         </form>
     );

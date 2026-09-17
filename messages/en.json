@@ -931,12 +931,13 @@
       "mtnNumberLabel": "MTN Mobile Money Number",
       "orangeNumberLabel": "Orange Money Number",
       "phoneCountryLabel": "Cameroon (+237)",
+      "clientCapacityHint": "Each agent covers up to {ratio} clients — with this many agents, you can manage up to {count} clients.",
       "phoneHint": "A payment prompt will appear on this phone. Enter your PIN to validate.",
       "cardPaymentTitle": "Card Payment via CamPay",
       "cardPaymentDescription": "You will be redirected to the secure CamPay gateway to complete payment with Visa or Mastercard.",
       "errorMinimum": "Enter at least 1 agent and 1 client.",
       "errorPhone": "Please enter a valid Cameroon phone number (e.g. 6XX XX XX XX).",
-      "securityNote": "Secured & encrypted 256-bit payment via CamPay",
+      "securityNote": "Secured  payment",
       "payButton": "Pay {amount} FCFA",
       "processingPayment": "Processing payment..."
     },
@@ -1662,5 +1663,32 @@
     "noResultsTitle": "No results found",
     "noResultsDesc": "No procedure or client matches your search \"{query}\".",
     "resetSearch": "Reset search"
+  },
+  "forgotPassword": {
+    "title": "Forgot password",
+    "subtitle": "Enter your email to receive a reset link.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "Enter your email",
+    "sendButton": "Send reset link",
+    "sending": "Sending...",
+    "backToSignIn": "Back to sign in",
+    "successMessage": "If an account exists for this email, a password reset link has been sent.",
+    "errorGeneric": "Something went wrong. Please try again."
+  },
+  "resetPassword": {
+    "title": "Reset your password",
+    "subtitle": "Choose a new password for your account.",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Confirm password",
+    "submitButton": "Reset password",
+    "submitting": "Resetting...",
+    "backToSignIn": "Back to sign in",
+    "successMessage": "Your password has been reset. Redirecting to sign in...",
+    "invalidTokenTitle": "Invalid or expired link",
+    "invalidTokenMessage": "This reset link is invalid or has expired.",
+    "requestNewLink": "Request a new link",
+    "errorMismatch": "Passwords do not match.",
+    "errorTooShort": "Password must be at least 8 characters.",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }

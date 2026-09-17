@@ -219,16 +219,15 @@ export async function createCustomPlanAndCheckoutAction(formData: FormData): Pro
     const { session, agencyId } = ctx;
 
     const numAgents = parseInt((formData.get("numAgents") as string) || "", 10);
-    const numClients = parseInt((formData.get("numClients") as string) || "", 10);
     const paymentMethod = String(formData.get("paymentMethod") || "");
     const phoneNumber = String(formData.get("phoneNumber") || "").replace(/\D/g, "");
 
-    if (Number.isNaN(numAgents) || numAgents < 1 || Number.isNaN(numClients) || numClients < 1) {
-        return { error: "Enter a valid number of agents and clients (at least 1 each)." };
+    if (Number.isNaN(numAgents) || numAgents < 1) {
+        return { error: "Enter a valid number of agents (at least 1)." };
     }
 
     try {
-        const { getPricingSettings, calculateCustomPlanPrice } = await import("@/lib/pricing");
+        const { getPricingSettings, calculateCustomPlanPrice, getClientCapacityForAgents } = await import("@/lib/pricing");
         const [subscription, pricingSettings] = await Promise.all([
             prisma.subscription.findUnique({ where: { agencyId } }),
             getPricingSettings(),
@@ -236,7 +235,8 @@ export async function createCustomPlanAndCheckoutAction(formData: FormData): Pro
 
         if (!subscription) return { error: "No subscription found for your agency." };
 
-        const priceFcfa = calculateCustomPlanPrice(numAgents, numClients, pricingSettings);
+        const numClients = getClientCapacityForAgents(numAgents);
+        const priceFcfa = calculateCustomPlanPrice(numAgents, pricingSettings);
 
         const newPlan = await prisma.plan.create({
             data: {

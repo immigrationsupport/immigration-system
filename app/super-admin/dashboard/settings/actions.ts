@@ -15,12 +15,10 @@ export async function updatePricingSettingsAction(formData: FormData) {
 
     const basePriceFcfa = parseInt((formData.get("basePriceFcfa") as string) || "", 10);
     const pricePerAgentFcfa = parseInt((formData.get("pricePerAgentFcfa") as string) || "", 10);
-    const pricePerClientFcfa = parseInt((formData.get("pricePerClientFcfa") as string) || "", 10);
 
     if (
         Number.isNaN(basePriceFcfa) || basePriceFcfa < 0 ||
-        Number.isNaN(pricePerAgentFcfa) || pricePerAgentFcfa < 0 ||
-        Number.isNaN(pricePerClientFcfa) || pricePerClientFcfa < 0
+        Number.isNaN(pricePerAgentFcfa) || pricePerAgentFcfa < 0
     ) {
         return { error: "All amounts must be positive numbers." };
     }
@@ -28,14 +26,14 @@ export async function updatePricingSettingsAction(formData: FormData) {
     try {
         await prisma.pricingSettings.upsert({
             where: { id: "singleton" },
-            update: { basePriceFcfa, pricePerAgentFcfa, pricePerClientFcfa },
-            create: { id: "singleton", basePriceFcfa, pricePerAgentFcfa, pricePerClientFcfa },
+            update: { basePriceFcfa, pricePerAgentFcfa },
+            create: { id: "singleton", basePriceFcfa, pricePerAgentFcfa },
         });
 
         await prisma.auditLog.create({
             data: {
                 action: "UPDATE_PRICING_SETTINGS",
-                details: auditDetails("pricingSettingsUpdated", { base: basePriceFcfa, agent: pricePerAgentFcfa, client: pricePerClientFcfa }),
+                details: auditDetails("pricingSettingsUpdated", { base: basePriceFcfa, agent: pricePerAgentFcfa }),
                 userId: session.user.id,
             },
         });

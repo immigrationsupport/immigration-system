@@ -1,6 +1,7 @@
 import React from "react";
 import prisma from "@/lib/prisma";
 import { AlertCircle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import ResetPasswordForm from "./reset-password-form";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ export default async function ResetPasswordPage({
     params: Promise<{ token: string; locale: string }>;
 }) {
     const { token, locale } = await params;
+    const t = await getTranslations({ locale, namespace: "resetPassword" });
 
     const verification = await prisma.verification.findFirst({
         where: { identifier: `${RESET_TOKEN_PREFIX}${token}` },
@@ -38,13 +40,11 @@ export default async function ResetPasswordPage({
                             <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A8A] mb-2">{agencyName}</p>
                         )}
                         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                            {locale === "fr" ? "Réinitialiser le mot de passe" : "Reset your password"}
+                            {t("title")}
                         </h1>
                         {isValid && (
                             <p className="mt-2 text-sm text-gray-500">
-                                {locale === "fr"
-                                    ? "Choisissez un nouveau mot de passe pour votre compte."
-                                    : "Choose a new password for your account."}
+                                {t("subtitle")}
                             </p>
                         )}
                     </div>
@@ -55,24 +55,20 @@ export default async function ResetPasswordPage({
                         <div className="space-y-6">
                             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-4 rounded-sm text-sm flex items-start gap-3">
                                 <AlertCircle className="shrink-0 h-5 w-5 mt-0.5" />
-                                <span className="font-medium">
-                                    {locale === "fr"
-                                        ? "Ce lien de réinitialisation est invalide ou a expiré."
-                                        : "This reset link is invalid or has expired."}
-                                </span>
+                                <span className="font-medium">{t("invalidTokenMessage")}</span>
                             </div>
                             <a
                                 href={`/${locale}/forgot-password`}
                                 className="block text-center w-full py-2.5 px-4 rounded-sm shadow-sm text-sm font-medium text-white bg-[#1E3A8A] hover:bg-blue-900 transition-colors"
                             >
-                                {locale === "fr" ? "Demander un nouveau lien" : "Request a new link"}
+                                {t("requestNewLink")}
                             </a>
                         </div>
                     )}
 
                     <div className="mt-6 text-center">
                         <a href={`/${locale}/sign-in`} className="text-sm font-semibold text-[#1E3A8A] hover:underline">
-                            {locale === "fr" ? "Retour à la connexion" : "Back to sign in"}
+                            {t("backToSignIn")}
                         </a>
                     </div>
                 </div>

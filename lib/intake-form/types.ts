@@ -6,7 +6,9 @@ export type QuestionType =
     | "date"
     | "select"
     | "number"
-    | "upload";
+    | "upload"
+    | "phone"
+    | "country";
 
 export interface QuestionOption {
     value: string;

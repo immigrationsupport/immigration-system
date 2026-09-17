@@ -4,13 +4,14 @@ import { getVisibleQuestions } from "@/lib/intake-form/engine";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { Link } from "@/i18n/routing";
+import { Link, redirect } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import ContactAgencyButton from "@/components/ContactAgencyButton";
 
 export default async function ClientDashboard() {
     const t = await getTranslations("dashboard.clientDashboard");
+    const locale = await getLocale();
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -83,6 +84,10 @@ export default async function ClientDashboard() {
             : "NOT_STARTED";
     }
 
+    if (intakeForm?.invited && intakeFormStatus === "NOT_STARTED") {
+        redirect({ href: "/intake-form", locale });
+    }
+
     // Fetch Action Required count from steps
     const actionRequiredCount = await prisma.application.count({
         where: { 
@@ -99,7 +104,7 @@ export default async function ClientDashboard() {
                     <p className="text-gray-500 font-medium tracking-tight">{t("subtitle")}</p>
                 </div>
             </div>
-            {intakeFormStatus !== "SUBMITTED" && (
+            {intakeForm?.invited && intakeFormStatus !== "SUBMITTED" && (
                 <Link href="/intake-form">
                     <div className="bg-white p-6 shadow-sm border border-blue-100 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-all cursor-pointer group">
                         <div className="flex items-center gap-4">

@@ -38,6 +38,8 @@ export default async function ClientQuestionnairePage({ params }: { params: { id
     const answers = (form?.answers as Record<string, any>) || {};
     const country = form?.country || null;
 
+    const steps = form ? getAnsweredQuestionsBySection(country, answers) : [];
+
     const documents = await prisma.intakeFormDocument.findMany({
         where: { clientId: id },
         select: { id: true, questionId: true, fileName: true },
@@ -46,8 +48,6 @@ export default async function ClientQuestionnairePage({ params }: { params: { id
     for (const doc of documents) {
         documentsByQuestion[doc.questionId] = { id: doc.id, fileName: doc.fileName };
     }
-    const steps = form ? getAnsweredQuestionsBySection(country, answers) : [];
-
     const countryLabels: Record<string, string> = {
         CANADA: t("questionnaireCountryCanada"),
         FRANCE: t("questionnaireCountryFrance"),

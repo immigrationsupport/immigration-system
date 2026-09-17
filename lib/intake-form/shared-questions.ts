@@ -15,6 +15,7 @@ export const destinationQuestion: Question = {
         { value: "CANADA", label: "Canada" },
         { value: "FRANCE", label: "France" },
         { value: "GERMANY", label: "Allemagne" },
+        { value: "OTHER", label: "Autre" },
     ],
 };
 
@@ -32,8 +33,7 @@ export const personalDetailsQuestions: Question[] = [
         id: "phone",
         section: "personalDetails",
         label: "Votre numéro de téléphone (WhatsApp de préférence)",
-        helpText: "Pensez à préciser l'indicatif du pays. Exemple : +237 676 11 32 24",
-        type: "text",
+        type: "phone",
         required: true,
         profileField: "phoneNumber",
     },
@@ -49,8 +49,7 @@ export const personalDetailsQuestions: Question[] = [
         id: "countryOfResidence",
         section: "personalDetails",
         label: "Quel est votre pays de résidence actuel ?",
-        placeholder: "Exemple : Cameroun",
-        type: "text",
+        type: "country",
         required: true,
     },
     {
@@ -250,15 +249,6 @@ export const academicQuestions: Question[] = [
         type: "text",
         required: true,
         condition: [{ questionId: "licenceHasOtherDegree", equals: "YES" }],
-    },
-
-    {
-        id: "academicOtherDetails",
-        section: "academicOptional",
-        label: "Autres informations concernant vos études que vous jugez important de préciser (facultatif)",
-        helpText: "Exemple : J'ai un doctorat, je ne peux pas avoir accès à mes relevés de notes de Licence",
-        type: "textarea",
-        required: false,
     },
 ];
 

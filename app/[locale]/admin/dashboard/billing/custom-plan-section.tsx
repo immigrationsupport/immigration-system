@@ -26,10 +26,14 @@ import { MethodCard } from "./upgrade-plan-section";
 
 type PaymentMethod = "MTN_MOBILE_MONEY" | "ORANGE_MONEY" | "CARD";
 
+// Keep in sync with AGENT_TO_CLIENT_RATIO in lib/pricing.ts (not imported
+// directly here since that file also imports prisma, which can't ship to
+// the client bundle).
+const AGENT_TO_CLIENT_RATIO = 20;
+
 interface PricingSettings {
     basePriceFcfa: number;
     pricePerAgentFcfa: number;
-    pricePerClientFcfa: number;
 }
 
 export default function CustomPlanSection({ pricing }: { pricing: PricingSettings }) {
@@ -38,18 +42,14 @@ export default function CustomPlanSection({ pricing }: { pricing: PricingSetting
 
     const [open, setOpen] = useState(false);
     const [numAgents, setNumAgents] = useState("1");
-    const [numClients, setNumClients] = useState("10");
     const [method, setMethod] = useState<PaymentMethod>("MTN_MOBILE_MONEY");
     const [phone, setPhone] = useState("");
     const [error, setError] = useState("");
     const [isPending, startTransition] = useTransition();
 
     const agents = Math.max(0, parseInt(numAgents, 10) || 0);
-    const clients = Math.max(0, parseInt(numClients, 10) || 0);
-    const totalPrice =
-        pricing.basePriceFcfa +
-        agents * pricing.pricePerAgentFcfa +
-        clients * pricing.pricePerClientFcfa;
+    const clientCapacity = agents * AGENT_TO_CLIENT_RATIO;
+    const totalPrice = pricing.basePriceFcfa + agents * pricing.pricePerAgentFcfa;
 
     function closeDialog() {
         if (!isPending) {
@@ -62,7 +62,7 @@ export default function CustomPlanSection({ pricing }: { pricing: PricingSetting
     function handleConfirm() {
         setError("");
 
-        if (agents < 1 || clients < 1) {
+        if (agents < 1) {
             setError(t("errorMinimum"));
             return;
         }
@@ -78,7 +78,6 @@ export default function CustomPlanSection({ pricing }: { pricing: PricingSetting
         startTransition(async () => {
             const formData = new FormData();
             formData.set("numAgents", String(agents));
-            formData.set("numClients", String(clients));
             formData.set("paymentMethod", method);
             formData.set("phoneNumber", phone);
 
@@ -144,31 +143,20 @@ export default function CustomPlanSection({ pricing }: { pricing: PricingSetting
                     </div>
 
                     <div className="p-6 space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-black text-gray-800 mb-1.5">
-                                    {t("numAgentsLabel")}
-                                </label>
-                                <Input
-                                    type="number"
-                                    min={1}
-                                    value={numAgents}
-                                    onChange={(e) => setNumAgents(e.target.value)}
-                                    disabled={isPending}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-black text-gray-800 mb-1.5">
-                                    {t("numClientsLabel")}
-                                </label>
-                                <Input
-                                    type="number"
-                                    min={1}
-                                    value={numClients}
-                                    onChange={(e) => setNumClients(e.target.value)}
-                                    disabled={isPending}
-                                />
-                            </div>
+                        <div>
+                            <label className="block text-sm font-black text-gray-800 mb-1.5">
+                                {t("numAgentsLabel")}
+                            </label>
+                            <Input
+                                type="number"
+                                min={1}
+                                value={numAgents}
+                                onChange={(e) => setNumAgents(e.target.value)}
+                                disabled={isPending}
+                            />
+                            <p className="text-xs text-gray-500 font-semibold mt-2">
+                                {t("clientCapacityHint", { count: clientCapacity, ratio: AGENT_TO_CLIENT_RATIO })}
+                            </p>
                         </div>
 
                         <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/50 border border-blue-100 p-4">
@@ -177,7 +165,7 @@ export default function CustomPlanSection({ pricing }: { pricing: PricingSetting
                                     {t("summaryTitle")}
                                 </p>
                                 <p className="font-black text-gray-900 text-lg mt-0.5">
-                                    {t("agentsCount", { count: agents })}, {t("clientsCount", { count: clients })}
+                                    {t("agentsCount", { count: agents })}, {t("clientsCount", { count: clientCapacity })}
                                 </p>
                             </div>
                             <div className="text-right">

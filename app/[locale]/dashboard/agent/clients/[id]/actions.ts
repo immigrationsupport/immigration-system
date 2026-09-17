@@ -280,23 +280,36 @@ export async function sendIntakeFormLinkAction(clientId: string) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "";
         const formUrl = `${appUrl}/fr/intake-form`;
 
+        const agency = await prisma.agency.findUnique({
+            where: { id: agencyId },
+            select: { name: true },
+        });
+        const agencyName = agency?.name || "votre agence";
+
         const html = `
-            <p>Bonjour ${client.name},</p>
+            <p>Bonjour Monsieur/Madame ${client.name},</p>
             <p>Merci de bien vouloir vous connecter à votre compte et compléter le formulaire de renseignement suivant afin que nous puissions poursuivre le traitement de votre dossier :</p>
             <p><a href="${formUrl}" style="background-color:#1E3A8A;color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;">Remplir le formulaire de renseignement</a></p>
             <p>Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br/>${formUrl}</p>
             <p>Vous devrez vous connecter avec votre compte pour y accéder — vos réponses seront automatiquement sauvegardées au fur et à mesure, vous pouvez donc reprendre plus tard si besoin.</p>
+            <p>Cordialement,<br/>${session.user.name}<br/>${agencyName}</p>
         `;
 
         const result = await sendEmail({
             to: client.email,
-            subject: "Formulaire de renseignement à compléter — Procédure Facile",
+            subject: `Formulaire de renseignement à compléter — ${agencyName}`,
             html,
         });
 
         if (result.error) {
             return { error: "Failed to send the email. Please try again." };
         }
+
+        await prisma.intakeFormResponse.upsert({
+            where: { clientId },
+            update: { invited: true },
+            create: { clientId, invited: true },
+        });
 
         await prisma.auditLog.create({
             data: {

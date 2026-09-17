@@ -23,14 +23,18 @@ export default async function IntakeFormPage() {
         );
     }
 
-    let form = await prisma.intakeFormResponse.findUnique({
+    const form = await prisma.intakeFormResponse.findUnique({
         where: { clientId: session.user.id },
     });
 
-    if (!form) {
-        form = await prisma.intakeFormResponse.create({
-            data: { clientId: session.user.id },
-        });
+    if (!form || !form.invited) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh] px-4 text-center">
+                <p className="text-gray-500 font-medium max-w-md">
+                    Vous n'êtes pas autorisé à remplir ce formulaire pour le moment. Contactez votre agent si vous pensez qu'il s'agit d'une erreur.
+                </p>
+            </div>
+        );
     }
 
     const savedAnswers = (form.answers as Record<string, any>) || {};

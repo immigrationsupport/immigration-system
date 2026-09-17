@@ -13,6 +13,7 @@ import {
     FormStep,
 } from "@/lib/intake-form/engine";
 import { Question } from "@/lib/intake-form/types";
+import { COUNTRIES, findCountryByDialCode } from "@/lib/intake-form/countries";
 import {
     saveIntakeFormProgressAction,
     submitIntakeFormAction,
@@ -150,6 +151,53 @@ function QuestionField({
                 </div>
             );
         }
+
+        case "phone": {
+            const raw = typeof value === "string" ? value : "";
+            const spaceIndex = raw.indexOf(" ");
+            const currentDialCode = spaceIndex > 0 ? raw.slice(0, spaceIndex) : "+237";
+            const currentNumber = spaceIndex > 0 ? raw.slice(spaceIndex + 1) : raw;
+
+            return (
+                <div className="flex gap-2">
+                    <select
+                        value={currentDialCode}
+                        onChange={(e) => onChange(`${e.target.value} ${currentNumber}`.trim())}
+                        className="w-28 shrink-0 border border-gray-200 rounded-xl px-2 py-2.5 text-sm"
+                    >
+                        {COUNTRIES.filter((c) => c.dialCode).map((c) => (
+                            <option key={c.code} value={c.dialCode}>
+                                {c.dialCode} {c.code}
+                            </option>
+                        ))}
+                    </select>
+                    <Input
+                        type="tel"
+                        value={currentNumber}
+                        placeholder="676 11 32 24"
+                        onChange={(e) => onChange(`${currentDialCode} ${e.target.value}`.trim())}
+                    />
+                </div>
+            );
+        }
+
+        case "country":
+            return (
+                <select
+                    value={value ?? ""}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                >
+                    <option value="" disabled>
+                        Sélectionnez un pays...
+                    </option>
+                    {COUNTRIES.map((c) => (
+                        <option key={c.code} value={c.name}>
+                            {c.name}
+                        </option>
+                    ))}
+                </select>
+            );
 
         default:
             return null;
@@ -295,7 +343,19 @@ export default function IntakeFormClient({
     const isLastStep = safeStepIndex === steps.length - 1;
 
     const setAnswer = (id: string, value: any) => {
-        setAnswers((prev) => ({ ...prev, [id]: value }));
+        setAnswers((prev) => {
+            const next = { ...prev, [id]: value };
+
+            if (id === "phone" && typeof value === "string" && !prev.countryOfResidence) {
+                const dialCode = value.split(" ")[0];
+                const matched = findCountryByDialCode(dialCode);
+                if (matched && matched.code !== "OT") {
+                    next.countryOfResidence = matched.name;
+                }
+            }
+
+            return next;
+        });
     };
 
     const validateCurrentStep = () => {
@@ -395,7 +455,8 @@ export default function IntakeFormClient({
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-bold text-[#1E3A8A] mb-6">{currentStep.label}</h2>
+                <h2 className="text-lg font-bold text-[#1E3A8A] mb-1">{currentStep.label}</h2>
+                <p className="text-xs text-gray-400 mb-6">Les questions marquées d'une étoile (*) sont obligatoires.</p>
 
                 <div className="space-y-6">
                     {currentStep.questions.map((q) => (
