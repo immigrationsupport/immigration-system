@@ -17,15 +17,15 @@ export const canadaModule: Question[] = [
         section: "ca_immigration",
         label: "Veuillez préciser les détails de la demande qui avait été faite auprès de IRCC et la décision de l'agent.",
         type: "textarea",
-        required: true,
+        required: false,
         condition: [{ questionId: "ca_hasIrccApplication", equals: "YES" }],
     },
 
     // --- Diploma equivalence label for Canada is WES ---
     {
-        id: "ca_masterWes",
-        section: "academicMaster",
-        label: "Avez-vous fait une évaluation des études (WES) de votre diplôme de Master 2 ?",
+        id: "ca_diplomaWes",
+        section: "academicMain",
+        label: "Avez-vous fait une évaluation des études (WES) de ce diplôme ?",
         helpText: "Il s'agit de ce qui est souvent appelé l'équivalence de diplôme",
         type: "radio",
         required: true,
@@ -34,12 +34,12 @@ export const canadaModule: Question[] = [
             { value: "NO", label: "Non" },
             { value: "IN_PROGRESS", label: "En cours" },
         ],
-        condition: [{ questionId: "hasMaster", equals: "YES" }],
+        condition: [{ questionId: "educationLevel", notEquals: "NONE" }],
     },
     {
-        id: "ca_licenceWes",
-        section: "academicLicence",
-        label: "Avez-vous fait une évaluation des études (WES) de ce diplôme de licence ?",
+        id: "ca_diploma2Wes",
+        section: "academicSecond",
+        label: "Avez-vous fait une évaluation des études (WES) de cet autre diplôme ?",
         helpText: "Il s'agit de ce qui est souvent appelé l'équivalence de diplôme",
         type: "radio",
         required: true,
@@ -48,20 +48,7 @@ export const canadaModule: Question[] = [
             { value: "NO", label: "Non" },
             { value: "IN_PROGRESS", label: "En cours" },
         ],
-        condition: [{ questionId: "hasMaster", equals: "NO" }],
-    },
-    {
-        id: "ca_bac2Wes",
-        section: "academicBac2",
-        label: "Avez-vous fait une évaluation des études (WES) de votre diplôme de niveau Bac+2 ?",
-        type: "radio",
-        required: true,
-        options: [
-            { value: "YES", label: "Oui" },
-            { value: "NO", label: "Non" },
-            { value: "IN_PROGRESS", label: "En cours" },
-        ],
-        condition: [{ questionId: "licenceHasOtherDegree", equals: "YES" }],
+        condition: [{ questionId: "hasOtherDiploma", equals: "YES" }],
     },
 
     // --- Language tests ---
@@ -79,14 +66,16 @@ export const canadaModule: Question[] = [
     {
         id: "ca_frenchTestType",
         section: "language",
-        label: "Quel(s) test(s) de langue française avez-vous fait (cochez plusieurs cases si applicable) ?",
-        type: "checkbox",
+        label: "Quel test de langue française avez-vous fait ?",
+        helpText: "Si vous avez fait plusieurs tests, indiquez celui avec votre meilleur résultat.",
+        type: "radio",
         required: true,
         options: [
             { value: "TCF_CANADA", label: "TCF-Canada" },
             { value: "TCF_QUEBEC", label: "TCF-Québec" },
             { value: "TEF_CANADA", label: "TEF-Canada" },
             { value: "TEF_QUEBEC", label: "TEF-Québec / TEFAQ" },
+            { value: "OTHER", label: "Autre" },
         ],
         condition: [{ questionId: "ca_hasFrenchTest", equals: "YES" }],
         documentType: "LANGUAGE_REGISTRATION",
@@ -99,6 +88,10 @@ export const canadaModule: Question[] = [
         type: "number",
         required: true,
         condition: [{ questionId: "ca_hasFrenchTest", equals: "YES" }],
+        maxFromAnswer: {
+            questionId: "ca_frenchTestType",
+            map: { TCF_CANADA: 20, TCF_QUEBEC: 20, TEF_CANADA: 699, TEF_QUEBEC: 699 },
+        },
     },
     {
         id: "ca_frenchScoreCE",
@@ -108,6 +101,10 @@ export const canadaModule: Question[] = [
         type: "number",
         required: true,
         condition: [{ questionId: "ca_hasFrenchTest", equals: "YES" }],
+        maxFromAnswer: {
+            questionId: "ca_frenchTestType",
+            map: { TCF_CANADA: 20, TCF_QUEBEC: 20, TEF_CANADA: 699, TEF_QUEBEC: 699 },
+        },
     },
     {
         id: "ca_frenchScoreEO",
@@ -117,6 +114,10 @@ export const canadaModule: Question[] = [
         type: "number",
         required: true,
         condition: [{ questionId: "ca_hasFrenchTest", equals: "YES" }],
+        maxFromAnswer: {
+            questionId: "ca_frenchTestType",
+            map: { TCF_CANADA: 20, TCF_QUEBEC: 20, TEF_CANADA: 699, TEF_QUEBEC: 699 },
+        },
     },
     {
         id: "ca_frenchScoreEE",
@@ -126,6 +127,10 @@ export const canadaModule: Question[] = [
         type: "number",
         required: true,
         condition: [{ questionId: "ca_hasFrenchTest", equals: "YES" }],
+        maxFromAnswer: {
+            questionId: "ca_frenchTestType",
+            map: { TCF_CANADA: 20, TCF_QUEBEC: 20, TEF_CANADA: 699, TEF_QUEBEC: 699 },
+        },
         documentType: "LANGUAGE_RESULT",
     },
     {
@@ -142,12 +147,14 @@ export const canadaModule: Question[] = [
     {
         id: "ca_englishTestType",
         section: "language",
-        label: "Quel(s) test(s) de langue anglaise avez-vous fait ?",
-        type: "checkbox",
+        label: "Quel test de langue anglaise avez-vous fait ?",
+        helpText: "Si vous avez fait plusieurs tests, indiquez celui avec votre meilleur résultat.",
+        type: "radio",
         required: true,
         options: [
             { value: "IELTS", label: "IELTS" },
             { value: "CELPIP", label: "CELPIP" },
+            { value: "OTHER", label: "Autre" },
         ],
         condition: [{ questionId: "ca_hasEnglishTest", equals: "YES" }],
         documentType: "LANGUAGE_REGISTRATION",
@@ -160,6 +167,7 @@ export const canadaModule: Question[] = [
         type: "number",
         required: true,
         condition: [{ questionId: "ca_hasEnglishTest", equals: "YES" }],
+        maxFromAnswer: { questionId: "ca_englishTestType", map: { IELTS: 9 } },
     },
     {
         id: "ca_englishScoreReading",
@@ -169,6 +177,7 @@ export const canadaModule: Question[] = [
         type: "number",
         required: true,
         condition: [{ questionId: "ca_hasEnglishTest", equals: "YES" }],
+        maxFromAnswer: { questionId: "ca_englishTestType", map: { IELTS: 9 } },
     },
     {
         id: "ca_englishScoreWriting",
@@ -178,6 +187,7 @@ export const canadaModule: Question[] = [
         type: "number",
         required: true,
         condition: [{ questionId: "ca_hasEnglishTest", equals: "YES" }],
+        maxFromAnswer: { questionId: "ca_englishTestType", map: { IELTS: 9 } },
     },
     {
         id: "ca_englishScoreSpeaking",
@@ -187,6 +197,7 @@ export const canadaModule: Question[] = [
         type: "number",
         required: true,
         condition: [{ questionId: "ca_hasEnglishTest", equals: "YES" }],
+        maxFromAnswer: { questionId: "ca_englishTestType", map: { IELTS: 9 } },
         documentType: "LANGUAGE_RESULT",
     },
 

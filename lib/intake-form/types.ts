@@ -54,6 +54,13 @@ export interface Question {
      * (used for an end date that may still be ongoing).
      */
     allowPresent?: boolean;
+    /**
+     * For type === "number" only — caps the value based on another
+     * question's answer (e.g. the chosen test type), so a TCF score can't
+     * exceed 20 while a TEF score can't exceed 699. `default` applies when
+     * the sibling answer isn't in `map` (e.g. "OTHER" test — no cap).
+     */
+    maxFromAnswer?: { questionId: string; map: Record<string, number>; default?: number };
 }
 
 export interface CountryModule {

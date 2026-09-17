@@ -153,7 +153,11 @@ export async function submitIntakeFormAction(answers: Record<string, any>) {
     }
 }
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
+const ALLOWED_TYPES: Record<string, number> = {
+    "application/pdf": 10 * 1024 * 1024, // 10 MB
+    "image/jpeg": 4 * 1024 * 1024, // 4 MB
+    "image/png": 4 * 1024 * 1024, // 4 MB
+};
 
 /**
  * Step 1 of the upload — get a signed S3 PUT url. These documents aren't
@@ -171,7 +175,15 @@ export async function createIntakeFormUploadUrlAction(
     if (!session) return { error: "Unauthorized access." };
 
     if (!fileName || !fileName.trim()) return { error: "File name is required." };
-    if (fileSize > MAX_FILE_SIZE) return { error: "File is too large. Maximum size is 20 MB." };
+
+    const maxForType = ALLOWED_TYPES[contentType];
+    if (!maxForType) {
+        return { error: "Only PDF, JPEG, and PNG files are accepted." };
+    }
+    if (fileSize > maxForType) {
+        const maxMb = Math.round(maxForType / (1024 * 1024));
+        return { error: `File is too large. Maximum size is ${maxMb} MB for this file type.` };
+    }
 
     try {
         const safeFileName = fileName.trim().replace(/[^a-zA-Z0-9._-]/g, "_");

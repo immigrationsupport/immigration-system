@@ -26,7 +26,7 @@ export const germanyModule: Question[] = [
         section: "de_immigration",
         label: "Veuillez préciser les détails de la demande faite et la décision reçue.",
         type: "textarea",
-        required: true,
+        required: false,
         condition: [{ questionId: "de_hasVisaApplication", equals: "YES" }],
     },
     {
@@ -58,9 +58,9 @@ export const germanyModule: Question[] = [
 
     // --- Diploma equivalence for Germany is the ANABIN check / ZAB certificate ---
     {
-        id: "de_masterAnabin",
-        section: "academicMaster",
-        label: "Avez-vous vérifié si votre diplôme de Master 2 est reconnu dans la base ANABIN, ou obtenu un certificat ZAB ?",
+        id: "de_diplomaAnabin",
+        section: "academicMain",
+        label: "Avez-vous vérifié si ce diplôme est reconnu dans la base ANABIN, ou obtenu un certificat ZAB ?",
         helpText: "ANABIN classe les diplômes en H+ (reconnu), H+/- (au cas par cas) ou H- (non reconnu). Si non listé, une évaluation ZAB (Zeugnisbewertung) est nécessaire.",
         type: "radio",
         required: true,
@@ -70,12 +70,12 @@ export const germanyModule: Question[] = [
             { value: "ZAB_IN_PROGRESS", label: "Certificat ZAB en cours" },
             { value: "NOT_CHECKED", label: "Pas encore vérifié" },
         ],
-        condition: [{ questionId: "hasMaster", equals: "YES" }],
+        condition: [{ questionId: "educationLevel", notEquals: "NONE" }],
     },
     {
-        id: "de_licenceAnabin",
-        section: "academicLicence",
-        label: "Avez-vous vérifié si ce diplôme de licence est reconnu dans la base ANABIN, ou obtenu un certificat ZAB ?",
+        id: "de_diploma2Anabin",
+        section: "academicSecond",
+        label: "Avez-vous vérifié si cet autre diplôme est reconnu dans la base ANABIN, ou obtenu un certificat ZAB ?",
         type: "radio",
         required: true,
         options: [
@@ -84,21 +84,7 @@ export const germanyModule: Question[] = [
             { value: "ZAB_IN_PROGRESS", label: "Certificat ZAB en cours" },
             { value: "NOT_CHECKED", label: "Pas encore vérifié" },
         ],
-        condition: [{ questionId: "hasMaster", equals: "NO" }],
-    },
-    {
-        id: "de_bac2Anabin",
-        section: "academicBac2",
-        label: "Avez-vous vérifié si ce diplôme de niveau Bac+2 est reconnu dans la base ANABIN ?",
-        type: "radio",
-        required: true,
-        options: [
-            { value: "H_PLUS", label: "Oui, classé H+ (reconnu)" },
-            { value: "H_PLUS_MINUS", label: "Oui, classé H+/- (au cas par cas)" },
-            { value: "ZAB_IN_PROGRESS", label: "Certificat ZAB en cours" },
-            { value: "NOT_CHECKED", label: "Pas encore vérifié" },
-        ],
-        condition: [{ questionId: "licenceHasOtherDegree", equals: "YES" }],
+        condition: [{ questionId: "hasOtherDiploma", equals: "YES" }],
     },
 
     // --- Language tests — German (Goethe/telc/TestDaF), plus English for Blue Card roles taught/worked in English ---
@@ -116,14 +102,16 @@ export const germanyModule: Question[] = [
     {
         id: "de_germanTestType",
         section: "language",
-        label: "Quel(s) test(s) avez-vous fait (cochez plusieurs cases si applicable) ?",
-        type: "checkbox",
+        label: "Quel test avez-vous fait ?",
+        helpText: "Si vous avez fait plusieurs tests, indiquez celui avec votre meilleur résultat.",
+        type: "radio",
         required: true,
         options: [
             { value: "GOETHE", label: "Goethe-Institut" },
             { value: "TELC", label: "telc" },
             { value: "TESTDAF", label: "TestDaF" },
             { value: "OSD", label: "ÖSD" },
+            { value: "OTHER", label: "Autre" },
         ],
         condition: [{ questionId: "de_hasGermanTest", equals: "YES" }],
         documentType: "LANGUAGE_REGISTRATION",
@@ -152,12 +140,13 @@ export const germanyModule: Question[] = [
     {
         id: "de_englishTestType",
         section: "language",
-        label: "Quel(s) test(s) de langue anglaise avez-vous fait ?",
-        type: "checkbox",
+        label: "Quel test de langue anglaise avez-vous fait ?",
+        type: "radio",
         required: true,
         options: [
             { value: "IELTS", label: "IELTS" },
             { value: "TOEFL", label: "TOEFL" },
+            { value: "OTHER", label: "Autre" },
         ],
         condition: [{ questionId: "de_hasEnglishTest", equals: "YES" }],
         documentType: "LANGUAGE_REGISTRATION",

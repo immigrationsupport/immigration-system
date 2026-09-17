@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition, useEffect, ChangeEvent } from "react";
+import { useMemo, useState, useTransition, useEffect, useRef, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,22 +34,37 @@ function QuestionField({
     question,
     value,
     onChange,
+    allAnswers,
 }: {
     question: Question;
     value: any;
     onChange: (value: any) => void;
+    allAnswers: Record<string, any>;
 }) {
     switch (question.type) {
         case "text":
-        case "number":
+        case "number": {
+            let maxValue: number | undefined;
+            if (question.type === "number" && question.maxFromAnswer) {
+                const siblingAnswer = allAnswers[question.maxFromAnswer.questionId];
+                maxValue = question.maxFromAnswer.map[siblingAnswer] ?? question.maxFromAnswer.default;
+            }
             return (
                 <Input
                     type={question.type === "number" ? "number" : "text"}
+                    max={maxValue}
                     value={value ?? ""}
                     placeholder={question.placeholder}
-                    onChange={(e) => onChange(e.target.value)}
+                    onChange={(e) => {
+                        let v = e.target.value;
+                        if (question.type === "number" && maxValue !== undefined && v !== "" && Number(v) > maxValue) {
+                            v = String(maxValue);
+                        }
+                        onChange(v);
+                    }}
                 />
             );
+        }
 
         case "date":
             return (
@@ -332,6 +347,12 @@ function MonthYearField({
     );
 }
 
+const ACCEPTED_TYPES: Record<string, number> = {
+    "application/pdf": 10 * 1024 * 1024,
+    "image/jpeg": 4 * 1024 * 1024,
+    "image/png": 4 * 1024 * 1024,
+};
+
 function DocumentUploadField({
     questionId,
     uploadedFile,
@@ -342,15 +363,30 @@ function DocumentUploadField({
     onChange: (file: { id: string; fileName: string } | null) => void;
 }) {
     const [uploading, setUploading] = useState(false);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
     const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         e.target.value = "";
         if (!file) return;
 
+        const maxForType = ACCEPTED_TYPES[file.type];
+        if (!maxForType) {
+            toast.error("Seuls les fichiers PDF, JPEG et PNG sont acceptés.");
+            return;
+        }
+        if (file.size > maxForType) {
+            const maxMb = Math.round(maxForType / (1024 * 1024));
+            toast.error(`Fichier trop volumineux — taille maximale : ${maxMb} Mo pour ce type de fichier.`);
+            return;
+        }
+
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
         setUploading(true);
         try {
-            const prepared = await createIntakeFormUploadUrlAction(questionId, file.name, file.type || "application/octet-stream", file.size);
+            const prepared = await createIntakeFormUploadUrlAction(questionId, file.name, file.type, file.size);
             if (prepared?.error || !prepared.uploadUrl || !prepared.storageKey) {
                 toast.error(prepared?.error || "Échec de la préparation de l'envoi.");
                 return;
@@ -358,8 +394,9 @@ function DocumentUploadField({
 
             const uploadRes = await fetch(prepared.uploadUrl, {
                 method: "PUT",
-                headers: { "Content-Type": file.type || "application/octet-stream" },
+                headers: { "Content-Type": file.type },
                 body: file,
+                signal: controller.signal,
             });
 
             if (!uploadRes.ok) {
@@ -375,12 +412,21 @@ function DocumentUploadField({
 
             onChange({ id: confirmed.document.id, fileName: confirmed.document.fileName });
             toast.success("Fichier envoyé avec succès.");
-        } catch (err) {
-            console.error(err);
-            toast.error("Une erreur est survenue lors de l'envoi.");
+        } catch (err: any) {
+            if (err?.name === "AbortError") {
+                toast("Envoi annulé.");
+            } else {
+                console.error(err);
+                toast.error("Une erreur est survenue lors de l'envoi.");
+            }
         } finally {
+            abortControllerRef.current = null;
             setUploading(false);
         }
+    };
+
+    const handleCancelUpload = () => {
+        abortControllerRef.current?.abort();
     };
 
     const handleRemove = async () => {
@@ -417,18 +463,32 @@ function DocumentUploadField({
         );
     }
 
+    if (uploading) {
+        return (
+            <div className="flex items-center justify-between gap-3 p-4 border-2 border-dashed border-blue-200 bg-blue-50/30 rounded-xl">
+                <span className="flex items-center gap-2 text-sm font-semibold text-gray-500">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Envoi en cours...
+                </span>
+                <button
+                    type="button"
+                    onClick={handleCancelUpload}
+                    className="text-xs font-bold text-red-600 hover:underline"
+                >
+                    Annuler
+                </button>
+            </div>
+        );
+    }
+
     return (
         <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all text-sm font-semibold text-gray-500">
-            {uploading ? (
-                <>
-                    <Loader2 className="h-4 w-4 animate-spin" /> Envoi en cours...
-                </>
-            ) : (
-                <>
-                    <Upload className="h-4 w-4" /> Téléverser un fichier (optionnel)
-                </>
-            )}
-            <input type="file" className="hidden" onChange={handleFileSelect} disabled={uploading} />
+            <Upload className="h-4 w-4" /> Téléverser un fichier (PDF, JPEG ou PNG — optionnel)
+            <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                className="hidden"
+                onChange={handleFileSelect}
+            />
         </label>
     );
 }
@@ -554,9 +614,16 @@ export default function IntakeFormClient({
                     <CheckCircle2 className="h-8 w-8 text-green-600" />
                 </div>
                 <h1 className="text-xl font-bold text-gray-900 mb-2">Merci, {clientName} !</h1>
-                <p className="text-gray-500">
+                <p className="text-gray-500 mb-6">
                     Votre formulaire a bien été envoyé. Votre agent utilisera ces informations pour préparer votre dossier — vous pourrez toujours en discuter ensemble par la suite.
                 </p>
+                <Button
+                    onClick={() => router.push("/dashboard/client")}
+                    className="rounded-xl text-white"
+                    style={{ backgroundColor: "#1E3A8A" }}
+                >
+                    Revenir à l'accueil
+                </Button>
             </div>
         );
     }
@@ -600,6 +667,7 @@ export default function IntakeFormClient({
                                 question={q}
                                 value={answers[q.id]}
                                 onChange={(v) => setAnswer(q.id, v)}
+                                allAnswers={answers}
                             />
                             {q.documentType && (
                                 <div className="mt-3">

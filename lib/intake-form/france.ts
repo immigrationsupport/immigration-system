@@ -25,7 +25,7 @@ export const franceModule: Question[] = [
         section: "fr_immigration",
         label: "Veuillez préciser les détails de la demande faite et la décision reçue.",
         type: "textarea",
-        required: true,
+        required: false,
         condition: [{ questionId: "fr_hasPrefectureApplication", equals: "YES" }],
     },
     {
@@ -44,9 +44,9 @@ export const franceModule: Question[] = [
 
     // --- Diploma equivalence for France is the ENIC-NARIC attestation ---
     {
-        id: "fr_masterEnicNaric",
-        section: "academicMaster",
-        label: "Avez-vous fait une demande d'attestation de comparabilité ENIC-NARIC pour votre diplôme de Master 2 ?",
+        id: "fr_diplomaEnicNaric",
+        section: "academicMain",
+        label: "Avez-vous fait une demande d'attestation de comparabilité ENIC-NARIC pour ce diplôme ?",
         helpText: "Délivrée par France Éducation International — c'est l'équivalent français de l'évaluation de diplôme",
         type: "radio",
         required: true,
@@ -55,12 +55,12 @@ export const franceModule: Question[] = [
             { value: "NO", label: "Non" },
             { value: "IN_PROGRESS", label: "En cours" },
         ],
-        condition: [{ questionId: "hasMaster", equals: "YES" }],
+        condition: [{ questionId: "educationLevel", notEquals: "NONE" }],
     },
     {
-        id: "fr_licenceEnicNaric",
-        section: "academicLicence",
-        label: "Avez-vous fait une demande d'attestation de comparabilité ENIC-NARIC pour ce diplôme de licence ?",
+        id: "fr_diploma2EnicNaric",
+        section: "academicSecond",
+        label: "Avez-vous fait une demande d'attestation de comparabilité ENIC-NARIC pour cet autre diplôme ?",
         type: "radio",
         required: true,
         options: [
@@ -68,20 +68,7 @@ export const franceModule: Question[] = [
             { value: "NO", label: "Non" },
             { value: "IN_PROGRESS", label: "En cours" },
         ],
-        condition: [{ questionId: "hasMaster", equals: "NO" }],
-    },
-    {
-        id: "fr_bac2EnicNaric",
-        section: "academicBac2",
-        label: "Avez-vous fait une demande d'attestation de comparabilité ENIC-NARIC pour votre diplôme de niveau Bac+2 ?",
-        type: "radio",
-        required: true,
-        options: [
-            { value: "YES", label: "Oui" },
-            { value: "NO", label: "Non" },
-            { value: "IN_PROGRESS", label: "En cours" },
-        ],
-        condition: [{ questionId: "licenceHasOtherDegree", equals: "YES" }],
+        condition: [{ questionId: "hasOtherDiploma", equals: "YES" }],
     },
 
     // --- Language tests — TCF / DELF-DALF, with TCF IRN specifically for naturalization ---
@@ -99,15 +86,16 @@ export const franceModule: Question[] = [
     {
         id: "fr_frenchTestType",
         section: "language",
-        label: "Quel(s) test(s) avez-vous fait (cochez plusieurs cases si applicable) ?",
-        helpText: "Le TCF IRN est spécifiquement requis pour une demande de naturalisation depuis janvier 2026 — l'attestation ENIC-NARIC seule n'y suffit plus.",
-        type: "checkbox",
+        label: "Quel test avez-vous fait ?",
+        helpText: "Le TCF IRN est spécifiquement requis pour une demande de naturalisation depuis janvier 2026 — l'attestation ENIC-NARIC seule n'y suffit plus. Si vous avez fait plusieurs tests, indiquez celui avec votre meilleur résultat.",
+        type: "radio",
         required: true,
         options: [
             { value: "TCF_TP", label: "TCF Tout Public" },
             { value: "TCF_IRN", label: "TCF IRN (immigration, résidence, naturalisation)" },
             { value: "DELF", label: "DELF" },
             { value: "DALF", label: "DALF" },
+            { value: "OTHER", label: "Autre" },
         ],
         condition: [{ questionId: "fr_hasFrenchTest", equals: "YES" }],
         documentType: "LANGUAGE_REGISTRATION",
