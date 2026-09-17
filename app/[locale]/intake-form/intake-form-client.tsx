@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition, ChangeEvent } from "react";
+import { useMemo, useState, useTransition, useEffect, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
     FormStep,
 } from "@/lib/intake-form/engine";
 import { Question } from "@/lib/intake-form/types";
-import { COUNTRIES, findCountryByDialCode } from "@/lib/intake-form/countries";
+import { COUNTRIES, findCountryByDialCode, Country } from "@/lib/intake-form/countries";
 import {
     saveIntakeFormProgressAction,
     submitIntakeFormAction,
@@ -152,56 +152,184 @@ function QuestionField({
             );
         }
 
-        case "phone": {
-            const raw = typeof value === "string" ? value : "";
-            const spaceIndex = raw.indexOf(" ");
-            const currentDialCode = spaceIndex > 0 ? raw.slice(0, spaceIndex) : "+237";
-            const currentNumber = spaceIndex > 0 ? raw.slice(spaceIndex + 1) : raw;
-
-            return (
-                <div className="flex gap-2">
-                    <select
-                        value={currentDialCode}
-                        onChange={(e) => onChange(`${e.target.value} ${currentNumber}`.trim())}
-                        className="w-28 shrink-0 border border-gray-200 rounded-xl px-2 py-2.5 text-sm"
-                    >
-                        {COUNTRIES.filter((c) => c.dialCode).map((c) => (
-                            <option key={c.code} value={c.dialCode}>
-                                {c.dialCode} {c.code}
-                            </option>
-                        ))}
-                    </select>
-                    <Input
-                        type="tel"
-                        value={currentNumber}
-                        placeholder="676 11 32 24"
-                        onChange={(e) => onChange(`${currentDialCode} ${e.target.value}`.trim())}
-                    />
-                </div>
-            );
-        }
+        case "phone":
+            return <PhoneField value={value} onChange={onChange} />;
 
         case "country":
-            return (
-                <select
-                    value={value ?? ""}
-                    onChange={(e) => onChange(e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
-                >
-                    <option value="" disabled>
-                        Sélectionnez un pays...
-                    </option>
-                    {COUNTRIES.map((c) => (
-                        <option key={c.code} value={c.name}>
-                            {c.name}
-                        </option>
-                    ))}
-                </select>
-            );
+            return <CountryField value={value} onChange={onChange} />;
+
+        case "monthYear":
+            return <MonthYearField value={value} onChange={onChange} allowPresent={question.allowPresent} />;
 
         default:
             return null;
     }
+}
+
+function PhoneField({ value, onChange }: { value: any; onChange: (v: string) => void }) {
+    const raw = typeof value === "string" ? value : "";
+    const spaceIndex = raw.indexOf(" ");
+    const currentDialCode = spaceIndex > 0 ? raw.slice(0, spaceIndex) : "+237";
+    const currentNumber = spaceIndex > 0 ? raw.slice(spaceIndex + 1) : raw;
+
+    const formatOption = (c: Country) => `${c.name} (${c.dialCode})`;
+
+    const [countrySearch, setCountrySearch] = useState(() => {
+        const match = findCountryByDialCode(currentDialCode);
+        return match ? formatOption(match) : currentDialCode;
+    });
+
+    const handleCountryInput = (text: string) => {
+        setCountrySearch(text);
+        const match = COUNTRIES.find((c) => formatOption(c) === text);
+        if (match) {
+            onChange(`${match.dialCode} ${currentNumber}`.trim());
+        }
+    };
+
+    return (
+        <div className="flex gap-2">
+            <div className="w-52 shrink-0">
+                <input
+                    list="country-dial-codes"
+                    value={countrySearch}
+                    onChange={(e) => handleCountryInput(e.target.value)}
+                    placeholder="Rechercher un pays..."
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"
+                />
+                <datalist id="country-dial-codes">
+                    {COUNTRIES.map((c) => (
+                        <option key={c.code} value={formatOption(c)} />
+                    ))}
+                </datalist>
+            </div>
+            <Input
+                type="tel"
+                value={currentNumber}
+                placeholder="676 11 32 24"
+                onChange={(e) => onChange(`${currentDialCode} ${e.target.value}`.trim())}
+            />
+        </div>
+    );
+}
+
+function CountryField({ value, onChange }: { value: any; onChange: (v: string) => void }) {
+    const [search, setSearch] = useState(typeof value === "string" ? value : "");
+
+    // Keeps the input in sync when the value changes from outside this
+    // field — e.g. auto-filled from the phone country a moment earlier.
+    useEffect(() => {
+        if (typeof value === "string" && value !== search) {
+            setSearch(value);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [value]);
+
+    const handleInput = (text: string) => {
+        setSearch(text);
+        const match = COUNTRIES.find((c) => c.name === text);
+        if (match) {
+            onChange(match.name);
+        }
+    };
+
+    return (
+        <>
+            <input
+                list="countries-list"
+                value={search}
+                onChange={(e) => handleInput(e.target.value)}
+                placeholder="Rechercher un pays..."
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+            />
+            <datalist id="countries-list">
+                {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.name} />
+                ))}
+            </datalist>
+        </>
+    );
+}
+
+const MONTH_NAMES = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+];
+
+function MonthYearField({
+    value,
+    onChange,
+    allowPresent,
+}: {
+    value: any;
+    onChange: (v: string) => void;
+    allowPresent?: boolean;
+}) {
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: currentYear - 1999 }, (_, i) => currentYear - i);
+
+    const isPresent = value === "PRESENT";
+    const [year, month] = typeof value === "string" && value.includes("-") ? value.split("-") : ["", ""];
+
+    const handlePresentToggle = (checked: boolean) => {
+        onChange(checked ? "PRESENT" : "");
+    };
+
+    const handleMonthChange = (newMonth: string) => {
+        onChange(`${year || currentYear}-${newMonth}`);
+    };
+
+    const handleYearChange = (newYear: string) => {
+        onChange(`${newYear}-${month || "01"}`);
+    };
+
+    return (
+        <div className="space-y-2">
+            <div className="flex gap-2">
+                <select
+                    value={month}
+                    onChange={(e) => handleMonthChange(e.target.value)}
+                    disabled={isPresent}
+                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm disabled:bg-gray-50 disabled:text-gray-400"
+                >
+                    <option value="" disabled>
+                        Mois
+                    </option>
+                    {MONTH_NAMES.map((name, i) => (
+                        <option key={name} value={String(i + 1).padStart(2, "0")}>
+                            {name}
+                        </option>
+                    ))}
+                </select>
+                <select
+                    value={year}
+                    onChange={(e) => handleYearChange(e.target.value)}
+                    disabled={isPresent}
+                    className="w-32 shrink-0 border border-gray-200 rounded-xl px-3 py-2.5 text-sm disabled:bg-gray-50 disabled:text-gray-400"
+                >
+                    <option value="" disabled>
+                        Année
+                    </option>
+                    {years.map((y) => (
+                        <option key={y} value={y}>
+                            {y}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            {allowPresent && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={isPresent}
+                        onChange={(e) => handlePresentToggle(e.target.checked)}
+                        className="accent-[#1E3A8A]"
+                    />
+                    <span className="text-sm font-medium text-gray-700">En cours (poste actuel)</span>
+                </label>
+            )}
+        </div>
+    );
 }
 
 function DocumentUploadField({

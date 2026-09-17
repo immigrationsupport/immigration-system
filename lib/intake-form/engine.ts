@@ -32,11 +32,8 @@ const SECTION_ORDER = [
     "fr_immigration",
     "de_immigration",
     "academic",
-    "academicMaster",
-    "academicLicence",
-    "academicLicenceBis",
-    "academicBac2",
-    "academicOptional",
+    "academicMain",
+    "academicSecond",
     "experience",
     "experienceJob1",
     "experienceJob2",
@@ -55,11 +52,8 @@ export const SECTION_LABELS: Record<string, string> = {
     fr_immigration: "Précisions sur votre démarche en France",
     de_immigration: "Précisions sur votre démarche en Allemagne",
     academic: "Parcours académique / Diplôme universitaire",
-    academicMaster: "Détails du diplôme de niveau Master 2",
-    academicLicence: "Détails du diplôme de licence",
-    academicLicenceBis: "Détails du diplôme de licence",
-    academicBac2: "Détails du diplôme de niveau Bac+2",
-    academicOptional: "Autres détails concernant vos études (facultatif)",
+    academicMain: "Détails de votre diplôme",
+    academicSecond: "Détails de votre autre diplôme",
     experience: "Expérience professionnelle",
     experienceJob1: "Détails de votre emploi le plus récent (ou en cours)",
     experienceJob2: "Détails de l'autre emploi",
@@ -152,6 +146,14 @@ export function formatAnswerForDisplay(question: Question, value: any): string {
         return value
             .map((v) => question.options?.find((o) => o.value === v)?.label || v)
             .join(", ");
+    }
+
+    if (question.type === "monthYear") {
+        if (value === "PRESENT") return "En cours";
+        const [year, month] = String(value).split("-");
+        const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+        const monthName = monthNames[parseInt(month, 10) - 1];
+        return monthName ? `${monthName} ${year}` : String(value);
     }
 
     if (question.options) {

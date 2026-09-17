@@ -8,7 +8,8 @@ export type QuestionType =
     | "number"
     | "upload"
     | "phone"
-    | "country";
+    | "country"
+    | "monthYear";
 
 export interface QuestionOption {
     value: string;
@@ -47,6 +48,12 @@ export interface Question {
      * under when the client attaches it.
      */
     documentType?: string;
+    /**
+     * For type === "monthYear" only — when true, shows an "En cours"
+     * checkbox that stores the special value "PRESENT" instead of a date
+     * (used for an end date that may still be ongoing).
+     */
+    allowPresent?: boolean;
 }
 
 export interface CountryModule {
