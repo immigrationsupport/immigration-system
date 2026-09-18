@@ -6,6 +6,7 @@ import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import {
     Sparkles,
+    ArrowUp,
     Send,
     Loader2,
     X,
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 import { aiSearchAction, type ToolResultPayload, type ChatTurn } from "./actions";
 import { ResultCards } from "./ai-result-display";
+import VoiceInputButton from "@/components/VoiceInputButton";
 
 interface ChatMessage {
     id: string;
@@ -343,7 +345,7 @@ export default function AiChatDrawer() {
                                 e.preventDefault();
                                 handleSendMessage();
                             }}
-                            className="relative flex items-center gap-2"
+                            className="flex items-end gap-2"
                         >
                             <textarea
                                 ref={textareaRef}
@@ -353,19 +355,22 @@ export default function AiChatDrawer() {
                                 onKeyDown={handleKeyDown}
                                 placeholder={t("chat.inputPlaceholder", { defaultValue: "Ask the AI assistant anything..." })}
                                 disabled={loading}
-                                className="w-full resize-none py-3 pl-4 pr-12 text-xs bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 rounded-2xl outline-none transition-all placeholder:text-gray-400 max-h-24"
+                                className="flex-1 min-w-0 resize-none py-3 px-4 text-xs bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 rounded-2xl outline-none transition-all placeholder:text-gray-400 max-h-24"
+                            />
+                            <VoiceInputButton
+                                onResult={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
                             />
                             <Button
-                                type="submit"
-                                disabled={loading || !input.trim()}
-                                className="absolute right-1.5 h-8 w-8 p-0 rounded-xl bg-[#1E3A8A] hover:bg-blue-900 text-white disabled:opacity-40 transition-all shadow-sm flex items-center justify-center shrink-0"
-                            >
-                                {loading ? (
-                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                    <Send className="h-3.5 w-3.5" />
-                                )}
-                            </Button>
+    type="submit"
+    disabled={loading || !input.trim()}
+    className="h-9 w-9 p-0 rounded-full bg-[#1E3A8A] hover:bg-[#162E6F] text-white flex items-center justify-center shrink-0 shadow-sm transition-all disabled:bg-[#1E3A8A] disabled:text-white disabled:opacity-100"
+>
+    {loading ? (
+        <Loader2 className="h-5 w-5 animate-spin" />
+    ) : (
+        <Send className="h-10 w-10 stroke-[10]"/>
+    )}
+</Button>
                         </form>
                     </div>
                 </div>

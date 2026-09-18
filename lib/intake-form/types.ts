@@ -61,6 +61,12 @@ export interface Question {
      * the sibling answer isn't in `map` (e.g. "OTHER" test — no cap).
      */
     maxFromAnswer?: { questionId: string; map: Record<string, number>; default?: number };
+    /**
+     * For type === "number" only — a fixed cap that doesn't depend on any
+     * other answer (e.g. CO/CE scores are capped at 699 regardless of
+     * which test was chosen). Ignored if maxFromAnswer is also set.
+     */
+    max?: number;
 }
 
 export interface CountryModule {

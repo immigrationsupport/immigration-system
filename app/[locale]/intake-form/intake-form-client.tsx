@@ -45,9 +45,13 @@ function QuestionField({
         case "text":
         case "number": {
             let maxValue: number | undefined;
-            if (question.type === "number" && question.maxFromAnswer) {
-                const siblingAnswer = allAnswers[question.maxFromAnswer.questionId];
-                maxValue = question.maxFromAnswer.map[siblingAnswer] ?? question.maxFromAnswer.default;
+            if (question.type === "number") {
+                if (question.maxFromAnswer) {
+                    const siblingAnswer = allAnswers[question.maxFromAnswer.questionId];
+                    maxValue = question.maxFromAnswer.map[siblingAnswer] ?? question.maxFromAnswer.default;
+                } else if (question.max !== undefined) {
+                    maxValue = question.max;
+                }
             }
             return (
                 <Input

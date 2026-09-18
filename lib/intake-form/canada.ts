@@ -88,10 +88,7 @@ export const canadaModule: Question[] = [
         type: "number",
         required: true,
         condition: [{ questionId: "ca_hasFrenchTest", equals: "YES" }],
-        maxFromAnswer: {
-            questionId: "ca_frenchTestType",
-            map: { TCF_CANADA: 20, TCF_QUEBEC: 20, TEF_CANADA: 699, TEF_QUEBEC: 699 },
-        },
+        max: 699,
     },
     {
         id: "ca_frenchScoreCE",
@@ -101,10 +98,7 @@ export const canadaModule: Question[] = [
         type: "number",
         required: true,
         condition: [{ questionId: "ca_hasFrenchTest", equals: "YES" }],
-        maxFromAnswer: {
-            questionId: "ca_frenchTestType",
-            map: { TCF_CANADA: 20, TCF_QUEBEC: 20, TEF_CANADA: 699, TEF_QUEBEC: 699 },
-        },
+        max: 699,
     },
     {
         id: "ca_frenchScoreEO",

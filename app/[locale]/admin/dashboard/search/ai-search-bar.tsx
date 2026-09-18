@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { aiSearchAction, type ToolResultPayload } from "./actions";
 import { ResultCards } from "./ai-result-display";
+import VoiceInputButton from "@/components/VoiceInputButton";
 
 interface ChatMessage {
     role: "user" | "assistant";
@@ -88,10 +89,11 @@ export default function AiSearchBar() {
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => messages.length > 0 && setPanelOpen(true)}
                     placeholder={t("placeholder")}
-                    className="pl-11 pr-24 h-11 rounded-2xl text-sm"
+                    className="pl-11 pr-32 h-11 rounded-2xl text-sm"
                     disabled={loading}
                 />
                 <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <VoiceInputButton onResult={(text) => setQuery((prev) => (prev ? `${prev} ${text}` : text))} />
                     {messages.length > 0 && (
                         <button
                             type="button"
@@ -166,4 +168,4 @@ export default function AiSearchBar() {
             )}
         </div>
     );
-}
+}
