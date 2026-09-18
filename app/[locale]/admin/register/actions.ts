@@ -143,7 +143,7 @@ export async function registerAgencyAdminAction(
                     agency: { connect: { id: agency.id } },
                     address,
                     profession,
-                    emailVerified: false,
+                    emailVerified: true,
                     accounts: {
                         create: {
                             providerId: "credential",

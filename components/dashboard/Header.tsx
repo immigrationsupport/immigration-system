@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { NotificationBell } from "./NotificationBell";
 
 interface HeaderProps {
     title: string;
@@ -65,6 +66,8 @@ export function Header({ title, onMenuClick, showLogout = false, centerSlot, loc
                 )}
 
                 <div className="flex items-center gap-2 md:gap-4 shrink-0 ml-auto">
+                    {["AGENT", "ADMIN"].includes((session?.user as any)?.role) && <NotificationBell />}
+
                     {locale && (
                         <div className="flex items-center rounded-full border border-gray-200 p-0.5 text-xs font-bold">
                             <Link

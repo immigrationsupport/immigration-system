@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auditDetails } from "@/lib/audit-log";
 import { extractProfileSyncFields } from "@/lib/intake-form/engine";
+import { notifyIntakeFormSubmitted } from "@/lib/notifications-actions";
 import { createS3UploadUrl, createS3DownloadUrl } from "@/lib/s3";
 import crypto from "crypto";
 
@@ -146,6 +147,7 @@ export async function submitIntakeFormAction(answers: Record<string, any>) {
         });
 
         revalidatePath("/dashboard/client");
+        await notifyIntakeFormSubmitted(session.user.id, session.user.name);
         return { success: true };
     } catch (e: any) {
         console.error("Submit intake form error:", e);

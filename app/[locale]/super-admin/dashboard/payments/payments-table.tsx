@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Building2, Search } from "lucide-react";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { useTranslations } from "next-intl";
 
 const PAGE_SIZE = 10;
 
@@ -28,12 +29,6 @@ interface PaymentRow {
     };
 }
 
-const METHOD_LABELS: Record<string, string> = {
-    MTN_MOBILE_MONEY: "MTN Mobile Money",
-    ORANGE_MONEY: "Orange Money",
-    CARD: "Card",
-};
-
 const STATUS_STYLES: Record<string, string> = {
     SUCCESS:
         "bg-green-100 text-green-700 border border-green-200",
@@ -48,6 +43,7 @@ export default function PaymentsTable({
 }: {
     payments: PaymentRow[];
 }) {
+    const t = useTranslations("superAdminDashboard.paymentsPage");
     const [query, setQuery] = useState("");
     const [status, setStatus] = useState("ALL");
     const [page, setPage] = useState(1);
@@ -105,7 +101,7 @@ export default function PaymentsTable({
                         onChange={(e) =>
                             setQuery(e.target.value)
                         }
-                        placeholder="Search by agency, plan or reference..."
+                        placeholder={t("searchPlaceholder")}
                         className="pl-9"
                     />
                 </div>
@@ -118,16 +114,16 @@ export default function PaymentsTable({
                     className="text-sm font-bold border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#1E3A8A] bg-white"
                 >
                     <option value="ALL">
-                        All statuses
+                        {t("allStatuses")}
                     </option>
                     <option value="SUCCESS">
-                        Success
+                        {t("statusLabels.SUCCESS")}
                     </option>
                     <option value="PENDING">
-                        Pending
+                        {t("statusLabels.PENDING")}
                     </option>
                     <option value="FAILED">
-                        Failed
+                        {t("statusLabels.FAILED")}
                     </option>
                 </select>
             </div>
@@ -137,31 +133,31 @@ export default function PaymentsTable({
                     <thead>
                         <tr className="bg-gray-100/80">
                             <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                Agency
+                                {t("columns.agency")}
                             </th>
 
                             <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                Plan
+                                {t("columns.plan")}
                             </th>
 
                             <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                Amount
+                                {t("columns.amount")}
                             </th>
 
                             <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                Method
+                                {t("columns.method")}
                             </th>
 
                             <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                Reference
+                                {t("columns.reference")}
                             </th>
 
                             <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                Date
+                                {t("columns.date")}
                             </th>
 
                             <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                Status
+                                {t("columns.status")}
                             </th>
                         </tr>
                     </thead>
@@ -190,7 +186,7 @@ export default function PaymentsTable({
 
                                 <td className="px-6 py-4 text-gray-700 font-semibold">
                                     {p.method ? (
-                                        METHOD_LABELS[p.method]
+                                        t.has(`methods.${p.method}`) ? t(`methods.${p.method}`) : p.method
                                     ) : (
                                         <span className="text-gray-300">
                                             —
@@ -216,7 +212,7 @@ export default function PaymentsTable({
                                             ]
                                         }`}
                                     >
-                                        {p.status}
+                                        {t.has(`statusLabels.${p.status}`) ? t(`statusLabels.${p.status}`) : p.status}
                                     </span>
                                 </td>
                             </tr>
@@ -228,7 +224,7 @@ export default function PaymentsTable({
                                     colSpan={7}
                                     className="px-6 py-16 text-center text-gray-400 font-semibold"
                                 >
-                                    No payments match your search.
+                                    {t("empty")}
                                 </td>
                             </tr>
                         )}

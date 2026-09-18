@@ -35,6 +35,7 @@ import {
 } from "./actions";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
+import { useTranslations } from "next-intl";
 
 const PAGE_SIZE = 10;
 
@@ -99,6 +100,7 @@ export default function UserList({
 }: {
     initialUsers: UserRow[];
 }) {
+    const t = useTranslations("superAdminDashboard.usersPage");
     const [users, setUsers] = useState(initialUsers);
     const [query, setQuery] = useState("");
     const [role, setRole] = useState("ALL");
@@ -248,7 +250,7 @@ export default function UserList({
                             onChange={(e) =>
                                 setQuery(e.target.value)
                             }
-                            placeholder="Search by name, email or agency..."
+                            placeholder={t("searchPlaceholder")}
                             className="pl-9"
                         />
                     </div>
@@ -261,19 +263,19 @@ export default function UserList({
                         className="text-sm font-bold border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#1E3A8A] bg-white"
                     >
                         <option value="ALL">
-                            All roles
+                            {t("allRoles")}
                         </option>
                         <option value="SUPER_ADMIN">
-                            Super Admin
+                            {t("roles.SUPER_ADMIN")}
                         </option>
                         <option value="ADMIN">
-                            Admin
+                            {t("roles.ADMIN")}
                         </option>
                         <option value="AGENT">
-                            Agent
+                            {t("roles.AGENT")}
                         </option>
                         <option value="CLIENT">
-                            Client
+                            {t("roles.CLIENT")}
                         </option>
                     </select>
                 </div>
@@ -283,23 +285,23 @@ export default function UserList({
                         <thead>
                             <tr className="bg-gray-100/80">
                                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                    User
+                                    {t("columns.user")}
                                 </th>
 
                                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                    Agency
+                                    {t("columns.agency")}
                                 </th>
 
                                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                    Role
+                                    {t("columns.role")}
                                 </th>
 
                                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200">
-                                    Status
+                                    {t("columns.status")}
                                 </th>
 
                                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-widest text-[#1E3A8A] border-b-2 border-gray-200 text-right">
-                                    Actions
+                                    {t("columns.actions")}
                                 </th>
                             </tr>
                         </thead>
@@ -374,15 +376,15 @@ export default function UserList({
                                                 className="text-xs font-bold border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#1E3A8A] bg-white"
                                             >
                                                 <option value="ADMIN">
-                                                    Admin
+                                                    {t("roles.ADMIN")}
                                                 </option>
 
                                                 <option value="AGENT">
-                                                    Agent
+                                                    {t("roles.AGENT")}
                                                 </option>
 
                                                 <option value="CLIENT">
-                                                    Client
+                                                    {t("roles.CLIENT")}
                                                 </option>
                                             </select>
                                         )}
@@ -397,8 +399,8 @@ export default function UserList({
                                             }`}
                                         >
                                             {u.isSuspended
-                                                ? "Suspended"
-                                                : u.status}
+                                                ? t("statusLabels.SUSPENDED")
+                                                : (t.has(`statusLabels.${u.status}`) ? t(`statusLabels.${u.status}`) : u.status)}
                                         </span>
                                     </td>
 
@@ -421,12 +423,12 @@ export default function UserList({
                                                     {u.isSuspended ? (
                                                         <>
                                                             <CheckCircle2 className="h-4 w-4" />
-                                                            Reactivate
+                                                            {t("actions.reactivate")}
                                                         </>
                                                     ) : (
                                                         <>
                                                             <Ban className="h-4 w-4" />
-                                                            Suspend
+                                                            {t("actions.suspend")}
                                                         </>
                                                     )}
                                                 </Button>
@@ -437,7 +439,7 @@ export default function UserList({
                                                         setDeletingUser(u);
                                                     }}
                                                     className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all rounded-lg"
-                                                    title="Delete User"
+                                                    title={t("actions.delete")}
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
@@ -453,7 +455,7 @@ export default function UserList({
                                         colSpan={5}
                                         className="px-6 py-16 text-center text-gray-400 font-semibold"
                                     >
-                                        No users match your search.
+                                        {t("empty")}
                                     </td>
                                 </tr>
                             )}

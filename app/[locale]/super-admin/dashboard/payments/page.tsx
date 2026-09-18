@@ -3,10 +3,12 @@ import { getAllPayments } from "./actions";
 import PaymentsTable from "./payments-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Wallet, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function SuperAdminPaymentsPage() {
+    const t = await getTranslations("superAdminDashboard.paymentsPage");
     const payments = await getAllPayments();
 
     const totalRevenue = payments
@@ -19,8 +21,8 @@ export default async function SuperAdminPaymentsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold" style={{ color: "#1E3A8A" }}>Payments</h1>
-                <p className="text-gray-500 text-sm mt-1">Every subscription payment made across all agencies.</p>
+                <h1 className="text-2xl font-bold" style={{ color: "#1E3A8A" }}>{t("title")}</h1>
+                <p className="text-gray-500 text-sm mt-1">{t("subtitle")}</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -30,7 +32,7 @@ export default async function SuperAdminPaymentsPage() {
                             <Wallet className="h-5 w-5" />
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase">Total Revenue</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase">{t("totalRevenue")}</p>
                             <p className="text-lg font-black text-gray-900">{totalRevenue.toLocaleString()} FCFA</p>
                         </div>
                     </CardContent>
@@ -41,7 +43,7 @@ export default async function SuperAdminPaymentsPage() {
                             <CheckCircle2 className="h-5 w-5" />
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase">Successful</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase">{t("successful")}</p>
                             <p className="text-lg font-black text-gray-900">{successCount}</p>
                         </div>
                     </CardContent>
@@ -52,7 +54,7 @@ export default async function SuperAdminPaymentsPage() {
                             <Clock className="h-5 w-5" />
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase">Pending</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase">{t("pending")}</p>
                             <p className="text-lg font-black text-gray-900">{pendingCount}</p>
                         </div>
                     </CardContent>
@@ -63,7 +65,7 @@ export default async function SuperAdminPaymentsPage() {
                             <XCircle className="h-5 w-5" />
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase">Failed</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase">{t("failed")}</p>
                             <p className="text-lg font-black text-gray-900">{failedCount}</p>
                         </div>
                     </CardContent>

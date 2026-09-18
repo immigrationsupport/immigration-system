@@ -2,10 +2,12 @@ import React from "react";
 import { getAllPlans, getPricingSettings } from "./actions";
 import PlanManager from "./plan-manager";
 import PricingSettingsForm from "./pricing-settings-form";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function SuperAdminSettingsPage() {
+    const t = await getTranslations("superAdminDashboard.settingsPage");
     const [plans, pricingSettings] = await Promise.all([
         getAllPlans(),
         getPricingSettings(),
@@ -14,8 +16,8 @@ export default async function SuperAdminSettingsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold" style={{ color: "#1E3A8A" }}>Settings</h1>
-                <p className="text-gray-500 text-sm mt-1">Manage the plans agencies can subscribe to.</p>
+                <h1 className="text-2xl font-bold" style={{ color: "#1E3A8A" }}>{t("title")}</h1>
+                <p className="text-gray-500 text-sm mt-1">{t("subtitle")}</p>
             </div>
 
             <PricingSettingsForm initial={pricingSettings as any} />

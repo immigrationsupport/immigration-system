@@ -1626,6 +1626,74 @@
     "agenciesPage": {
       "title": "Agencies",
       "subtitle": "Manage every agency on the platform and its subscription plan."
+    },
+    "paymentsPage": {
+      "title": "Payments",
+      "subtitle": "Every subscription payment made across all agencies.",
+      "totalRevenue": "Total Revenue",
+      "successful": "Successful",
+      "pending": "Pending",
+      "failed": "Failed",
+      "searchPlaceholder": "Search by agency, plan or reference...",
+      "allStatuses": "All Statuses",
+      "empty": "No payments found.",
+      "columns": {
+        "agency": "Agency",
+        "plan": "Plan",
+        "amount": "Amount",
+        "method": "Method",
+        "reference": "Reference",
+        "date": "Date",
+        "status": "Status"
+      },
+      "methods": {
+        "MTN_MOBILE_MONEY": "MTN Mobile Money",
+        "ORANGE_MONEY": "Orange Money",
+        "CARD": "Card"
+      },
+      "statusLabels": {
+        "SUCCESS": "Success",
+        "PENDING": "Pending",
+        "FAILED": "Failed"
+      }
+    },
+    "usersPage": {
+      "title": "Users",
+      "subtitle": "Every user on the platform, across every agency.",
+      "searchPlaceholder": "Search by name, email or agency...",
+      "allRoles": "All Roles",
+      "empty": "No users found.",
+      "columns": {
+        "user": "User",
+        "role": "Role",
+        "agency": "Agency",
+        "created": "Created",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "roles": {
+        "SUPER_ADMIN": "Super Admin",
+        "ADMIN": "Admin",
+        "AGENT": "Agent",
+        "CLIENT": "Client"
+      },
+      "statusLabels": {
+        "ACTIVE": "Active",
+        "SUSPENDED": "Suspended",
+        "PENDING": "Pending",
+        "REJECTED": "Rejected"
+      },
+      "actions": {
+        "suspend": "Suspend user",
+        "reactivate": "Reactivate user",
+        "delete": "Delete user"
+      }
+    },
+    "settingsPage": {
+      "title": "Settings",
+      "subtitle": "Manage the plans agencies can subscribe to.",
+      "plansTitle": "Subscription Plans",
+      "plansSubtitle": "Define pricing tiers and quotas for agencies."
     }
   },
   "errorBoundary": {

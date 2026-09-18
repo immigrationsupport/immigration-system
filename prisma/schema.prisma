@@ -16,6 +16,19 @@ model PricingSettings {
   @@map("pricing_settings")
 }
 
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  clientId  String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
 model IntakeFormDocument {
   id         String   @id @default(uuid())
   clientId   String
@@ -145,6 +158,7 @@ model User {
   authoredLogs       AuditLog[]        @relation("AuthorLogs")
   documents          Document[]
   intakeFormResponse IntakeFormResponse?
+  notifications       Notification[]
   intakeFormDocuments IntakeFormDocument[]
   messages           Message[]
   receivedMessages   OfficialMessage[] @relation("ReceivedMessages")

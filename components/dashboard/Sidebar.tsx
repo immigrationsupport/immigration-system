@@ -102,9 +102,11 @@ export function Sidebar({
      * Super Admin belongs to the global platform area.
      * Admin/Agent continue using the existing admin area.
      */
+    const localeMatch = pathname.match(/^\/(en|fr)/);
+    const localePrefix = localeMatch ? localeMatch[0] : "";
     const homeHref = isSuperAdmin
-        ? "/super-admin/dashboard"
-        : "/dashboard";
+        ? `${localePrefix}/super-admin/dashboard`
+        : `${localePrefix}/dashboard`;
 
     /*
      * ------------------------------------------------------------
@@ -289,11 +291,13 @@ export function Sidebar({
                          *
                          * Both keep "Agences" active.
                          */
+                        const cleanPath = pathname.replace(/^\/(en|fr)/, "") || "/";
+                        const cleanHref = item.href.replace(/^\/(en|fr)/, "") || "/";
                         const isActive =
                             index === 0
-                                ? pathname === item.href
-                                : pathname === item.href ||
-                                  pathname.startsWith(`${item.href}/`);
+                                ? cleanPath === cleanHref
+                                : cleanPath === cleanHref ||
+                                  cleanPath.startsWith(`${cleanHref}/`);
 
                         const IconComponent =
                             iconMap[item.icon] || LayoutDashboard;

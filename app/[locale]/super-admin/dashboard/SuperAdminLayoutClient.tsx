@@ -10,25 +10,23 @@ interface SidebarItem {
     href: string;
 }
 
-interface SuperAdminDashboardShellProps {
+interface SuperAdminLayoutClientProps {
+    children: React.ReactNode;
     items: SidebarItem[];
     userRole: string;
     userName: string;
-    agencyName?: string | null;
-    children: React.ReactNode;
+    agencyName: string | null;
+    locale?: string;
 }
 
-// This is a client component because opening/closing the mobile sidebar
-// needs interactive state (useState) and a click handler. The parent
-// layout.tsx stays a server component so the SUPER_ADMIN auth check and
-// redirect keep happening on the server before any of this ever renders.
-export function SuperAdminDashboardShell({
+export default function SuperAdminLayoutClient({
+    children,
     items,
     userRole,
     userName,
     agencyName,
-    children,
-}: SuperAdminDashboardShellProps) {
+    locale,
+}: SuperAdminLayoutClientProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
@@ -42,12 +40,14 @@ export function SuperAdminDashboardShell({
                 onClose={() => setIsSidebarOpen(false)}
             />
 
-            <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative">
+            <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative max-w-full">
                 <Header
                     title=""
                     showLogout={true}
                     onMenuClick={() => setIsSidebarOpen(true)}
+                    locale={locale}
                 />
+
                 <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full mx-auto" style={{ backgroundColor: "#F9FAFB" }}>
                     {children}
                 </main>

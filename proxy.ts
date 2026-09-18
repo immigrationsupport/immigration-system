@@ -14,11 +14,6 @@ export default async function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // /super-admin is outside the [locale] tree, so it must never be handed off to the
-    // next-intl middleware.
-    const isSuperAdminRoute = pathname === "/super-admin" || pathname.startsWith("/super-admin/");
-    const isOutsideLocaleTree = isSuperAdminRoute;
-
     // Strip leading locale prefix to get the "bare" pathname for auth checks
     // e.g. /en/dashboard/client -> /dashboard/client
     const localePattern = /^\/(en|fr)(\/|$)/;
@@ -58,18 +53,14 @@ export default async function proxy(request: NextRequest) {
 
         if (needsAuth) {
             if (publicAdminRoutes.includes(barePathname)) {
-                if (barePathname.startsWith("/super-admin")) {
-                    // /super-admin isn't part of the [locale] tree
-                    return NextResponse.next();
-                }
                 // For /admin/register, let next-intl handle the routing
                 return intlMiddleware(request);
             }
             url.pathname = `/sign-in`;
             return NextResponse.redirect(url);
         }
-        // Not protected — let next-intl handle locale routing (skip for /admin, /super-admin)
-        return isOutsideLocaleTree ? NextResponse.next() : intlMiddleware(request);
+        // Not protected — let next-intl handle locale routing
+        return intlMiddleware(request);
     }
 
     const { role, isSuspended } = session.user as any;
@@ -112,15 +103,13 @@ export default async function proxy(request: NextRequest) {
         url.pathname = `/dashboard`;
         return NextResponse.redirect(url);
     }
-    if ((userRole === "AGENT" || userRole === "ADMIN") && pathname === barePathname && !isOutsideLocaleTree) {
+    if ((userRole === "AGENT" || userRole === "ADMIN" || userRole === "SUPER_ADMIN") && pathname === barePathname) {
         url.pathname = `/fr${barePathname}`;
         return NextResponse.redirect(url);
     }
 
-
     // All auth checks passed — let next-intl finalize locale routing
-    // (skip for /admin and /super-admin, which aren't part of the [locale] tree)
-    return isOutsideLocaleTree ? NextResponse.next() : intlMiddleware(request);
+    return intlMiddleware(request);
 }
 
 export const config = {

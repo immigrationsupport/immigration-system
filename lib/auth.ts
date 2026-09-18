@@ -1,156 +1,165 @@
 import "dotenv/config";
-import { betterAuth } from 'better-auth'
-import { prismaAdapter } from 'better-auth/adapters/prisma'
-import prisma from '@/lib/prisma'
-import { multiSession, emailOTP } from "better-auth/plugins"
-import { sendEmail } from "@/lib/resend"
-import { buildOtpEmailHtml } from "@/lib/otp-email"
-import { auditDetails } from "@/lib/audit-log"
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import prisma from "@/lib/prisma";
+import { auditDetails } from "@/lib/audit-log";
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
-        provider: 'postgresql',
+        provider: "postgresql",
     }),
-    baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+
+    baseURL:
+        process.env.BETTER_AUTH_URL ||
+        "http://localhost:3000",
+
     secret: process.env.BETTER_AUTH_SECRET,
+
     session: {
-        expiresIn: 60 * 60 * 24 * 90, // 90 days in seconds (7,776,000s)
-        updateAge: 60 * 60 * 24 * 1, // 1 day
+        expiresIn: 60 * 60 * 24 * 90,
+        updateAge: 60 * 60 * 24 * 1,
     },
+
     advanced: {
-        // Ensure the session cookie always carries a Max-Age so it persists
-        // across browser restarts (not treated as a session-only cookie).
         defaultCookieAttributes: {
-            maxAge: 60 * 60 * 24 * 90, // 90 days
+            maxAge: 60 * 60 * 24 * 90,
         },
     },
-    plugins: [
-        emailOTP({
-            otpLength: 6,
-            expiresIn: 300, // 5 minutes
-            allowedAttempts: 3,
-            // Registration already creates the user directly (see
-            // app/[locale]/admin/register/actions.ts) — the OTP plugin is
-            // only ever used to verify an email that already exists, never
-            // to sign someone up on its own.
-            disableSignUp: true,
-            sendVerificationOTP: async ({ email, otp, type }) => {
-                const subject =
-                    type === "email-verification"
-                        ? "Your verification code"
-                        : "Your sign-in code";
 
-                const result = await sendEmail({
-                    to: email,
-                    subject,
-                    html: buildOtpEmailHtml({ otp, type }),
-                });
+    plugins: [],
 
-                if (result.error) {
-                    console.error(`[Email OTP] Failed to send to ${email}:`, result.error);
-                }
-            },
-        }),
-    ],
     debug: true,
+
     emailAndPassword: {
         enabled: true,
         autoSignIn: true,
     },
+
     emailVerification: {
-        sendOnSignUp: true,
+        sendOnSignUp: false,
         autoSignInAfterVerification: true,
-        sendVerificationEmail: async ({ user, url, token }: any) => {
-            console.log(`[Email Verification] Send to ${user.email}: ${url}`);
+        sendVerificationEmail: async ({ user, url }: any) => {
+            console.log(
+                `[Email Verification] Send to ${user.email}: ${url}`
+            );
         },
     },
+
     user: {
         additionalFields: {
-           role: {
+            role: {
                 type: "string",
                 defaultValue: "CLIENT",
             },
-           agencyId: {
+
+            agencyId: {
                 type: "string",
-                required: false
+                required: false,
             },
+
             mustChangePassword: {
                 type: "boolean",
                 defaultValue: false,
-                required: false
+                required: false,
             },
+
             status: {
                 type: "string",
                 defaultValue: "ACTIVE",
             },
+
             isSuspended: {
                 type: "boolean",
-                defaultValue: false
+                defaultValue: false,
             },
+
             profileCompleted: {
                 type: "boolean",
-                defaultValue: false
+                defaultValue: false,
             },
+
             dateOfBirth: {
                 type: "date",
-                required: false
+                required: false,
             },
+
             nationality: {
                 type: "string",
-                required: false
+                required: false,
             },
+
             maritalStatus: {
                 type: "string",
-                required: false
+                required: false,
             },
+
             numberOfChildren: {
                 type: "number",
                 defaultValue: 0,
-                required: false
+                required: false,
             },
+
             phoneNumber: {
                 type: "string",
-                required: false
+                required: false,
             },
+
             profession: {
                 type: "string",
-                required: false
+                required: false,
             },
+
             address: {
                 type: "string",
-                required: false
-            }
+                required: false,
+            },
         },
     },
+
     baseHooks: {
         session: {
             create: {
                 after: async (session: any) => {
-                    // Better-Auth hooks usually pass the session object which has userId
                     if (session.userId) {
                         try {
-                            // 1. Fetch the actual user to get the 'name'
-                            const user = await prisma.user.findUnique({ 
-                                where: { id: session.userId } 
-                            });
+                            const user =
+                                await prisma.user.findUnique({
+                                    where: {
+                                        id: session.userId,
+                                    },
+                                });
 
-                            
                             await prisma.auditLog.create({
                                 data: {
                                     action: "USER_LOGIN",
-                                    details: auditDetails("userLoggedIn", { name: user?.name || "Unknown User", email: user?.email || "No Email" }),
-                                    userId: session.userId
-                                }
+                                    details: auditDetails(
+                                        "userLoggedIn",
+                                        {
+                                            name:
+                                                user?.name ||
+                                                "Unknown User",
+                                            email:
+                                                user?.email ||
+                                                "No Email",
+                                        }
+                                    ),
+                                    userId: session.userId,
+                                },
                             });
-
                         } catch (error) {
-                            console.error("[AUTH_HOOK_ERROR]:", error);
+                            console.error(
+                                "[AUTH_HOOK_ERROR]:",
+                                error
+                            );
                         }
                     }
-                }
-            }
-        }
-
+                },
+            },
+        },
     },
-    trustedOrigins: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-})
+
+    trustedOrigins: [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+});

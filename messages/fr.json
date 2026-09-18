@@ -1626,6 +1626,74 @@
     "agenciesPage": {
       "title": "Agences",
       "subtitle": "Gérer toutes les agences de la plateforme et leur forfait d’abonnement."
+    },
+    "paymentsPage": {
+      "title": "Paiements",
+      "subtitle": "Tous les paiements d'abonnement effectués par l'ensemble des agences.",
+      "totalRevenue": "Revenus totaux",
+      "successful": "Réussis",
+      "pending": "En attente",
+      "failed": "Échoués",
+      "searchPlaceholder": "Rechercher par agence, forfait ou référence...",
+      "allStatuses": "Tous les statuts",
+      "empty": "Aucun paiement trouvé.",
+      "columns": {
+        "agency": "Agence",
+        "plan": "Forfait",
+        "amount": "Montant",
+        "method": "Méthode",
+        "reference": "Référence",
+        "date": "Date",
+        "status": "Statut"
+      },
+      "methods": {
+        "MTN_MOBILE_MONEY": "MTN Mobile Money",
+        "ORANGE_MONEY": "Orange Money",
+        "CARD": "Carte bancaire"
+      },
+      "statusLabels": {
+        "SUCCESS": "Réussi",
+        "PENDING": "En attente",
+        "FAILED": "Échoué"
+      }
+    },
+    "usersPage": {
+      "title": "Utilisateurs",
+      "subtitle": "Tous les utilisateurs de la plateforme, toutes agences confondues.",
+      "searchPlaceholder": "Rechercher par nom, email ou agence...",
+      "allRoles": "Tous les rôles",
+      "empty": "Aucun utilisateur trouvé.",
+      "columns": {
+        "user": "Utilisateur",
+        "role": "Rôle",
+        "agency": "Agence",
+        "created": "Créé le",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "roles": {
+        "SUPER_ADMIN": "Super Administrateur",
+        "ADMIN": "Administrateur",
+        "AGENT": "Agent",
+        "CLIENT": "Client"
+      },
+      "statusLabels": {
+        "ACTIVE": "Actif",
+        "SUSPENDED": "Suspendu",
+        "PENDING": "En attente",
+        "REJECTED": "Rejeté"
+      },
+      "actions": {
+        "suspend": "Suspendre l'utilisateur",
+        "reactivate": "Réactiver l'utilisateur",
+        "delete": "Supprimer l'utilisateur"
+      }
+    },
+    "settingsPage": {
+      "title": "Paramètres",
+      "subtitle": "Gérer les forfaits auxquels les agences peuvent souscrire.",
+      "plansTitle": "Forfaits d'abonnement",
+      "plansSubtitle": "Définir les paliers tarifaires et quotas pour les agences."
     }
   },
   "errorBoundary": {
