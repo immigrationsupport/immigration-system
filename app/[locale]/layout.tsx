@@ -27,7 +27,6 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Procédure Facile",
     description: "Cabinet de conseil professionnel en immigration.",
-    images: [{ url: "/logos/logo-icon.png", width: 1024, height: 1024, alt: "Procédure Facile" }],
     siteName: "Procédure Facile",
     locale: "fr_FR",
     type: "website",
@@ -36,7 +35,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Procédure Facile",
     description: "Cabinet de conseil professionnel en immigration.",
-    images: ["/logos/logo-icon.png"],
   },
 };
 
