@@ -52,7 +52,7 @@ export async function collectMobileMoney(params: CollectPaymentParams): Promise<
       console.error("CamPay collect failed:", res.status, text.slice(0, 1000));
       return {
         ok: false,
-        error: data.message || data.detail || data.error || "CamPay could not start the payment.",
+        error: data.message || data.detail || data.error || "CamPay n'a pas pu démarrer le paiement.",
       };
     }
 
@@ -64,13 +64,13 @@ export async function collectMobileMoney(params: CollectPaymentParams): Promise<
 
     if (!reference) {
       console.error("CamPay collect returned no reference:", data);
-      return { ok: false, error: "CamPay started no identifiable transaction." };
+      return { ok: false, error: "CamPay n'a démarré aucune transaction identifiable." };
     }
 
     return { ok: true, gatewayReference: String(reference) };
   } catch (error) {
     console.error("CamPay collect error:", error);
-    return { ok: false, error: "Could not reach CamPay. Please try again." };
+    return { ok: false, error: "Impossible de contacter CamPay. Veuillez réessayer." };
   }
 }
 
@@ -111,7 +111,7 @@ export async function initializePayment(params: HostedPaymentParams): Promise<Ho
         email: params.customerEmail,
         redirect_url: params.redirectUrl,
         failure_redirect_url: params.redirectUrl,
-        payment_options: "MOMO,CARD",
+        payment_options: "CARD,MOMO",
       }),
       cache: "no-store",
     });
@@ -128,7 +128,7 @@ export async function initializePayment(params: HostedPaymentParams): Promise<Ho
       console.error("CamPay payment link failed:", res.status, text.slice(0, 1000));
       return {
         ok: false,
-        error: data.message || data.detail || data.error || "Could not create the card checkout.",
+        error: data.message || data.detail || data.error || "Impossible de créer le paiement par carte.",
       };
     }
 
@@ -139,7 +139,7 @@ export async function initializePayment(params: HostedPaymentParams): Promise<Ho
     };
   } catch (error) {
     console.error("CamPay payment link error:", error);
-    return { ok: false, error: "Could not reach CamPay. Please try again." };
+    return { ok: false, error: "Impossible de contacter CamPay. Veuillez réessayer." };
   }
 }
 
@@ -292,7 +292,7 @@ export async function verifyTransaction(gatewayReference: string): Promise<Verif
       return {
         ok: false,
         successful: false,
-        error: data.message || data.detail || "Verification failed.",
+        error: data.message || data.detail || "Échec de la vérification.",
       };
     }
 
@@ -314,7 +314,7 @@ export async function verifyTransaction(gatewayReference: string): Promise<Verif
     };
   } catch (error) {
     console.error("CamPay verification error:", error);
-    return { ok: false, successful: false, error: "Could not reach CamPay." };
+    return { ok: false, successful: false, error: "Impossible de contacter CamPay." };
   }
 }
 

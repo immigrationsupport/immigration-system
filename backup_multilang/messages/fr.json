@@ -945,6 +945,8 @@
     "selectAgent": "Sélectionner un agent",
     "unassigned": "Non assigné",
     "statusSuspended": "Suspendu",
+    "noClients": "Aucun client trouvé",
+    "toastAssignSuccess": "Agent assigné avec succès",
     "statusActive": "Actif",
     "assignTooltipDisabled": "Impossible d'assigner un agent à un client suspendu",
     "assignTooltip": "Assigner/Réassigner un agent",

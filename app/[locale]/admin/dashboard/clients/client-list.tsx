@@ -483,7 +483,7 @@ export default function ClientList({
                                         colSpan={5}
                                         className="px-6 py-16 text-center text-gray-400 font-semibold"
                                     >
-                                        {t("noClients")}
+                                        {t("noClientsFound")}
                                     </td>
                                 </tr>
                             )}

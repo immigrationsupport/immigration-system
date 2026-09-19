@@ -21,8 +21,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://procedure-facile.com"),
   title: "Procédure Facile",
   description: "Professional immigration consultancy...",
+  openGraph: {
+    title: "Procédure Facile",
+    description: "Cabinet de conseil professionnel en immigration.",
+    images: [{ url: "/logos/logo-horizontal.png", width: 1200, height: 630, alt: "Procédure Facile" }],
+    siteName: "Procédure Facile",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Procédure Facile",
+    description: "Cabinet de conseil professionnel en immigration.",
+    images: ["/logos/logo-horizontal.png"],
+  },
 };
 
 export default async function RootLayout({

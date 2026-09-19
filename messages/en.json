@@ -1004,6 +1004,8 @@
     "colAssignedAgent": "Assigned Agent",
     "colStatus": "Status",
     "colActions": "Actions",
+    "noClients": "No clients found",
+    "toastAssignSuccess": "Agent assigned successfully",
     "viewDetailsTooltip": "View Details",
     "selectAgent": "Select Agent",
     "unassigned": "Unassigned",
