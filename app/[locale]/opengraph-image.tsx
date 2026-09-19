@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import fs from "fs";
 import path from "path";
 
-export const size = { width: 1200, height: 630 };
+export const size = { width: 1200, height: 1200 };
 export const contentType = "image/png";
 
 export default async function OpengraphImage() {
@@ -20,20 +20,21 @@ export default async function OpengraphImage() {
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: "#1E3A8A",
-                    gap: 28,
+                    backgroundColor: "#FFFFFF",
+                    gap: 40,
+                    padding: 80,
+                    textAlign: "center",
                 }}
             >
                 <img
                     src={logoBase64}
-                    width={200}
-                    height={200}
-                    style={{ borderRadius: 28 }}
+                    width={340}
+                    height={340}
                 />
                 <div
                     style={{
-                        color: "white",
-                        fontSize: 64,
+                        color: "#1E3A8A",
+                        fontSize: 76,
                         fontWeight: 800,
                         letterSpacing: -1,
                     }}
@@ -42,8 +43,8 @@ export default async function OpengraphImage() {
                 </div>
                 <div
                     style={{
-                        color: "#93C5FD",
-                        fontSize: 28,
+                        color: "#64748B",
+                        fontSize: 34,
                         fontWeight: 500,
                     }}
                 >
