@@ -70,6 +70,9 @@ export async function collectMobileMoney(params: CollectPaymentParams): Promise<
     return { ok: true, gatewayReference: String(reference) };
   } catch (error) {
     console.error("CamPay collect error:", error);
+    if (error instanceof Error && error.message.includes("CAMPAY_PERMANENT_TOKEN")) {
+      return { ok: false, error: "Configuration CamPay manquante (jeton non défini). Contactez le support technique." };
+    }
     return { ok: false, error: "Impossible de contacter CamPay. Veuillez réessayer." };
   }
 }
@@ -139,6 +142,9 @@ export async function initializePayment(params: HostedPaymentParams): Promise<Ho
     };
   } catch (error) {
     console.error("CamPay payment link error:", error);
+    if (error instanceof Error && error.message.includes("CAMPAY_PERMANENT_TOKEN")) {
+      return { ok: false, error: "Configuration CamPay manquante (jeton non défini). Contactez le support technique." };
+    }
     return { ok: false, error: "Impossible de contacter CamPay. Veuillez réessayer." };
   }
 }
@@ -314,6 +320,9 @@ export async function verifyTransaction(gatewayReference: string): Promise<Verif
     };
   } catch (error) {
     console.error("CamPay verification error:", error);
+    if (error instanceof Error && error.message.includes("CAMPAY_PERMANENT_TOKEN")) {
+      return { ok: false, successful: false, error: "Configuration CamPay manquante (jeton non défini). Contactez le support technique." };
+    }
     return { ok: false, successful: false, error: "Impossible de contacter CamPay." };
   }
 }
