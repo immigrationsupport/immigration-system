@@ -359,7 +359,7 @@ export default function StepEditor({
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 pb-32">
             {error && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-red-700 text-sm">
                     <AlertCircle className="shrink-0 w-4 h-4 mt-0.5" />
@@ -488,7 +488,7 @@ export default function StepEditor({
                                     </button>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex flex-col gap-1">
                                     <select
                                         value={step.type}
                                         onChange={(e) =>
@@ -503,6 +503,7 @@ export default function StepEditor({
                                                 }
                                             )
                                         }
+                                        title={t("behavesLikeHelp")}
                                         className="text-xs font-bold border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-600"
                                     >
                                         <option value="">
@@ -531,6 +532,9 @@ export default function StepEditor({
                                             )
                                         )}
                                     </select>
+                                    <p className="text-[11px] text-gray-400 leading-tight">
+                                        {t("behavesLikeHelp")}
+                                    </p>
                                 </div>
 
                                 <Textarea

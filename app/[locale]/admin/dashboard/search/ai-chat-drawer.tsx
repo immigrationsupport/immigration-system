@@ -191,22 +191,22 @@ export default function AiChatDrawer() {
             {isOpen && (
                 <div className="fixed bottom-6 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[500px] md:w-[560px] h-[640px] max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-gray-200 flex flex-col z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200">
                     {/* Header */}
-                    <div className="px-5 py-4 bg-[#1E3A8A] text-white flex items-center justify-between shrink-0 shadow-md">
+                    <div className="px-5 py-4 bg-white text-gray-900 flex items-center justify-between shrink-0 shadow-sm border-b border-gray-100">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 text-amber-300">
+                            <div className="h-10 w-10 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100 text-[#1E3A8A]">
                                 <Sparkles className="h-5 w-5" />
                             </div>
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <h3 className="font-extrabold text-base tracking-tight">
+                                    <h3 className="font-extrabold text-base tracking-tight text-gray-900">
                                         {t("chat.title", { defaultValue: "AI Assistant Chat" })}
                                     </h3>
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 uppercase tracking-widest">
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-600 border border-emerald-200 uppercase tracking-widest">
                                         Online
                                     </span>
                                 </div>
-                                <p className="text-xs text-blue-200 font-medium flex items-center gap-1.5 mt-0.5">
-                                    <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                                <p className="text-xs text-gray-500 font-medium flex items-center gap-1.5 mt-0.5">
+                                    <CheckCircle2 className="h-3 w-3 text-emerald-500" />
                                     {t("chat.statusSaved", { defaultValue: "Chat history saved" })}
                                 </p>
                             </div>
@@ -216,25 +216,25 @@ export default function AiChatDrawer() {
                             {messages.length > 0 && (
                                 <div className="relative">
                                     {confirmClear ? (
-                                        <div className="flex items-center gap-1 bg-red-600/90 rounded-xl p-1 text-xs">
+                                        <div className="flex items-center gap-1 bg-red-50 border border-red-200 rounded-xl p-1 text-xs">
                                             <button
                                                 onClick={handleClearHistory}
-                                                className="px-2 py-1 font-bold bg-white text-red-700 rounded-lg hover:bg-red-50"
+                                                className="px-2 py-1 font-bold bg-red-600 text-white rounded-lg hover:bg-red-700"
                                             >
                                                 Clear
                                             </button>
                                             <button
                                                 onClick={() => setConfirmClear(false)}
-                                                className="p-1 hover:bg-white/20 rounded-lg"
+                                                className="p-1 hover:bg-red-100 rounded-lg"
                                             >
-                                                <X className="h-3.5 w-3.5 text-white" />
+                                                <X className="h-3.5 w-3.5 text-red-700" />
                                             </button>
                                         </div>
                                     ) : (
                                         <button
                                             type="button"
                                             onClick={() => setConfirmClear(true)}
-                                            className="p-2 hover:bg-white/10 rounded-xl transition-colors text-blue-200 hover:text-white"
+                                            className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-700"
                                             title={t("chat.clearHistory", { defaultValue: "Clear conversation" })}
                                         >
                                             <Trash2 className="h-4 w-4" />
@@ -246,7 +246,7 @@ export default function AiChatDrawer() {
                             <button
                                 type="button"
                                 onClick={() => setIsOpen(false)}
-                                className="p-2 hover:bg-white/10 rounded-xl transition-colors text-blue-200 hover:text-white"
+                                className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-700"
                             >
                                 <X className="h-5 w-5" />
                             </button>

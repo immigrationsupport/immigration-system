@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import ApplicationTable from "./application-table";
 import { getTranslations } from "next-intl/server";
+import { getFriendlyStatus } from "@/lib/steps";
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +33,11 @@ export default async function AllApplicationsPage() {
             },
             steps: {
                 select: {
-                    type: true
+                    type: true,
+                    order: true,
+                    status: true
                 },
-                take: 1
+                orderBy: { order: "asc" }
             }
         },
         orderBy: {
@@ -46,7 +49,8 @@ export default async function AllApplicationsPage() {
     const applications = rawApplications.map(app => ({
         ...app,
         destination: app.country,
-        type: (app as any).steps[0]?.type || "GENERAL"
+        type: app.steps[0]?.type || "GENERAL",
+        friendlyStatus: getFriendlyStatus(app.status, app.steps)
     }));
 
     // Fetch agents for the assignment dropdown, scoped to this agency

@@ -60,3 +60,111 @@ export function getDefaultStepLabel(type: ProcedureType): string {
 export function getDefaultStepCatalog(): { type: ProcedureType; label: string }[] {
     return APP_STEP_SEQUENCE.map((type) => ({ type, label: STEP_LABELS[type] }));
 }
+
+/**
+ * Detailed 19-step Express Entry journey (Canada), provided by an
+ * immigration expert to replace the generic 11-step default. Steps map to
+ * a built-in ProcedureType where one genuinely matches (so they keep that
+ * type's special fields/automations); everything else is a plain custom
+ * step with a French label — no schema change needed for new step types.
+ * Used as the seed template for a brand-new agency's very first workflow.
+ */
+export interface FriendlyStatusStep {
+    type: ProcedureType | null;
+    order: number;
+    status: string; // ProcedureStatus
+}
+
+/**
+ * Derives a clearer, business-meaningful status for the agency to see at a
+ * glance, from an expert's feedback that "Pending" is too vague. Based on
+ * step TYPE and relative ORDER (never a fixed step number), so it works
+ * for any workflow shape — the detailed 19-step template, a customized
+ * version of it, or an entirely different country's workflow — degrading
+ * gracefully wherever a given type isn't present. Pure in-memory logic on
+ * data already fetched for display, so it adds no extra queries or delay.
+ */
+export function getFriendlyStatus(
+    applicationStatus: string,
+    steps: FriendlyStatusStep[]
+): string {
+    if (applicationStatus === "REJECTED") return "Demande rejetée";
+
+    const byType = (type: ProcedureType) => steps.find((s) => s.type === type);
+
+    const feePayment = byType("FEE_PAYMENT");
+    if (feePayment && feePayment.status === "PENDING") return "Attente de paiement";
+
+    const passportSubmission = byType("PASSPORT_SUBMISSION");
+    if (
+        applicationStatus === "APPROVED" ||
+        applicationStatus === "COMPLETED" ||
+        (passportSubmission && passportSubmission.status === "APPROVED")
+    ) {
+        return "Demande de RP approuvée";
+    }
+
+    const profileCreation = byType("PROFILE_CREATION");
+    const applicationSubmission = byType("APPLICATION_SUBMISSION");
+
+    // Find the furthest-along step that's been started (approved or
+    // in-progress) to know where the client currently stands.
+    const currentOrder = steps
+        .filter((s) => s.status === "APPROVED" || s.status === "IN_PROGRESS")
+        .reduce((max, s) => Math.max(max, s.order), -1);
+
+    if (applicationSubmission && currentOrder >= applicationSubmission.order) {
+        return currentOrder === applicationSubmission.order
+            ? "Préparation de la demande de RP en cours"
+            : "Traitement IRCC en cours";
+    }
+
+    if (profileCreation && currentOrder >= profileCreation.order) {
+        return "Attente d'une invitation";
+    }
+
+    return "Préliminaire en cours";
+}
+
+export function getDetailedDefaultSteps(): StepDefinition[] {
+    const step = (
+        type: ProcedureType | null,
+        label: string | null,
+        order: number,
+        subSteps: SubStepDefinition[] = []
+    ): StepDefinition => ({
+        type,
+        label,
+        description: null,
+        order,
+        subSteps,
+        requiredDocuments: [],
+    });
+
+    return [
+        step("REGISTRATION", null, 0),
+        step("CONTRACT_SIGNING", null, 1),
+        step("FEE_PAYMENT", null, 2),
+        step("DOCUMENT_COLLECTION", "Collecte de documents et d'information et analyse", 3),
+        step("DIPLOMA_EQUIVALENCE", null, 4),
+        step("LANGUAGE_TEST_REGISTRATION", null, 5),
+        step(null, "Préparation du ou des tests de langue", 6),
+        step("LANGUAGE_TEST_RESULTS", null, 7),
+        step("PROFILE_CREATION", "Création de la demande Entrée Express", 8),
+        step(null, "Attente d'une invitation à présenter une demande de résidence permanente", 9),
+        step(
+            "APPLICATION_SUBMISSION",
+            "Préparation de la demande de résidence permanente pour soumission",
+            10,
+            [{ label: "Examen médical", description: null, order: 0 }]
+        ),
+        step(null, "Traitement de la demande par IRCC en cours et attente d'instruction biométrique", 11),
+        step(null, "Biométrie en cours", 12),
+        step(null, "Traitement de la demande par IRCC en cours", 13),
+        step(null, "Traitement d'ADR (Additional Documents Request) éventuel", 14),
+        step(null, "Entrevue avec un agent IRCC éventuelle", 15),
+        step("PASSPORT_SUBMISSION", "Soumission du passeport pour visa", 16),
+        step(null, "Préparation du voyage avant arrivée (optionnel pour le client)", 17),
+        step(null, "Suivi après arrivée (optionnel pour le client)", 18),
+    ];
+}

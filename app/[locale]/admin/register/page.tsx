@@ -34,6 +34,15 @@ export default function AdminRegisterPage() {
         e.preventDefault();
         setError("");
 
+        const hasLetter = /[a-zA-Z]/.test(password);
+        const hasDigit = /[0-9]/.test(password);
+        const hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
+
+        if (password.length < 8 || !hasLetter || !hasDigit || !hasSpecialChar) {
+            setError(t("errorPasswordComplexity"));
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError(t("errorPasswordsMismatch"));
             return;
@@ -267,6 +276,7 @@ export default function AdminRegisterPage() {
                                     )}
                                 </button>
                             </div>
+                            <p className="text-xs text-gray-400 mt-1">{t("passwordHint")}</p>
                         </div>
 
                         <div>

@@ -30,6 +30,7 @@ interface Application {
     id: string;
     type: string;
     status: string;
+    friendlyStatus?: string;
     destination: string;
     createdAt: Date;
     client: {
@@ -432,7 +433,8 @@ export default function ApplicationTable({
                                 </td>
 
                                 <td className="px-6 py-5">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-col items-start gap-1">
+                                      <div className="flex items-center gap-2">
 
                                         <select
                                             value={app.status}
@@ -484,6 +486,12 @@ export default function ApplicationTable({
                                             />
                                         )}
 
+                                      </div>
+                                      {app.friendlyStatus && (
+                                          <span className="text-[11px] font-semibold text-gray-400 pl-1">
+                                              {app.friendlyStatus}
+                                          </span>
+                                      )}
                                     </div>
                                 </td>
 
@@ -606,4 +614,4 @@ export default function ApplicationTable({
             )}
         </div>
     );
-}
+}

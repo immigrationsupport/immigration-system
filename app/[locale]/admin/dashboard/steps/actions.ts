@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getAgencyTemplates, getTemplateSteps } from "@/lib/steps-server";
-import { StepDefinition, APP_STEP_SEQUENCE, STEP_LABELS } from "@/lib/steps";
+import { StepDefinition, APP_STEP_SEQUENCE, STEP_LABELS, getDetailedDefaultSteps } from "@/lib/steps";
 import { ProcedureType } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 import { checkWorkflowQuota } from "@/lib/subscription";
@@ -47,20 +47,7 @@ export async function createTemplateAction(
 
         const seedSteps = defaultTemplate
             ? await getTemplateSteps(defaultTemplate.id)
-            : await (async () => {
-                  // If no Default workflow exists, create the built-in catalog
-                  // with NULL labels. The label is resolved from next-intl at
-                  // display time, so it never gets frozen in the language used
-                  // when the workflow was created.
-                  return APP_STEP_SEQUENCE.map((type, index) => ({
-                      type: type as ProcedureType,
-                      label: null as string | null,
-                      description: null as string | null,
-                      order: index,
-                      subSteps: [] as { label: string; description: string | null; order: number }[],
-                      requiredDocuments: [] as string[]
-                  }));
-              })();
+            : getDetailedDefaultSteps();
 
         const template = await prisma.applicationTemplate.create({
             data: {

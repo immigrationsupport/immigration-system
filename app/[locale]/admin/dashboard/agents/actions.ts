@@ -7,6 +7,7 @@ import { hashPassword } from "better-auth/crypto"; // Use Better Auth utility
 import { revalidatePath } from "next/cache";
 import { checkAgentQuota } from "@/lib/subscription";
 import { auditDetails } from "@/lib/audit-log";
+import { sendAgentWelcomeEmail } from "@/lib/email";
 export async function createAgentAction(formData: FormData): Promise<{ error?: string; code?: "NO_SUBSCRIPTION" | "INACTIVE" | "QUOTA_EXCEEDED"; success?: boolean }> {
     const session = await auth.api.getSession({
         headers: await headers()
@@ -86,6 +87,13 @@ if (!quota.ok) {
                 targetId: newUser.id,
             }
         });
+
+        // Send email to newly created agent with system link
+        sendAgentWelcomeEmail({
+            agentEmail: email,
+            agentName: name,
+            password: password,
+        }).catch((err) => console.error("Error sending welcome email to agent:", err));
 
         revalidatePath("/admin/dashboard/agents");
         return { success: true };

@@ -46,8 +46,8 @@ export async function registerAgencyAdminAction(
             ? "L'adresse doit contenir 200 caractères maximum."
             : "Address must be 200 characters or less.",
         passwordTooShort: isFr
-            ? "Le mot de passe doit contenir au moins 8 caractères."
-            : "Password must be at least 8 characters long.",
+            ? "Le mot de passe doit contenir au moins 8 caractères, avec au moins une lettre, un chiffre et un caractère spécial."
+            : "Password must be at least 8 characters long, with at least one letter, one digit, and one special character.",
         passwordsMismatch: isFr
             ? "Les mots de passe ne correspondent pas."
             : "Passwords do not match.",
@@ -94,7 +94,11 @@ export async function registerAgencyAdminAction(
         return { error: messages.addressTooLong };
     }
 
-    if (password.length < 8) {
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasDigit = /[0-9]/.test(password);
+    const hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
+
+    if (password.length < 8 || !hasLetter || !hasDigit || !hasSpecialChar) {
         return { error: messages.passwordTooShort };
     }
 
