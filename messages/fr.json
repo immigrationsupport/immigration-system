@@ -1051,6 +1051,7 @@
     "unsuspendTooltip": "Réactiver le client",
     "suspendTooltip": "Suspendre le client",
     "deleteTooltip": "Supprimer le client",
+    "noClients": "Aucun client trouvé",
     "noClientsFound": "Aucun client trouvé correspondant à votre recherche.",
     "edit": {
       "tooltip": "Modifier le client",
