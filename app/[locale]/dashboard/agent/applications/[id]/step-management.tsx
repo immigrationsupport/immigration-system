@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { toast } from "sonner";
 import {
     Loader2,
     Upload,
@@ -134,11 +136,32 @@ function stepNeedsDocuments(step: any): boolean {
     );
 }
 
+import { getIntakeFormDocumentUrlAction } from "@/app/[locale]/intake-form/actions";
+import { importIntakeFormDocumentAction } from "../actions";
+
+interface QuestionnaireQuestion {
+    id: string;
+    label: string;
+    value: string;
+    document: { id: string; fileName: string } | null;
+}
+
+interface QuestionnaireSection {
+    section: string;
+    label: string;
+    questions: QuestionnaireQuestion[];
+}
+
 interface StepManagementProps {
     applicationId: string;
     currentStatus: string;
     steps: any[];
     country: string;
+    clientId?: string;
+    intakeDocuments?: { id: string; fileName: string; questionId: string; questionLabel: string }[];
+    languageTestInfo?: { label: string; value: string }[];
+    questionnaireSections?: QuestionnaireSection[];
+    questionnaireStatus?: string | null;
 
     // Called after any successful mutation.
     onRefresh?: () => void;
@@ -149,6 +172,11 @@ export default function StepManagement({
     currentStatus,
     steps,
     country,
+    clientId,
+    intakeDocuments = [],
+    languageTestInfo = [],
+    questionnaireSections = [],
+    questionnaireStatus = null,
     onRefresh
 }: StepManagementProps) {
     const t = useTranslations("agentStepManagement");
@@ -162,6 +190,17 @@ export default function StepManagement({
     const [appStatus, setAppStatus] = useState(currentStatus);
     const [loadingAppStatus, setLoadingAppStatus] = useState(false);
     const [loadingStepId, setLoadingStepId] = useState<string | null>(null);
+
+    // Which content this card shows: the step-by-step table (default) or
+    // the client's full intake-form Q&A, toggled in place — no extra
+    // scrolling, no navigating away.
+    const [activeView, setActiveView] = useState<"steps" | "questionnaire">("steps");
+
+    // Portals need document.body, which only exists client-side after mount.
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // MODAL States
     const [requestModal, setRequestModal] = useState<{
@@ -344,6 +383,33 @@ export default function StepManagement({
     // ---------------------------------------------------------
     // FINALIZE PROCEDURE ACTION
     // ---------------------------------------------------------
+    const handleOpenIntakeDocument = async (documentId: string) => {
+        const result = await getIntakeFormDocumentUrlAction(documentId);
+        if (result?.error || !result.url) {
+            toast.error(result?.error || "Impossible d'ouvrir ce fichier.");
+            return;
+        }
+        window.open(result.url, "_blank");
+    };
+
+    const [importingId, setImportingId] = useState<string | null>(null);
+
+    const handleImportIntakeDocument = async (stepId: string, intakeDocumentId: string) => {
+        setImportingId(intakeDocumentId);
+        try {
+            const result = await importIntakeFormDocumentAction(stepId, intakeDocumentId);
+            if (result?.error) {
+                toast.error(result.error);
+                return;
+            }
+            toast.success("Document importé avec succès.");
+            router.refresh();
+            onRefresh?.();
+        } finally {
+            setImportingId(null);
+        }
+    };
+
     const handleFinalizeProcedure = async () => {
         setLoadingFinalize(true);
 
@@ -482,6 +548,98 @@ export default function StepManagement({
                 </div>
             </div>
 
+            {/* =====================================================
+                VIEW TOGGLE — Steps table vs. full questionnaire,
+                swapped in place right here, no extra scrolling.
+            ===================================================== */}
+            {clientId && (
+                <div className="flex items-center gap-2 border-b border-gray-200">
+                    <button
+                        type="button"
+                        onClick={() => setActiveView("steps")}
+                        className={`px-5 py-3 text-xs font-black uppercase tracking-widest border-b-2 -mb-px transition-colors ${
+                            activeView === "steps"
+                                ? "border-[#1E3A8A] text-[#1E3A8A]"
+                                : "border-transparent text-gray-400 hover:text-gray-600"
+                        }`}
+                    >
+                        {t("stepsTabLabel", { defaultValue: "Étapes" })}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveView("questionnaire")}
+                        className={`px-5 py-3 text-xs font-black uppercase tracking-widest border-b-2 -mb-px transition-colors ${
+                            activeView === "questionnaire"
+                                ? "border-[#1E3A8A] text-[#1E3A8A]"
+                                : "border-transparent text-gray-400 hover:text-gray-600"
+                        }`}
+                    >
+                        {t("questionnaireTabLabel", { defaultValue: "Questionnaire" })}
+                        {questionnaireStatus && (
+                            <span
+                                className={`ml-2 text-[9px] px-2 py-0.5 rounded-full normal-case tracking-normal font-bold ${
+                                    questionnaireStatus === "SUBMITTED"
+                                        ? "bg-emerald-50 text-emerald-700"
+                                        : "bg-yellow-50 text-yellow-700"
+                                }`}
+                            >
+                                {questionnaireStatus === "SUBMITTED"
+                                    ? t("questionnaireStatusSubmitted", { defaultValue: "Soumis" })
+                                    : t("questionnaireStatusDraft", { defaultValue: "Brouillon" })}
+                            </span>
+                        )}
+                    </button>
+                </div>
+            )}
+
+            {activeView === "questionnaire" ? (
+                /* =====================================================
+                    FULL QUESTIONNAIRE — every question/answer the client
+                    submitted, shown in place of the steps table. When the
+                    client hasn't answered anything yet, show an empty
+                    state instead of hiding the tab entirely.
+                ===================================================== */
+                questionnaireSections.length === 0 ? (
+                    <div className="bg-white border border-gray-200 shadow-sm p-10 text-center">
+                        <p className="text-sm font-bold text-gray-400">
+                            {t("questionnaireEmptyState", {
+                                defaultValue: "Aucune réponse au formulaire pour le moment."
+                            })}
+                        </p>
+                    </div>
+                ) : (
+                <div className="bg-white border border-gray-200 shadow-sm divide-y divide-gray-100">
+                    {questionnaireSections.map((section) => (
+                        <div key={section.section}>
+                            <div className="bg-gray-50/70 px-6 py-3">
+                                <h4 className="text-xs font-black text-[#1E3A8A] uppercase tracking-wide">
+                                    {section.label}
+                                </h4>
+                            </div>
+                            <div className="divide-y divide-gray-50">
+                                {section.questions.map((q) => (
+                                    <div key={q.id} className="px-6 py-4">
+                                        <p className="text-xs font-bold text-gray-400 mb-1">{q.label}</p>
+                                        <p className="text-sm font-semibold text-gray-900">{q.value}</p>
+                                        {q.document && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleOpenIntakeDocument(q.document!.id)}
+                                                className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-bold text-[#1E3A8A] hover:underline"
+                                            >
+                                                <FileCheck2 className="h-3.5 w-3.5" />
+                                                {q.document.fileName}
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                )
+            ) : (
+            <>
             {/* =====================================================
                 INDIVIDUAL STEP MANAGEMENT TABLE
             ===================================================== */}
@@ -888,6 +1046,84 @@ export default function StepManagement({
                                                                         );
                                                                     }
                                                                 )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                {/* =================================================
+                                                    INTAKE FORM DOCUMENTS
+                                                    (already uploaded by the client via the
+                                                    intake form, before this procedure existed)
+                                                ================================================= */}
+                                                {step.type === "DOCUMENT_COLLECTION" &&
+                                                    intakeDocuments.length > 0 && (
+                                                        <div className="mt-4 p-4 bg-blue-50/60 border border-blue-100 rounded-xl space-y-2">
+                                                            <span className="text-[10px] font-black text-[#1E3A8A] uppercase tracking-widest flex items-center gap-1.5">
+                                                                <FileCheck2 className="h-3.5 w-3.5" />
+                                                                Documents fournis via le formulaire de renseignement
+                                                            </span>
+                                                            <div className="flex flex-col gap-1.5">
+                                                                {intakeDocuments.map((doc) => {
+                                                                    const alreadyImported = step.Document?.some(
+                                                                        (d: any) => d.name === doc.fileName
+                                                                    );
+                                                                    return (
+                                                                        <div
+                                                                            key={doc.id}
+                                                                            className="flex items-center justify-between gap-2 text-xs font-semibold text-[#1E3A8A] bg-white px-3 py-2 rounded-lg border border-blue-100"
+                                                                        >
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleOpenIntakeDocument(doc.id)}
+                                                                                className="flex-1 min-w-0 text-left hover:underline"
+                                                                            >
+                                                                                <span className="truncate block">{doc.fileName}</span>
+                                                                                <span className="text-[10px] text-gray-400 block">
+                                                                                    {doc.questionLabel}
+                                                                                </span>
+                                                                            </button>
+                                                                            {alreadyImported ? (
+                                                                                <span className="text-[10px] font-black text-emerald-600 uppercase shrink-0 flex items-center gap-1">
+                                                                                    <CheckCircle2 className="h-3.5 w-3.5" /> Importé
+                                                                                </span>
+                                                                            ) : (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => handleImportIntakeDocument(step.id, doc.id)}
+                                                                                    disabled={importingId === doc.id}
+                                                                                    className="shrink-0 text-[10px] font-black uppercase px-2.5 py-1.5 rounded-lg bg-[#1E3A8A] text-white hover:bg-blue-900 disabled:opacity-60 flex items-center gap-1"
+                                                                                >
+                                                                                    {importingId === doc.id ? (
+                                                                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                                                                    ) : (
+                                                                                        "Importer"
+                                                                                    )}
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                {/* =================================================
+                                                    LANGUAGE TEST INFO FROM INTAKE FORM
+                                                ================================================= */}
+                                                {step.type === "LANGUAGE_TEST_RESULTS" &&
+                                                    languageTestInfo.length > 0 && (
+                                                        <div className="mt-4 p-4 bg-blue-50/60 border border-blue-100 rounded-xl space-y-2">
+                                                            <span className="text-[10px] font-black text-[#1E3A8A] uppercase tracking-widest flex items-center gap-1.5">
+                                                                <FileCheck2 className="h-3.5 w-3.5" />
+                                                                Notes fournies via le formulaire de renseignement
+                                                            </span>
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                {languageTestInfo.map((info, i) => (
+                                                                    <div key={i} className="bg-white px-3 py-2 rounded-lg border border-blue-100">
+                                                                        <p className="text-[10px] text-gray-400 font-semibold">{info.label}</p>
+                                                                        <p className="text-xs font-bold text-gray-800">{info.value}</p>
+                                                                    </div>
+                                                                ))}
                                                             </div>
                                                         </div>
                                                     )}
@@ -1322,11 +1558,19 @@ export default function StepManagement({
                     </tbody>
                 </table>
             </div>
+            </>
+            )}
 
             {/* =====================================================
                 REQUEST MODAL
+                Rendered via a portal to document.body so it is always
+                truly viewport-fixed and centered — a plain
+                position:fixed here would get "captured" by any
+                scrollable/backdrop-blurred ancestor (e.g. the admin's
+                details modal), making it pop up near the top of the
+                scrolled content instead of centered on screen.
             ===================================================== */}
-            {requestModal && (
+            {requestModal && mounted && createPortal(
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
 
                     <div className="bg-white rounded-[40px] p-10 max-w-lg w-full shadow-2xl space-y-6">
@@ -1433,13 +1677,14 @@ export default function StepManagement({
 
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* =====================================================
                 FINALIZE PROCEDURE MODAL
             ===================================================== */}
-            {finalizeModalOpen && (
+            {finalizeModalOpen && mounted && createPortal(
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
                     <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 space-y-4">
                         <div className="flex items-start justify-between gap-3">
@@ -1532,13 +1777,14 @@ export default function StepManagement({
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* =====================================================
                 SUCCESS MODAL
             ===================================================== */}
-            {successModal && (
+            {successModal && mounted && createPortal(
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
 
                     <div className="bg-white rounded-[40px] p-10 max-w-sm w-full text-center space-y-6">
@@ -1561,7 +1807,8 @@ export default function StepManagement({
                         </button>
 
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

@@ -14,7 +14,10 @@ export default async function ManageClientsPage() {
     const [clients, agents] = await Promise.all([
         prisma.user.findMany({
             where: { role: "CLIENT", agencyId },
-            include: { agent: { select: { name: true } } },
+            include: {
+                agent: { select: { name: true } },
+                intakeFormResponse: { select: { invited: true, submittedAt: true } }
+            },
             orderBy: { createdAt: "desc" }
         }),
         prisma.user.findMany({

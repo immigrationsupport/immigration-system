@@ -180,12 +180,17 @@ export default function ApplicationDetailsModal({ applicationId, onClose }: Deta
                         {/* Right Column: Timeline & Procedures */}
                         <div className="lg:col-span-2 space-y-6">
                             <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 overflow-x-auto">
-                                <StepManagement 
+                                <StepManagement
                                     applicationId={data.id}
                                     currentStatus={data.status}
                                     steps={data.steps}
                                     country={data.country}
                                     onRefresh={fetchDetails}
+                                    clientId={data.client.id}
+                                    intakeDocuments={data.intakeDocuments}
+                                    languageTestInfo={data.languageTestInfo}
+                                    questionnaireSections={data.questionnaireSections}
+                                    questionnaireStatus={data.questionnaireStatus}
                                 />
                             </div>
                         </div>

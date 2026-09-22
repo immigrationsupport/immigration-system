@@ -8,6 +8,8 @@ import {
     XCircle,
     Trash2,
     CheckCircle2,
+    Send,
+    Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,10 +17,12 @@ import {
     toggleSuspendClientAction,
     deleteClientAction
 } from "./actions";
+import { sendIntakeFormLinkAction } from "@/app/[locale]/dashboard/agent/clients/[id]/actions";
 import { TruncatedText } from "@/components/ui/truncated-text";
 import CreateClientModal from "./create-client-modal";
 import EditClientModal from "./edit-client-modal";
 import { useTranslations } from "next-intl";
+import { HelpGuideButton } from "@/components/ui/help-guide-button";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import { toast } from "sonner";
@@ -35,6 +39,10 @@ interface Client {
     agentId: string | null;
     agent?: {
         name: string;
+    } | null;
+    intakeFormResponse?: {
+        invited: boolean;
+        submittedAt: string | Date | null;
     } | null;
 }
 
@@ -53,6 +61,7 @@ export default function ClientList({
     agents
 }: ClientListProps) {
     const t = useTranslations("adminClients");
+    const tHelp = useTranslations("adminHelpGuides");
 
     const [clients, setClients] = useState<Client[]>(initialClients);
     const [search, setSearch] = useState("");
@@ -62,6 +71,33 @@ export default function ClientList({
     const [suspendingClient, setSuspendingClient] = useState<Client | null>(null);
     const [actionError, setActionError] = useState("");
     const [isPendingAction, setIsPendingAction] = useState(false);
+    const [sendingFormId, setSendingFormId] = useState<string | null>(null);
+
+    const handleSendForm = async (client: Client) => {
+        setSendingFormId(client.id);
+        const result = await sendIntakeFormLinkAction(client.id);
+        setSendingFormId(null);
+
+        if (result?.error) {
+            toast.error(t("sendFormToastError"));
+            return;
+        }
+
+        toast.success(t("sendFormToastSuccess"));
+        setClients((prev) =>
+            prev.map((c) =>
+                c.id === client.id
+                    ? {
+                          ...c,
+                          intakeFormResponse: {
+                              invited: true,
+                              submittedAt: c.intakeFormResponse?.submittedAt ?? null
+                          }
+                      }
+                    : c
+            )
+        );
+    };
 
     // Filter clients based on search query (name or email)
     const filteredClients = useMemo(() => {
@@ -190,12 +226,37 @@ export default function ClientList({
         <div className="space-y-6">
             {/* Header row */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1
-                    className="text-2xl font-semibold"
-                    style={{ color: "#1E3A8A" }}
-                >
-                    {t("pageTitle")}
-                </h1>
+                <div className="flex items-center gap-3">
+                    <h1
+                        className="text-2xl font-semibold"
+                        style={{ color: "#1E3A8A" }}
+                    >
+                        {t("pageTitle")}
+                    </h1>
+                    <HelpGuideButton
+                        title={tHelp("createClientTitle")}
+                        description={tHelp("createClientDescription")}
+                        label={tHelp("createClientHelpLabel")}
+                        steps={[
+                            { title: tHelp("createClientStep1Title"), description: tHelp("createClientStep1Desc") },
+                            { title: tHelp("createClientStep2Title"), description: tHelp("createClientStep2Desc") },
+                            { title: tHelp("createClientStep3Title"), description: tHelp("createClientStep3Desc") },
+                            { title: tHelp("createClientStep4Title"), description: tHelp("createClientStep4Desc") }
+                        ]}
+                    />
+                    <HelpGuideButton
+                        title={tHelp("assignAgentTitle")}
+                        description={tHelp("assignAgentDescription")}
+                        label={tHelp("assignAgentHelpLabel")}
+                        className="h-9 w-9 rounded-full border border-emerald-100 bg-emerald-50 text-emerald-700 flex items-center justify-center hover:bg-emerald-100 transition-all shrink-0"
+                        steps={[
+                            { title: tHelp("assignAgentStep1Title"), description: tHelp("assignAgentStep1Desc") },
+                            { title: tHelp("assignAgentStep2Title"), description: tHelp("assignAgentStep2Desc") },
+                            { title: tHelp("assignAgentStep3Title"), description: tHelp("assignAgentStep3Desc") },
+                            { title: tHelp("assignAgentStep4Title"), description: tHelp("assignAgentStep4Desc") }
+                        ]}
+                    />
+                </div>
 
                 <CreateClientModal
                     agents={agents}
@@ -410,6 +471,33 @@ export default function ClientList({
                                                 }}
                                             />
 
+                                            {!client.intakeFormResponse?.submittedAt && (
+                                                <button
+                                                    className="p-2 text-[#374151] hover:text-[#1E3A8A] hover:bg-white rounded-lg transition-all disabled:opacity-50"
+                                                    title={
+                                                        client.intakeFormResponse?.invited
+                                                            ? t("resendFormTooltip")
+                                                            : t("sendFormTooltip")
+                                                    }
+                                                    disabled={
+                                                        client.isSuspended ||
+                                                        sendingFormId === client.id
+                                                    }
+                                                    onClick={() =>
+                                                        handleSendForm(client)
+                                                    }
+                                                >
+                                                    {sendingFormId === client.id ? (
+                                                        <Loader2
+                                                            size={20}
+                                                            className="animate-spin"
+                                                        />
+                                                    ) : (
+                                                        <Send size={20} />
+                                                    )}
+                                                </button>
+                                            )}
+
                                             <button
                                                 className="p-2 text-[#374151] hover:text-[#1E3A8A] hover:bg-white rounded-lg transition-all disabled:opacity-50"
                                                 title={
@@ -483,7 +571,7 @@ export default function ClientList({
                                         colSpan={5}
                                         className="px-6 py-16 text-center text-gray-400 font-semibold"
                                     >
-                                        {t("noClientsFound")}
+                                        {t("noClients")}
                                     </td>
                                 </tr>
                             )}

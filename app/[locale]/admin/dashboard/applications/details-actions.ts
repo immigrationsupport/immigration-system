@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { auditDetails } from "@/lib/audit-log";
+import { getAllQuestions, getAnsweredQuestionsBySection, formatAnswerForDisplay } from "@/lib/intake-form/engine";
 
 export async function getApplicationDetails(applicationId: string) {
     try {
@@ -63,10 +64,53 @@ export async function getApplicationDetails(applicationId: string) {
             return { error: "This application does not belong to your agency." };
         }
 
+        // Pull in whatever the client already provided via the intake form
+        // (documents + language test info), same as the agent's view, so
+        // the admin doesn't have to open a separate screen to see it.
+        const [intakeFormResponse, intakeFormDocuments] = await Promise.all([
+            prisma.intakeFormResponse.findUnique({ where: { clientId: app.client.id } }),
+            prisma.intakeFormDocument.findMany({ where: { clientId: app.client.id } })
+        ]);
+
+        const intakeAnswers = (intakeFormResponse?.answers as Record<string, any>) || {};
+        const intakeCountry = intakeFormResponse?.country || null;
+        const allQuestions = getAllQuestions(intakeCountry);
+
+        const languageTestInfo = allQuestions
+            .filter((q) => /test|score/i.test(q.id) && intakeAnswers[q.id] !== undefined && intakeAnswers[q.id] !== "")
+            .map((q) => ({ label: q.label, value: formatAnswerForDisplay(q, intakeAnswers[q.id]) }));
+
+        const intakeDocumentsForDisplay = intakeFormDocuments.map((doc) => ({
+            id: doc.id,
+            fileName: doc.fileName,
+            questionId: doc.questionId,
+            questionLabel: allQuestions.find((q) => q.id === doc.questionId)?.label || doc.questionId
+        }));
+
+        // Full section-by-section Q&A (every question, not just the
+        // document/language-test subset above), rendered inline in this
+        // same modal — same data the agent's questionnaire page uses.
+        const questionnaireSections = intakeFormResponse
+            ? getAnsweredQuestionsBySection(intakeCountry, intakeAnswers).map((section) => ({
+                  section: section.section,
+                  label: section.label,
+                  questions: section.questions.map((q) => ({
+                      id: q.id,
+                      label: q.label,
+                      value: formatAnswerForDisplay(q, intakeAnswers[q.id]),
+                      document: intakeDocumentsForDisplay.find((d) => d.questionId === q.id) || null
+                  }))
+              }))
+            : [];
+
         const mappedApp = {
             ...app,
             destination: app.country,
-            type: app.steps[0]?.type || "GENERAL"
+            type: app.steps[0]?.type || "GENERAL",
+            intakeDocuments: intakeDocumentsForDisplay,
+            languageTestInfo,
+            questionnaireSections,
+            questionnaireStatus: intakeFormResponse?.status || null
         };
 
         return { success: true, application: mappedApp };

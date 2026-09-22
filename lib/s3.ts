@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+    CopyObjectCommand,
     DeleteObjectCommand,
     GetObjectCommand,
     HeadObjectCommand,
@@ -95,6 +96,25 @@ export async function checkS3ObjectExists(key: string) {
     } catch {
         return false;
     }
+}
+
+/**
+ * Copies an existing S3 object to a new key — used to "import" an
+ * intake-form document (stored under intake-form-documents/) into the
+ * official documents/ prefix that a real Document row expects, without
+ * asking the client to re-upload anything.
+ */
+export async function copyS3Object(sourceKey: string, destinationKey: string) {
+    const client = getS3Client();
+    const { bucket } = getS3Config();
+
+    await client.send(
+        new CopyObjectCommand({
+            Bucket: bucket,
+            CopySource: `${bucket}/${sourceKey}`,
+            Key: destinationKey,
+        })
+    );
 }
 
 export async function deleteS3Object(key: string) {

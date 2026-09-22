@@ -8,7 +8,7 @@ import { ApplicationStatus, ProcedureStatus } from "@prisma/client";
 import { auditDetails } from "@/lib/audit-log";
 import { getAgencyTemplates, getTemplateSteps } from "@/lib/steps-server";
 import { getTranslations } from "next-intl/server";
-import { createS3UploadUrl, deleteS3Object } from "@/lib/s3";
+import { createS3UploadUrl, deleteS3Object, copyS3Object } from "@/lib/s3";
 // Looks up the agency name that actually owns an application — used for
 // client-facing emails so the brand shown is always the client's own
 // agency, regardless of which agent/admin performed the action.
@@ -523,6 +523,86 @@ export async function addDocumentAction(
         return {
             error: e.message || "Failed to attach document."
         };
+    }
+}
+
+/**
+ * Copies a document the client already uploaded via the intake form into
+ * this step's official document list — so the agent doesn't have to ask
+ * the client to upload it again. Copies the underlying S3 file into the
+ * proper documents/{agencyId}/ prefix and creates a real Document row.
+ */
+export async function importIntakeFormDocumentAction(
+    stepId: string,
+    intakeDocumentId: string,
+    documentType: string = "OTHER"
+) {
+    const session = await auth.api.getSession({ headers: await headers() });
+
+    if (!session || !["AGENT", "ADMIN"].includes((session.user as any).role)) {
+        return { error: "Unauthorized access." };
+    }
+
+    const agencyId = (session.user as any).agencyId;
+
+    try {
+        const step = await prisma.applicationStep.findUnique({
+            where: { id: stepId },
+            include: { application: { include: { client: true } } }
+        });
+
+        if (!step) return { error: "Step not found." };
+        if (step.application.agencyId !== agencyId) {
+            return { error: "This application does not belong to your agency." };
+        }
+
+        const intakeDoc = await prisma.intakeFormDocument.findUnique({
+            where: { id: intakeDocumentId }
+        });
+
+        if (!intakeDoc) return { error: "Intake form document not found." };
+        if (intakeDoc.clientId !== step.application.clientId) {
+            return { error: "This document does not belong to this client." };
+        }
+
+        const safeFileName = intakeDoc.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const newKey = `documents/${agencyId}/${crypto.randomUUID()}-${safeFileName}`;
+
+        await copyS3Object(intakeDoc.storageKey, newKey);
+
+        const document = await prisma.document.create({
+            data: {
+                name: intakeDoc.fileName,
+                fileUrl: "",
+                storageKey: newKey,
+                type: documentType as any,
+                status: "UPLOADED",
+                procedureId: stepId,
+                uploaderId: session.user.id
+            }
+        });
+
+        await prisma.auditLog.create({
+            data: {
+                action: "DOCUMENT_UPLOAD",
+                details: auditDetails("documentUploadedByActor", {
+                    actorName: session.user.name,
+                    docName: intakeDoc.fileName,
+                    clientName: step.application.client.name,
+                    stepType: step.type
+                }),
+                userId: session.user.id,
+                agencyId,
+                targetId: step.applicationId
+            }
+        });
+
+        revalidatePath(`/dashboard/agent/applications/${step.applicationId}`);
+
+        return { success: true, document };
+    } catch (e: any) {
+        console.error("Import intake form document error:", e);
+        return { error: e.message || "Failed to import the document." };
     }
 }
 

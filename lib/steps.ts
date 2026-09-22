@@ -61,14 +61,6 @@ export function getDefaultStepCatalog(): { type: ProcedureType; label: string }[
     return APP_STEP_SEQUENCE.map((type) => ({ type, label: STEP_LABELS[type] }));
 }
 
-/**
- * Detailed 19-step Express Entry journey (Canada), provided by an
- * immigration expert to replace the generic 11-step default. Steps map to
- * a built-in ProcedureType where one genuinely matches (so they keep that
- * type's special fields/automations); everything else is a plain custom
- * step with a French label — no schema change needed for new step types.
- * Used as the seed template for a brand-new agency's very first workflow.
- */
 export interface FriendlyStatusStep {
     type: ProcedureType | null;
     order: number;
@@ -83,6 +75,19 @@ export interface FriendlyStatusStep {
  * version of it, or an entirely different country's workflow — degrading
  * gracefully wherever a given type isn't present. Pure in-memory logic on
  * data already fetched for display, so it adds no extra queries or delay.
+ *
+ * Mapping, per the expert's step-by-step rules (E<n> = "Étape n" in the
+ * detailed 19-step template):
+ *   - Préliminaire en cours .......... E1 through E8 (before the Express
+ *                                       Entry profile, E9, is created)
+ *   - Attente d'une invitation ....... E9 done, E10 in progress
+ *   - Préparation de la demande de RP  E11 in progress
+ *   - Traitement IRCC en cours ....... E12 onward, until the passport step
+ *   - Demande de RP approuvée ........ E17 approved (or app marked done)
+ *   - Demande rejetée ................ application rejected
+ *   - Attente de paiement ............ payment step is the one currently
+ *                                       blocking progress (can appear
+ *                                       anywhere the fee-payment step sits)
  */
 export function getFriendlyStatus(
     applicationStatus: string,
@@ -93,9 +98,12 @@ export function getFriendlyStatus(
     const byType = (type: ProcedureType) => steps.find((s) => s.type === type);
 
     const feePayment = byType("FEE_PAYMENT");
-    if (feePayment && feePayment.status === "PENDING") return "Attente de paiement";
+    const profileCreation = byType("PROFILE_CREATION"); // E9
+    const applicationSubmission = byType("APPLICATION_SUBMISSION"); // E11
+    const passportSubmission = byType("PASSPORT_SUBMISSION"); // E17
 
-    const passportSubmission = byType("PASSPORT_SUBMISSION");
+    // E17 — passport step approved (or the application itself marked done)
+    // is the clearest, most reliable "approved" signal.
     if (
         applicationStatus === "APPROVED" ||
         applicationStatus === "COMPLETED" ||
@@ -104,28 +112,68 @@ export function getFriendlyStatus(
         return "Demande de RP approuvée";
     }
 
-    const profileCreation = byType("PROFILE_CREATION");
-    const applicationSubmission = byType("APPLICATION_SUBMISSION");
+    // The step the client is actually waiting on right now: the first one,
+    // in order, that isn't approved yet. Everything below reads off of
+    // this — never off "the furthest step ever touched" — so an
+    // application stuck early (e.g. on payment) is never mistaken for one
+    // that has progressed much further, which was the bug: the previous
+    // version flagged "Attente de paiement" the instant fee payment was
+    // PENDING anywhere in the list, even before that step was reached.
+    const currentStep = [...steps]
+        .sort((a, b) => a.order - b.order)
+        .find((s) => s.status !== "APPROVED");
 
-    // Find the furthest-along step that's been started (approved or
-    // in-progress) to know where the client currently stands.
-    const currentOrder = steps
-        .filter((s) => s.status === "APPROVED" || s.status === "IN_PROGRESS")
-        .reduce((max, s) => Math.max(max, s.order), -1);
-
-    if (applicationSubmission && currentOrder >= applicationSubmission.order) {
-        return currentOrder === applicationSubmission.order
-            ? "Préparation de la demande de RP en cours"
-            : "Traitement IRCC en cours";
+    // Fee payment is genuinely what's blocking progress right now.
+    if (
+        feePayment &&
+        currentStep &&
+        currentStep.order === feePayment.order &&
+        feePayment.status !== "APPROVED"
+    ) {
+        return "Attente de paiement";
     }
 
-    if (profileCreation && currentOrder >= profileCreation.order) {
+    // E12 onward — the RP application is filed and now sits with IRCC
+    // (biometrics, processing, ADR, interview...) until E17 is reached.
+    if (
+        applicationSubmission &&
+        applicationSubmission.status === "APPROVED" &&
+        (!passportSubmission || passportSubmission.status !== "APPROVED")
+    ) {
+        return "Traitement IRCC en cours";
+    }
+
+    // E11 — the RP application itself is actively being assembled/submitted.
+    if (
+        applicationSubmission &&
+        currentStep &&
+        currentStep.order === applicationSubmission.order
+    ) {
+        return "Préparation de la demande de RP en cours";
+    }
+
+    // E9 done, waiting on the invitation (ITA) before the RP application
+    // (E11) can start.
+    if (
+        profileCreation &&
+        profileCreation.status === "APPROVED" &&
+        (!applicationSubmission || applicationSubmission.status !== "APPROVED")
+    ) {
         return "Attente d'une invitation";
     }
 
+    // E1 through E8: everything before the Express Entry profile is created.
     return "Préliminaire en cours";
 }
 
+/**
+ * Detailed 19-step Express Entry journey (Canada), provided by an
+ * immigration expert to replace the generic 11-step default. Steps map to
+ * a built-in ProcedureType where one genuinely matches (so they keep that
+ * type's special fields/automations); everything else is a plain custom
+ * step with a French label — no schema change needed for new step types.
+ * Used as the seed template for a brand-new agency's very first workflow.
+ */
 export function getDetailedDefaultSteps(): StepDefinition[] {
     const step = (
         type: ProcedureType | null,
