@@ -114,12 +114,14 @@ export async function sendAgentWelcomeEmail({
         </div>
     `;
 
-    const result = await sendEmail({
+    console.log(`[Email] Sending welcome email to agent: ${agentEmail}`);
+const result = await sendEmail({
         to: agentEmail,
         subject: "Bienvenue sur Procédure Facile – Vos identifiants d'accès",
         html,
         fromName: "Procédure Facile",
     });
+console.log(`[Email] Result for agent welcome email:`, result);
 
     if (result.error) {
         console.error("[Email] Failed to send agent welcome email:", result.error);
