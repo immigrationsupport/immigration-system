@@ -96,8 +96,11 @@ if (!quota.ok) {
             },
         });
 
-        // Send email to newly created client with system link
-        sendClientWelcomeEmail({
+        // Send email to newly created client with system link. Awaited (not
+        // fire-and-forget): on serverless hosting, an un-awaited promise can
+        // get cut off the moment the function returns, silently dropping
+        // the send with no log at all.
+        await sendClientWelcomeEmail({
             clientEmail: email,
             clientName: name,
             password: password,

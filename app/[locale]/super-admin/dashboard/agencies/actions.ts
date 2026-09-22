@@ -201,8 +201,11 @@ export async function createAgencyAction(formData: FormData) {
             };
         });
 
-        // Send agency creation notification email
-        sendAgencyCreatedNotificationEmail({
+        // Send agency creation notification email. Awaited (not
+        // fire-and-forget): on serverless hosting, an un-awaited promise
+        // can get cut off the moment the function returns, silently
+        // dropping the send with no log at all.
+        await sendAgencyCreatedNotificationEmail({
             agencyName: result.agency.name,
             adminName: result.admin.name,
             adminEmail: result.admin.email,

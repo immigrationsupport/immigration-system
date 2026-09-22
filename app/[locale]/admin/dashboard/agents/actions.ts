@@ -89,7 +89,10 @@ if (!quota.ok) {
         });
 
         // Send email to newly created agent with system link, same as clients.
-        sendAgentWelcomeEmail({
+        // Awaited (not fire-and-forget): on serverless hosting, an un-awaited
+        // promise can get cut off the moment the function returns, silently
+        // dropping the send with no log at all.
+        await sendAgentWelcomeEmail({
             agentEmail: email,
             agentName: name,
             password: password,
