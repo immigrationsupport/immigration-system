@@ -66,7 +66,9 @@ export async function sendClientWelcomeEmail({
 }
 
 /**
- * Send welcome email to a newly created agent via Resend.
+ * Send welcome email to a newly created agent via Resend. Mirrors
+ * sendClientWelcomeEmail above — agents were being created silently with
+ * no notification while clients always got one.
  */
 export async function sendAgentWelcomeEmail({
     agentEmail,
@@ -85,8 +87,8 @@ export async function sendAgentWelcomeEmail({
             </div>
             <div style="padding: 32px; color: #334155; font-size: 15px; line-height: 1.6;">
                 <p style="margin-top: 0;">Bonjour <strong>${agentName}</strong>,</p>
-                <p>Votre compte agent a été créé avec succès sur notre plateforme <strong>Procédure Facile</strong>.</p>
-                <p>Vous pouvez dès à présent accéder à votre espace de travail pour gérer les clients qui vous seront assignés.</p>
+                <p>Un compte agent a été créé pour vous sur la plateforme <strong>Procédure Facile</strong>.</p>
+                <p>Vous pouvez dès à présent accéder à votre espace agent pour gérer vos clients et suivre l'avancement de leurs dossiers.</p>
 
                 <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 24px 0;">
                     <p style="margin: 0 0 10px 0; font-weight: bold; color: #1E3A8A;">Vos identifiants d'accès :</p>

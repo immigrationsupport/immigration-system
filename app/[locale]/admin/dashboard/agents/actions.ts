@@ -88,7 +88,7 @@ if (!quota.ok) {
             }
         });
 
-        // Send email to newly created agent with system link
+        // Send email to newly created agent with system link, same as clients.
         sendAgentWelcomeEmail({
             agentEmail: email,
             agentName: name,
