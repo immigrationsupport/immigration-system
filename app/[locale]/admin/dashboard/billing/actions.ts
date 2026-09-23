@@ -97,7 +97,11 @@ async function processPaidCheckout({
         },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "";
+    const appUrlRaw = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "";
+    if (appUrlRaw && !appUrlRaw.startsWith("https://")) {
+      console.warn("NEXT_PUBLIC_APP_URL does not start with https://, which may cause payment redirects to be blocked:", appUrlRaw);
+    }
+    const appUrl = appUrlRaw;
     const locale = await getLocale();
     const verifyUrl = `${appUrl}/${locale}/admin/dashboard/billing/verify?ref=${encodeURIComponent(txRef)}`;
 

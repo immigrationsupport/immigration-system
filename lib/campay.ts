@@ -1,7 +1,7 @@
 // lib/campay.ts
 // CamPay integration for Mobile Money collections and hosted card checkout.
 
-const CAMPAY_BASE_URL = (process.env.CAMPAY_BASE_URL || "https://demo.campay.net").replace(/\/$/, "");
+const CAMPAY_BASE_URL = (process.env.CAMPAY_BASE_URL || "https://www.campay.net").replace(/\/$/, "");
 
 function getToken(): string {
   const token = process.env.CAMPAY_PERMANENT_TOKEN;
@@ -128,7 +128,12 @@ export async function initializePayment(params: HostedPaymentParams): Promise<Ho
     }
 
     if (!res.ok || !data.link) {
-      console.error("CamPay payment link failed:", res.status, text.slice(0, 1000));
+      console.error("CamPay payment link failed:", {
+        status: res.status,
+        url: `${CAMPAY_BASE_URL}/api/get_payment_link/`,
+        responseSnippet: text.slice(0, 1000),
+        parsedData: data,
+      });
       return {
         ok: false,
         error: data.message || data.detail || data.error || "Impossible de créer le paiement par carte.",
