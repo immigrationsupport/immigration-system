@@ -9,10 +9,12 @@ export async function sendClientWelcomeEmail({
     clientEmail,
     clientName,
     password,
+    agencyName,
 }: {
     clientEmail: string;
     clientName: string;
     password?: string;
+    agencyName?: string | null;
 }) {
     const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background-color: #ffffff;">
@@ -53,7 +55,7 @@ export async function sendClientWelcomeEmail({
         to: clientEmail,
         subject: "Bienvenue sur Procédure Facile – Vos identifiants d'accès",
         html,
-        fromName: "Procédure Facile",
+        fromName: agencyName || "Procédure Facile",
     });
 
     if (result.error) {
@@ -74,10 +76,12 @@ export async function sendAgentWelcomeEmail({
     agentEmail,
     agentName,
     password,
+    agencyName,
 }: {
     agentEmail: string;
     agentName: string;
     password?: string;
+    agencyName?: string | null;
 }) {
     const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background-color: #ffffff;">
@@ -114,14 +118,12 @@ export async function sendAgentWelcomeEmail({
         </div>
     `;
 
-    console.log(`[Email] Sending welcome email to agent: ${agentEmail}`);
-const result = await sendEmail({
+    const result = await sendEmail({
         to: agentEmail,
         subject: "Bienvenue sur Procédure Facile – Vos identifiants d'accès",
         html,
-        fromName: "Procédure Facile",
+        fromName: agencyName || "Procédure Facile",
     });
-console.log(`[Email] Result for agent welcome email:`, result);
 
     if (result.error) {
         console.error("[Email] Failed to send agent welcome email:", result.error);

@@ -299,6 +299,7 @@ export async function sendIntakeFormLinkAction(clientId: string) {
             to: client.email,
             subject: `Formulaire de renseignement à compléter — ${agencyName}`,
             html,
+            fromName: agencyName,
         });
 
         if (result.error) {

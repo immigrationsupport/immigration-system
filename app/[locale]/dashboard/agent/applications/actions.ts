@@ -234,7 +234,7 @@ export async function updateStepAction(
                 const agencyName = await getApplicationAgencyName(step.application.agencyId);
                 await sendEmail({
                     to: step.application.client.email,
-                    subject: `Action Required - ${agencyName || "ATLE Immigration"}`,
+                    subject: `Action Required - ${agencyName || "Procédure Facile"}`,
                     fromName: agencyName || undefined,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
@@ -270,7 +270,7 @@ export async function updateStepAction(
 
             await sendEmail({
                 to: step.application.client.email,
-                subject: `Step Validated - ${agencyName || "ATLE Immigration"}`,
+                subject: `Step Validated - ${agencyName || "Procédure Facile"}`,
                 fromName: agencyName || undefined,
                 html: `
                     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
@@ -920,7 +920,7 @@ export async function finalizeProcedureAction(
             try {
                 await sendEmail({
                     to: application.client.email,
-                    subject: `🎉 Congratulations! Your Procedure is Complete - ${agencyName || "ATLE Immigration"}`,
+                    subject: `🎉 Congratulations! Your Procedure is Complete - ${agencyName || "Procédure Facile"}`,
                     fromName: agencyName || undefined,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">

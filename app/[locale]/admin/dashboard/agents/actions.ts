@@ -92,10 +92,12 @@ if (!quota.ok) {
         // Awaited (not fire-and-forget): on serverless hosting, an un-awaited
         // promise can get cut off the moment the function returns, silently
         // dropping the send with no log at all.
+        const agency = await prisma.agency.findUnique({ where: { id: adminAgencyId }, select: { name: true } });
         await sendAgentWelcomeEmail({
             agentEmail: email,
             agentName: name,
             password: password,
+            agencyName: agency?.name,
         }).catch((err) => console.error("Error sending welcome email to agent:", err));
 
         revalidatePath("/admin/dashboard/agents");
