@@ -1028,6 +1028,7 @@
   },
   "adminClients": {
     "pageTitle": "Manage Clients",
+    "noClients": "No clients found.",
     "confirmSuspend": "Are you sure you want to suspend this client?",
     "confirmUnsuspend": "Are you sure you want to unsuspend this client?",
     "confirmDelete": "Are you sure you want to permanently delete this client? This action cannot be undone.",
@@ -1051,7 +1052,6 @@
     "unsuspendTooltip": "Unsuspend Client",
     "suspendTooltip": "Suspend Client",
     "deleteTooltip": "Delete Client",
-    "noClients": "No clients found",
     "noClientsFound": "No clients found matching your search.",
     "edit": {
       "tooltip": "Edit Client",
@@ -1784,29 +1784,25 @@
   },
   "forgotPassword": {
     "title": "Forgot password",
-    "subtitle": "Enter your email to receive a reset link.",
+    "subtitle": "Enter your email to receive a reset code.",
+    "codeStepSubtitle": "Enter the code we sent you and choose a new password.",
     "emailLabel": "Email address",
     "emailPlaceholder": "Enter your email",
-    "sendButton": "Send reset link",
+    "sendButton": "Send code",
     "sending": "Sending...",
     "backToSignIn": "Back to sign in",
-    "successMessage": "If an account exists for this email, a password reset link has been sent.",
-    "errorGeneric": "Something went wrong. Please try again."
-  },
-  "resetPassword": {
-    "title": "Reset your password",
-    "subtitle": "Choose a new password for your account.",
+    "codeSentMessage": "If an account exists for {email}, a code has been sent to it.",
+    "codeLabel": "Verification code",
+    "codePlaceholder": "6-digit code",
     "newPasswordLabel": "New password",
     "confirmPasswordLabel": "Confirm password",
-    "submitButton": "Reset password",
-    "submitting": "Resetting...",
-    "backToSignIn": "Back to sign in",
+    "resetButton": "Reset password",
+    "resetting": "Resetting...",
+    "resendCode": "Resend code",
     "successMessage": "Your password has been reset. Redirecting to sign in...",
-    "invalidTokenTitle": "Invalid or expired link",
-    "invalidTokenMessage": "This reset link is invalid or has expired.",
-    "requestNewLink": "Request a new link",
     "errorMismatch": "Passwords do not match.",
     "errorTooShort": "Password must be at least 8 characters.",
+    "errorInvalidCode": "This code is invalid or has expired. Please request a new one.",
     "errorGeneric": "Something went wrong. Please try again."
   }
 }

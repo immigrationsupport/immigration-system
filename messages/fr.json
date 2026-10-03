@@ -1028,6 +1028,7 @@
   },
   "adminClients": {
     "pageTitle": "Gérer les clients",
+    "noClients": "Aucun client trouvé.",
     "confirmSuspend": "Êtes-vous sûr de vouloir suspendre ce client ?",
     "confirmUnsuspend": "Êtes-vous sûr de vouloir réactiver ce client ?",
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer définitivement ce client ? Cette action est irréversible.",
@@ -1051,7 +1052,6 @@
     "unsuspendTooltip": "Réactiver le client",
     "suspendTooltip": "Suspendre le client",
     "deleteTooltip": "Supprimer le client",
-    "noClients": "Aucun client trouvé",
     "noClientsFound": "Aucun client trouvé correspondant à votre recherche.",
     "edit": {
       "tooltip": "Modifier le client",
@@ -1783,29 +1783,25 @@
     },
   "forgotPassword": {
     "title": "Mot de passe oublié",
-    "subtitle": "Entrez votre e-mail pour recevoir un lien de réinitialisation.",
+    "subtitle": "Entrez votre e-mail pour recevoir un code de réinitialisation.",
+    "codeStepSubtitle": "Entrez le code reçu et choisissez un nouveau mot de passe.",
     "emailLabel": "Adresse e-mail",
     "emailPlaceholder": "Entrez votre e-mail",
-    "sendButton": "Envoyer le lien",
+    "sendButton": "Envoyer le code",
     "sending": "Envoi en cours...",
     "backToSignIn": "Retour à la connexion",
-    "successMessage": "Si cet e-mail correspond à un compte, un lien de réinitialisation a été envoyé.",
-    "errorGeneric": "Une erreur est survenue. Veuillez réessayer."
-  },
-  "resetPassword": {
-    "title": "Réinitialiser le mot de passe",
-    "subtitle": "Choisissez un nouveau mot de passe pour votre compte.",
+    "codeSentMessage": "Si cet e-mail correspond à un compte, un code a été envoyé à {email}.",
+    "codeLabel": "Code de vérification",
+    "codePlaceholder": "Code à 6 chiffres",
     "newPasswordLabel": "Nouveau mot de passe",
     "confirmPasswordLabel": "Confirmer le mot de passe",
-    "submitButton": "Réinitialiser le mot de passe",
-    "submitting": "Réinitialisation...",
-    "backToSignIn": "Retour à la connexion",
+    "resetButton": "Réinitialiser le mot de passe",
+    "resetting": "Réinitialisation...",
+    "resendCode": "Renvoyer le code",
     "successMessage": "Votre mot de passe a été réinitialisé. Redirection vers la connexion...",
-    "invalidTokenTitle": "Lien invalide ou expiré",
-    "invalidTokenMessage": "Ce lien de réinitialisation est invalide ou a expiré.",
-    "requestNewLink": "Demander un nouveau lien",
     "errorMismatch": "Les mots de passe ne correspondent pas.",
     "errorTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+    "errorInvalidCode": "Ce code est invalide ou a expiré. Veuillez en demander un nouveau.",
     "errorGeneric": "Une erreur est survenue. Veuillez réessayer."
   }
 }

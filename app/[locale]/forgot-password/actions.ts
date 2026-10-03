@@ -3,10 +3,29 @@
 import prisma from "@/lib/prisma";
 import crypto from "crypto";
 import { sendEmail } from "@/lib/resend";
+import { buildOtpEmailHtml } from "@/lib/otp-email";
+import { hashPassword } from "better-auth/crypto";
 
-const RESET_TOKEN_PREFIX = "password-reset:";
-const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
+const RESET_CODE_PREFIX = "password-reset:";
+const RESET_CODE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_ATTEMPTS = 5;
 
+type ResetCodePayload = {
+    code: string;
+    userId: string;
+    attempts: number;
+};
+
+function emailIdentifier(email: string) {
+    return `${RESET_CODE_PREFIX}${email.trim().toLowerCase()}`;
+}
+
+/**
+ * Step 1: the agency/client enters their email. If an account exists, we
+ * generate a 6-digit code, store it against the email (not a secret link),
+ * and send it by mail. The response is intentionally generic either way so
+ * the page can't be used to enumerate which emails have accounts.
+ */
 export async function requestPasswordResetAction(email: string, locale: string = "en") {
     if (!email) {
         return { error: "Please provide your email address." };
@@ -18,16 +37,15 @@ export async function requestPasswordResetAction(email: string, locale: string =
     }
 
     const isFr = locale === "fr";
+    const normalizedEmail = email.trim().toLowerCase();
 
-    // Generic message shown regardless of outcome, to avoid leaking which
-    // emails have an account (user enumeration).
     const genericMessage = isFr
-        ? "Si cet e-mail correspond à un compte, un lien de réinitialisation a été envoyé."
-        : "If an account exists for this email, a password reset link has been sent.";
+        ? "Si cet e-mail correspond à un compte, un code a été envoyé."
+        : "If an account exists for this email, a code has been sent.";
 
     try {
         const user = await prisma.user.findUnique({
-            where: { email },
+            where: { email: normalizedEmail },
             select: {
                 id: true,
                 name: true,
@@ -40,67 +58,131 @@ export async function requestPasswordResetAction(email: string, locale: string =
             return { success: true, message: genericMessage };
         }
 
-        // Invalidate any previous outstanding reset tokens for this user.
-        await prisma.verification.deleteMany({
-            where: {
-                value: user.id,
-                identifier: { startsWith: RESET_TOKEN_PREFIX },
-            },
-        });
+        // Invalidate any previous outstanding code for this email.
+        const identifier = emailIdentifier(normalizedEmail);
+        await prisma.verification.deleteMany({ where: { identifier } });
 
-        const token = crypto.randomBytes(32).toString("hex");
+        const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
+
+        const payload: ResetCodePayload = { code, userId: user.id, attempts: 0 };
 
         await prisma.verification.create({
             data: {
-                identifier: `${RESET_TOKEN_PREFIX}${token}`,
-                value: user.id,
-                expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+                identifier,
+                value: JSON.stringify(payload),
+                expiresAt: new Date(Date.now() + RESET_CODE_TTL_MS),
             },
         });
 
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.BETTER_AUTH_URL || "http://localhost:3000";
-        const resetUrl = `${baseUrl}/${locale}/reset-password/${token}`;
-
-        // Use the client's own agency name when they belong to one (so the
-        // email doesn't say "ATLE Immigration" for another agency's client).
         const agencyName = user.agency?.name || "Procédure Facile";
-        const subject = isFr ? `Réinitialisation de mot de passe - ${agencyName}` : `Password Reset - ${agencyName}`;
-
-        const html = `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">  
-                <div style="padding: 30px;">
-                    <p style="font-size: 16px; color: #374151;">
-                        ${isFr ? "Bonjour" : "Hello"} <strong>${user.name}</strong>,
-                    </p>
-                    <p style="font-size: 14px; color: #4b5563; line-height: 1.6;">
-                        ${isFr
-                            ? "Nous avons reçu une demande de réinitialisation du mot de passe de votre compte. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe. Ce lien expire dans 1 heure."
-                            : "We received a request to reset your account password. Click the button below to choose a new password. This link expires in 1 hour."}
-                    </p>
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="${resetUrl}" style="background-color: #1E3A8A; color: white; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: bold; display: inline-block;">
-                            ${isFr ? "Réinitialiser le mot de passe" : "Reset Password"}
-                        </a>
-                    </div>
-                    <p style="font-size: 12px; color: #9ca3af; line-height: 1.6;">
-                        ${isFr
-                            ? "Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité — votre mot de passe restera inchangé."
-                            : "If you didn't request this, you can safely ignore this email — your password will remain unchanged."}
-                    </p>
-
-                </div>
-            </div>
-        `;
+        const subject = isFr ? `Code de réinitialisation - ${agencyName}` : `Password Reset Code - ${agencyName}`;
+        const html = buildOtpEmailHtml({ otp: code, type: "forget-password" });
 
         const emailResult = await sendEmail({ to: user.email, subject, html, fromName: agencyName });
         if (emailResult.error) {
             console.error("Password reset email failed to send:", emailResult.error);
-            return { error: isFr ? "Impossible d'envoyer l'e-mail pour le moment. Réessayez plus tard." : "Couldn't send the email right now. Please try again later." };
+            return {
+                error: isFr
+                    ? "Impossible d'envoyer l'e-mail pour le moment. Réessayez plus tard."
+                    : "Couldn't send the email right now. Please try again later.",
+            };
         }
 
         return { success: true, message: genericMessage };
     } catch (e: any) {
         console.error("Password reset request error:", e);
         return { error: "Something went wrong. Please try again." };
+    }
+}
+
+/**
+ * Step 2: the user enters the code they received, plus a new password
+ * (and confirmation) on the same page — no link, no separate route.
+ */
+export async function resetPasswordWithCodeAction(
+    email: string,
+    code: string,
+    newPassword: string,
+    confirmPassword: string,
+    locale: string = "en"
+) {
+    const isFr = locale === "fr";
+    const normalizedEmail = (email || "").trim().toLowerCase();
+    const normalizedCode = (code || "").trim();
+
+    if (!normalizedEmail || !normalizedCode) {
+        return { error: isFr ? "Veuillez saisir le code reçu par e-mail." : "Please enter the code sent to your email." };
+    }
+    if (!newPassword || !confirmPassword) {
+        return { error: isFr ? "Veuillez remplir les deux champs de mot de passe." : "Please fill in both password fields." };
+    }
+    if (newPassword !== confirmPassword) {
+        return { error: isFr ? "Les mots de passe ne correspondent pas." : "Passwords do not match." };
+    }
+    if (newPassword.length < 8) {
+        return { error: isFr ? "Le mot de passe doit contenir au moins 8 caractères." : "Password must be at least 8 characters." };
+    }
+
+    const identifier = emailIdentifier(normalizedEmail);
+    const invalidCodeMessage = isFr
+        ? "Ce code est invalide ou a expiré. Veuillez en demander un nouveau."
+        : "This code is invalid or has expired. Please request a new one.";
+
+    try {
+        const verification = await prisma.verification.findFirst({ where: { identifier } });
+
+        if (!verification) {
+            return { error: invalidCodeMessage };
+        }
+
+        if (verification.expiresAt < new Date()) {
+            await prisma.verification.delete({ where: { id: verification.id } });
+            return { error: invalidCodeMessage };
+        }
+
+        let payload: ResetCodePayload;
+        try {
+            payload = JSON.parse(verification.value);
+        } catch {
+            await prisma.verification.delete({ where: { id: verification.id } });
+            return { error: invalidCodeMessage };
+        }
+
+        if (payload.attempts >= MAX_ATTEMPTS) {
+            await prisma.verification.delete({ where: { id: verification.id } });
+            return { error: invalidCodeMessage };
+        }
+
+        if (payload.code !== normalizedCode) {
+            await prisma.verification.update({
+                where: { id: verification.id },
+                data: { value: JSON.stringify({ ...payload, attempts: payload.attempts + 1 }) },
+            });
+            return { error: invalidCodeMessage };
+        }
+
+        const userId = payload.userId;
+        const hashedPassword = await hashPassword(newPassword);
+
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: userId },
+                data: { password: hashedPassword, mustChangePassword: false },
+            }),
+            prisma.account.updateMany({
+                where: { userId, providerId: "credential" },
+                data: { password: hashedPassword },
+            }),
+            // Single-use code.
+            prisma.verification.delete({ where: { id: verification.id } }),
+            // Sign the user out everywhere — a password reset should invalidate
+            // any session that might have been active (e.g. on a shared device).
+            prisma.session.deleteMany({ where: { userId } }),
+        ]);
+
+        return { success: true };
+    } catch (e: any) {
+        console.error("Reset password with code error:", e);
+        return { error: isFr ? "Une erreur est survenue. Veuillez réessayer." : "Something went wrong. Please try again." };
     }
 }
