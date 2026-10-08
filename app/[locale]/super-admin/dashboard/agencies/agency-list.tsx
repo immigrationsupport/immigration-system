@@ -355,7 +355,14 @@ export default function AgencyList({
                                                     .filter(
                                                         (p) =>
                                                             p.slug !==
-                                                            "internal"
+                                                                "internal" &&
+                                                            // Hide private/custom ("Sur mesure") plans, except the
+                                                            // one this agency is already on, so its value still shows.
+                                                            (p.isPublic ||
+                                                                p.id ===
+                                                                    agency
+                                                                        .subscription
+                                                                        ?.plan.id)
                                                     )
                                                     .map((p) => (
                                                         <option
