@@ -658,6 +658,7 @@
       "errorAllFields": "All fields are required.",
       "errorEmailFormat": "Please enter a valid email address.",
       "errorPasswordLength": "Password must be at least 8 characters long.",
+      "errorPasswordComplexity": "Password must be at least 8 characters and include a letter, a number, and a special character.",
       "errorPasswordsMismatch": "Passwords do not match.",
       "errorGeneric": "Registration failed",
       "errorUnexpected": "Unexpected error occurred.",
@@ -689,6 +690,7 @@
       "otpErrorInvalid": "Invalid or expired code. Please try again.",
       "otpErrorSendFailed": "Account created, but we couldn't send the verification code. Please try signing in to resend it.",
       "otpErrorResendFailed": "Couldn't resend the code. Please try again shortly.",
+      "passwordHint": "At least 8 characters.",
       "backToSignIn": "Back to sign in"
     },
     "login": {
@@ -1052,6 +1054,10 @@
     "unsuspendTooltip": "Unsuspend Client",
     "suspendTooltip": "Suspend Client",
     "deleteTooltip": "Delete Client",
+    "toastDeleteSuccess": "Client deleted successfully",
+"toastSuspended": "Client suspended",
+"toastUnsuspended": "Client reactivated",
+"toastAssignSuccess": "Agent assigned successfully",
     "noClientsFound": "No clients found matching your search.",
     "edit": {
       "tooltip": "Edit Client",
@@ -1072,6 +1078,7 @@
     "pageTitle": "Procedure Steps",
     "pageSubtitle": "Build the step-by-step workflows your agency uses. Create as many as you need — one per type of application — then pick one whenever you start a new application.",
     "newWorkflow": "New Workflow",
+    "createError": "Failed to create workflow. Please try again.",
     "stepCount": "{count, plural, one {# step} other {# steps}}",
     "removeWorkflowTooltip": "Remove workflow",
     "removeConfirmTitle": "Remove \"{name}\"?",
@@ -1097,6 +1104,7 @@
       "deleteStepTooltip": "Delete step",
       "customStepOption": "Custom step (no special behavior)",
       "behavesLike": "Behaves like: {label}",
+      "behavesLikeHelp": "Associates this step with built-in system workflows (documents, payments, tests, etc.).",
       "instructionsPlaceholder": "Instructions shown to agents/clients for this step (optional)",
       "requiredDocumentsLabel": "Required documents",
       "addDocumentPlaceholder": "Type a document name and press Enter (e.g. Passport)",

@@ -6,7 +6,7 @@ import { ArrowLeft, User, Globe, Briefcase, GraduationCap, Users, Clock, CheckCi
 import StepManagement from "./step-management";
 import { getAgencyStepDefinitions } from "@/lib/steps-server";
 import { getTranslations } from "next-intl/server";
-import { getAllQuestions, formatAnswerForDisplay } from "@/lib/intake-form/engine";
+import { getAllQuestions, getAnsweredQuestionsBySection, formatAnswerForDisplay } from "@/lib/intake-form/engine";
 
 export default async function AgentApplicationManagementPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
     const { id } = await (params as any);
@@ -71,35 +71,45 @@ export default async function AgentApplicationManagementPage({ params }: { param
 
     if (!application) return <div className="p-8 text-center font-black text-red-500 uppercase">{t("procedureNotFound")}</div>;
 
-    // Pull in whatever the client already provided via the intake form
-    // (documents + language test info), so the agent doesn't have to ask
-    // for it again when managing Document Collection / Language Test
-    // Results steps.
+    const completedSteps = application.steps.filter(s => s.status === "APPROVED").length;
+    const progress = Math.round((completedSteps / application.steps.length) * 100);
+    const appType = application.type || "GENERAL";
+
+    // Questionnaire answers the client submitted - same data as the client
+    // profile page, so agents see it right next to the steps too.
     const [intakeFormResponse, intakeFormDocuments] = await Promise.all([
         prisma.intakeFormResponse.findUnique({ where: { clientId: application.client.id } }),
-        prisma.intakeFormDocument.findMany({ where: { clientId: application.client.id } })
+        prisma.intakeFormDocument.findMany({ where: { clientId: application.client.id } }),
     ]);
 
     const intakeAnswers = (intakeFormResponse?.answers as Record<string, any>) || {};
     const intakeCountry = intakeFormResponse?.country || null;
     const allQuestions = getAllQuestions(intakeCountry);
 
-    // Language-test related answers (any question id containing "Test" or
-    // "Score" from the country module), formatted for easy reading.
-    const languageTestInfo = allQuestions
-        .filter((q) => /test|score/i.test(q.id) && intakeAnswers[q.id] !== undefined && intakeAnswers[q.id] !== "")
-        .map((q) => ({ label: q.label, value: formatAnswerForDisplay(q, intakeAnswers[q.id]) }));
+    const questionnaireSections = intakeFormResponse
+        ? getAnsweredQuestionsBySection(intakeCountry, intakeAnswers).map((section) => ({
+              section: section.section,
+              label: section.label,
+              questions: section.questions.map((q) => {
+                  const doc = intakeFormDocuments.find((d) => d.questionId === q.id);
+                  return {
+                      id: q.id,
+                      label: q.label,
+                      value: formatAnswerForDisplay(q, intakeAnswers[q.id]),
+                      document: doc ? { id: doc.id, fileName: doc.fileName } : null,
+                  };
+              }),
+          }))
+        : [];
 
-    const intakeDocumentsForDisplay = intakeFormDocuments.map((doc) => ({
+    const questionnaireStatus = intakeFormResponse?.status || null;
+
+    const intakeDocuments = intakeFormDocuments.map((doc) => ({
         id: doc.id,
         fileName: doc.fileName,
         questionId: doc.questionId,
-        questionLabel: allQuestions.find((q) => q.id === doc.questionId)?.label || doc.questionId
+        questionLabel: allQuestions.find((q) => q.id === doc.questionId)?.label || doc.questionId,
     }));
-
-    const completedSteps = application.steps.filter(s => s.status === "APPROVED").length;
-    const progress = Math.round((completedSteps / application.steps.length) * 100);
-    const appType = application.type || "GENERAL";
 
     return (
         <div className="min-h-screen bg-[#F8F9FF] py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
@@ -169,14 +179,15 @@ export default async function AgentApplicationManagementPage({ params }: { param
             </div>
 
             <div className="bg-white p-6 rounded border border-gray-200 shadow-sm">
-                <StepManagement 
-                    applicationId={application.id} 
-                    currentStatus={application.status} 
-                    steps={application.steps} 
+                <StepManagement
+                    applicationId={application.id}
+                    currentStatus={application.status}
+                    steps={application.steps}
                     country={application.country}
                     clientId={application.client.id}
-                    intakeDocuments={intakeDocumentsForDisplay}
-                    languageTestInfo={languageTestInfo}
+                    intakeDocuments={intakeDocuments}
+                    questionnaireSections={questionnaireSections}
+                    questionnaireStatus={questionnaireStatus}
                 />
             </div>
 

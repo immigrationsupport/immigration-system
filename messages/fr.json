@@ -658,6 +658,7 @@
       "errorAllFields": "Tous les champs sont obligatoires.",
       "errorEmailFormat": "Veuillez saisir une adresse e-mail valide.",
       "errorPasswordLength": "Le mot de passe doit contenir au moins 8 caractères.",
+      "errorPasswordComplexity": "Le mot de passe doit comporter au moins 8 caractères et contenir une lettre, un chiffre et un caractère spécial.",
       "errorPasswordsMismatch": "Les mots de passe ne correspondent pas.",
       "errorGeneric": "Échec de l'inscription",
       "errorUnexpected": "Une erreur inattendue s'est produite.",
@@ -689,6 +690,7 @@
       "otpErrorInvalid": "Code invalide ou expiré. Veuillez réessayer.",
       "otpErrorSendFailed": "Compte créé, mais l'envoi du code de vérification a échoué. Essayez de vous connecter pour le renvoyer.",
       "otpErrorResendFailed": "Impossible de renvoyer le code. Veuillez réessayer sous peu.",
+      "passwordHint": "Au moins 8 caractères.",
       "backToSignIn": "Retour à la connexion"
     },
     "login": {
@@ -1052,6 +1054,10 @@
     "unsuspendTooltip": "Réactiver le client",
     "suspendTooltip": "Suspendre le client",
     "deleteTooltip": "Supprimer le client",
+    "toastDeleteSuccess": "Client supprimé avec succès",
+    "toastSuspended": "Client suspendu",
+    "toastUnsuspended": "Client réactivé",
+    "toastAssignSuccess": "Agent assigné avec succès",
     "noClientsFound": "Aucun client trouvé correspondant à votre recherche.",
     "edit": {
       "tooltip": "Modifier le client",
@@ -1072,6 +1078,7 @@
     "pageTitle": "Étapes de procédure",
     "pageSubtitle": "Construisez les workflows étape par étape utilisés par votre agence. Créez-en autant que nécessaire — un par type de demande — puis choisissez-en un chaque fois que vous démarrez une nouvelle demande.",
     "newWorkflow": "Nouveau workflow",
+    "createError": "Échec de la création du workflow. Veuillez réessayer.",
     "stepCount": "{count, plural, one {# étape} other {# étapes}}",
     "removeWorkflowTooltip": "Supprimer le workflow",
     "removeConfirmTitle": "Supprimer « {name} » ?",
@@ -1097,6 +1104,7 @@
       "deleteStepTooltip": "Supprimer l'étape",
       "customStepOption": "Étape personnalisée (aucun comportement spécial)",
       "behavesLike": "Se comporte comme : {label}",
+      "behavesLikeHelp": "Associe cette étape aux fonctionnalités système intégrées (documents, paiements, tests, etc.).",
       "instructionsPlaceholder": "Instructions affichées aux agents/clients pour cette étape (optionnel)",
       "requiredDocumentsLabel": "Documents requis",
       "addDocumentPlaceholder": "Tapez un nom de document et appuyez sur Entrée (ex. Passeport)",
